@@ -12,6 +12,7 @@ CARGO_ENV="/home/$SUDO_USER/.cargo/env"
 BASHRC=~/.bashrc
 KIRA_SETUP=/kira/setup
 KIRA_INFRA=/kira/infra
+KIRA_INFRA_SCRIPTS=$KIRA_INFRA/base-image/scripts
 KIRA_INFRA_REPO="https://github.com/KiraCore/infra"
 GO_VERSION="1.14.2"
 
@@ -30,11 +31,12 @@ else
     echo "Environment variables are already beeing sourced from $ETC_PROFILE"
 fi
 
-KIRA_SETUP_KIRA_ENV="$KIRA_SETUP/kira-env-v0.0.3" 
+KIRA_SETUP_KIRA_ENV="$KIRA_SETUP/kira-env-v0.0.4" 
 if [ ! -f "$KIRA_SETUP_KIRA_ENV" ] ; then
     echo "Setting up kira environment variables"
     echo "KIRA_SETUP=$KIRA_SETUP" >> $ETC_PROFILE
     echo "KIRA_INFRA=$KIRA_INFRA" >> $ETC_PROFILE
+    echo "KIRA_INFRA_SCRIPTS=$KIRA_INFRA_SCRIPTS" >> $KIRA_INFRA_SCRIPTS
     touch $KIRA_SETUP_KIRA_ENV
 else
     echo "Kira environment variables were already set"
@@ -85,6 +87,7 @@ if [ ! -f "$KIRA_SETUP_BASE_TOOLS" ] ; then
         automake \
         apt-utils \
         awscli \
+        dconf-editor \
         build-essential \
         bind9-host \
         bzip2 \
@@ -148,6 +151,9 @@ if [ ! -f "$KIRA_SETUP_BASE_TOOLS" ] ; then
     # https://linuxhint.com/install_aws_cli_ubuntu/
     aws --version
     touch $KIRA_SETUP_BASE_TOOLS
+
+    #allow to execute scripts just like .exe files with double click
+    gsettings set org.gnome.nautilus.preferences executable-text-activation 'launch'
 else
     echo "Base tools were already installed."
 fi
@@ -284,10 +290,16 @@ cd $KIRA_INFRA
 
 git describe --all
 
-
-
-
-
-
-
+KIRA_SETUP_ASMOTOOLS="$KIRA_SETUP/asmodat-automation-tools-v0.0.1" 
+if [ ! -f "$KIRA_SETUP_ASMOTOOLS" ] ; then
+    echo "Install Asmodat Automation helper tools"
+    ${KIRA_INFRA_SCRIPTS}/awshelper-update-v0.0.1.sh "v0.12.0"
+    AWSHelper version
+    
+    ${KIRA_INFRA_SCRIPTS}/cdhelper-update-v0.0.1.sh "v0.6.0"
+    CDHelper version
+    touch $KIRA_SETUP_ASMOTOOLS
+else
+    echo "Asmodat Automation Tools were already installed."
+fi
 
