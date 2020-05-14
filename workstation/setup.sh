@@ -36,7 +36,7 @@ if [ ! -f "$KIRA_SETUP_KIRA_ENV" ] ; then
     echo "Setting up kira environment variables"
     echo "KIRA_SETUP=$KIRA_SETUP" >> $ETC_PROFILE
     echo "KIRA_INFRA=$KIRA_INFRA" >> $ETC_PROFILE
-    echo "KIRA_INFRA_SCRIPTS=$KIRA_INFRA_SCRIPTS" >> $KIRA_INFRA_SCRIPTS
+    echo "KIRA_INFRA_SCRIPTS=$KIRA_INFRA_SCRIPTS" >> $ETC_PROFILE
     touch $KIRA_SETUP_KIRA_ENV
 else
     echo "Kira environment variables were already set"
