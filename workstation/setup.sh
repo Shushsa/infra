@@ -12,7 +12,7 @@ CARGO_ENV="/home/$SUDO_USER/.cargo/env"
 BASHRC=~/.bashrc
 KIRA_SETUP=/kira/setup
 KIRA_INFRA=/kira/infra
-KIRA_INFRA_SCRIPTS=$KIRA_INFRA/base-image/scripts
+KIRA_INFRA_SCRIPTS="${KIRA_INFRA}/docker/base-image/scripts"
 KIRA_INFRA_REPO="https://github.com/KiraCore/infra"
 GO_VERSION="1.14.2"
 
