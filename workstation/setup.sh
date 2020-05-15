@@ -287,7 +287,7 @@ mkdir -p $KIRA_INFRA
 git clone --branch "master" $KIRA_INFRA_REPO $KIRA_INFRA
 cd $KIRA_INFRA
 git describe --all
-chmod -Rv $KIRA_INFRA
+chmod -Rv 777 $KIRA_INFRA
 
 KIRA_SETUP_ASMOTOOLS="$KIRA_SETUP/asmodat-automation-tools-v0.0.1" 
 if [ ! -f "$KIRA_SETUP_ASMOTOOLS" ] ; then
