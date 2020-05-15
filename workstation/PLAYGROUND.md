@@ -1,3 +1,10 @@
+
+
+> Useful References
+
+* https://stackoverflow.com/questions/46032392/docker-compose-does-not-allow-to-use-local-images
+
+
 > Creating Shortcuts
 
 ```

@@ -1,0 +1,6 @@
+version: '3.8'
+services:
+  kiratools:
+    image: localhost:5000/kira-base:latest
+    container_name: kira-tools-image
+    network_mode: host

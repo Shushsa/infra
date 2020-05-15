@@ -15,6 +15,13 @@ KIRA_INFRA=/kira/infra
 KIRA_INFRA_SCRIPTS="${KIRA_INFRA}/docker/base-image/scripts"
 KIRA_INFRA_REPO="https://github.com/KiraCore/infra"
 GO_VERSION="1.14.2"
+NGINX_SERVICED_PATH="/etc/systemd/system/nginx.service.d"
+NGINX_CONFIG="/etc/nginx/nginx.conf"
+GOROOT="/usr/local/go"
+GOPATH="/home/go"
+GOBIN="${GOROOT}/bin"
+RUSTFLAGS="-Ctarget-feature=+aes,+ssse3"
+DOTNET_ROOT="/usr/bin/dotnet"
 
 mkdir -p $KIRA_SETUP 
 mkdir -p $KIRA_INFRA 
@@ -31,40 +38,37 @@ else
     echo "Environment variables are already beeing sourced from $ETC_PROFILE"
 fi
 
-KIRA_SETUP_KIRA_ENV="$KIRA_SETUP/kira-env-v0.0.4" 
+KIRA_SETUP_KIRA_ENV="$KIRA_SETUP/kira-env-v0.0.9" 
 if [ ! -f "$KIRA_SETUP_KIRA_ENV" ] ; then
     echo "Setting up kira environment variables"
+
+    PATH="$PATH:$GOBIN:$GOROOT:$GOPATH:/usr/local/bin/CDHelper:/usr/local/bin/AWSHelper"
+
     echo "KIRA_SETUP=$KIRA_SETUP" >> $ETC_PROFILE
     echo "KIRA_INFRA=$KIRA_INFRA" >> $ETC_PROFILE
     echo "KIRA_INFRA_SCRIPTS=$KIRA_INFRA_SCRIPTS" >> $ETC_PROFILE
+    echo "NGINX_CONFIG=$NGINX_CONFIG"
+    echo "NGINX_SERVICED_PATH=$NGINX_SERVICED_PATH" >> $ETC_PROFILE
+    echo "GOROOT=$GOROOT" >> $ETC_PROFILE
+    echo "GOPATH=$GOPATH" >> $ETC_PROFILE
+    echo "GOBIN=$GOBIN" >> $ETC_PROFILE
+    echo "GO111MODULE=on" >> $ETC_PROFILE
+    echo "RUSTFLAGS=$RUSTFLAGS" >> $ETC_PROFILE
+    echo "DOTNET_ROOT=$DOTNET_ROOT" >> $ETC_PROFILE
+
+    echo "PATH=$PATH" >> $ETC_PROFILE
+
+    source $ETC_PROFILE
     touch $KIRA_SETUP_KIRA_ENV
 else
     echo "Kira environment variables were already set"
 fi
 
-KIRA_SETUP_ENV_GO="$KIRA_SETUP/env-go-v0.0.2" 
-if [ ! -f "$KIRA_SETUP_ENV_GO" ] ; then
-    echo "Golang environment variables setup"
-    GOROOT="/usr/local/go"
-    GOPATH="/home/go"
-    GOBIN="${GOROOT}/bin"
-    PATH="$PATH:$GOBIN:$GOROOT:$GOPATH"
-
-    echo "GOROOT=$GOROOT" >> $ETC_PROFILE
-    echo "GOPATH=$GOPATH" >> $ETC_PROFILE
-    echo "GOBIN=$GOBIN" >> $ETC_PROFILE
-    echo "GO111MODULE=on" >> $ETC_PROFILE
-    echo "PATH=$PATH" >> $ETC_PROFILE
-    source $ETC_PROFILE
-    touch $KIRA_SETUP_ENV_GO
-else
-    echo "Go environment variables such as bin($GOBIN) and path were already set"
-fi
-
 KIRA_SETUP_CERTS="$KIRA_SETUP/certs-v0.0.3" 
 if [ ! -f "$KIRA_SETUP_CERTS" ] ; then
     echo "Installing certificates and package references..."
-    apt-get -y update
+    apt-get update -y --fix-missing
+    apt-get upgrade -y --allow-unauthenticated --allow-downgrades --allow-remove-essential --allow-change-held-packages
     apt-get install -y software-properties-common apt-transport-https ca-certificates gnupg curl wget
     curl https://packages.cloud.google.com/apt/doc/apt-key.gpg | apt-key add -
     curl https://dl-ssl.google.com/linux/linux_signing_key.pub | apt-key add -
@@ -80,7 +84,7 @@ fi
 KIRA_SETUP_BASE_TOOLS="$KIRA_SETUP/base-tools-v0.0.2" 
 if [ ! -f "$KIRA_SETUP_BASE_TOOLS" ] ; then
     echo "APT Update, Upgrade and Intall basic tools and dependencies..."
-    apt-get update
+    apt-get update -y --fix-missing
     apt-get upgrade -y --allow-unauthenticated --allow-downgrades --allow-remove-essential --allow-change-held-packages
     apt-get install -y --allow-unauthenticated --allow-downgrades --allow-remove-essential --allow-change-held-packages \
         autoconf \
@@ -220,12 +224,14 @@ else
     echo "Git simlink was already installed."
 fi
 
-KIRA_SETUP_DOTNET="$KIRA_SETUP/dotnet-v0.0.2" 
+KIRA_SETUP_DOTNET="$KIRA_SETUP/dotnet-v0.0.6" 
 if [ ! -f "$KIRA_SETUP_DOTNET" ] ; then
     echo "Installing .NET"
     wget -q https://packages.microsoft.com/config/ubuntu/19.04/packages-microsoft-prod.deb -O packages-microsoft-prod.deb
     dpkg -i packages-microsoft-prod.deb
-    apt-get update
+    apt-get update -y --fix-missing
+    apt-get install -y dotnet-runtime-deps-3.1
+    apt-get install -y dotnet-runtime-3.1
     apt-get install -y aspnetcore-runtime-3.1
     apt-get install -y dotnet-sdk-2.1
     apt-get install -y dotnet-sdk-3.1
@@ -258,10 +264,43 @@ else
     echo "Go $(go version) was already installed."
 fi
 
+KIRA_SETUP_SYSCTL="$KIRA_SETUP/systemctl-v0.0.1" 
+if [ ! -f "$KIRA_SETUP_SYSCTL" ] ; then
+    echo "Installing custom systemctl..."
+    wget https://raw.githubusercontent.com/gdraheim/docker-systemctl-replacement/master/files/docker/systemctl.py -O /usr/local/bin/systemctl2
+    chmod -v 777 /usr/local/bin/systemctl2
+    
+    systemctl2 --version
+    touch $KIRA_SETUP_SYSCTL
+else
+    echo "systemctl2 was already installed."
+fi
+
+KIRA_SETUP_NGINX="$KIRA_SETUP/nginx-v0.0.1" 
+if [ ! -f "$KIRA_SETUP_NGINX" ] ; then
+    echo "Setting up NGINX..."
+    cat > $NGINX_CONFIG << EOL
+worker_processes 1;
+events { worker_connections 512; }
+http { 
+#server{} 
+}
+#EOF
+EOL
+
+    mkdir -v $NGINX_SERVICED_PATH
+    printf "[Service]\nExecStartPost=/bin/sleep 0.1\n" > $NGINX_SERVICED_PATH/override.conf
+    
+    systemctl2 enable nginx.service
+    touch $KIRA_SETUP_NGINX
+else
+    echo "nginx was already installed."
+fi
+
 KIRA_SETUP_CHROME="$KIRA_SETUP/chrome-v0.0.1" 
 if [ ! -f "$KIRA_SETUP_CHROME" ] ; then
-    echo "Install Google Chrome"
-    apt-get update
+    echo "Installing Google Chrome..."
+    apt-get update -y --fix-missing
     apt install google-chrome-stable -y
     google-chrome --version
     touch $KIRA_SETUP_CHROME
@@ -271,7 +310,7 @@ fi
 
 KIRA_SETUP_VSCODE="$KIRA_SETUP/vscode-v0.0.2" 
 if [ ! -f "$KIRA_SETUP_VSCODE" ] ; then
-    echo "Install Visual Studio Code"
+    echo "Installing Visual Studio Code..."
     apt update
     apt upgrade
     apt install code -y
@@ -287,10 +326,10 @@ mkdir -p $KIRA_INFRA
 git clone --branch "master" $KIRA_INFRA_REPO $KIRA_INFRA
 cd $KIRA_INFRA
 git describe --all
-chmod -Rv 777 $KIRA_INFRA
+chmod -R 777 $KIRA_INFRA
 
-KIRA_SETUP_ASMOTOOLS="$KIRA_SETUP/asmodat-automation-tools-v0.0.1" 
-if [ ! -f "$KIRA_SETUP_ASMOTOOLS" ] ; then
+KIRA_SETUP_ASMOTOOLS="$KIRA_SETUP/asmodat-automation-tools-v0.0.3" 
+if [ ! -f "$KIRA_SETUP_ASMOTOOLS" ] ; then # this ensures that tools are updated only when requested, not when their version changes
     echo "Install Asmodat Automation helper tools"
     ${KIRA_INFRA_SCRIPTS}/awshelper-update-v0.0.1.sh "v0.12.0"
     AWSHelper version
@@ -302,3 +341,4 @@ else
     echo "Asmodat Automation Tools were already installed."
 fi
 
+# curl https://sh.rustup.rs -sSf | sh
