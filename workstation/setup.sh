@@ -5,14 +5,17 @@ set -e
 set -x
 
 # Local Update Shortcut:
-# (rm -fv ./setup.sh) && nano ./setup.sh && chmod 777 ./setup.sh
+# (rm -fv $KIRA_WORKSTATION/setup.sh) && nano $KIRA_WORKSTATION/setup.sh && chmod 777 $KIRA_WORKSTATION/setup.sh
 
 ETC_PROFILE="/etc/profile"
 CARGO_ENV="/home/$SUDO_USER/.cargo/env"
 BASHRC=~/.bashrc
 KIRA_SETUP=/kira/setup
 KIRA_INFRA=/kira/infra
-KIRA_INFRA_SCRIPTS="${KIRA_INFRA}/docker/base-image/scripts"
+KIRA_REGISTRY_PORT=5000
+KIRA_REGISTRY="localhost:$KIRA_REGISTRY_PORT"
+KIRA_SCRIPTS="${KIRA_INFRA}/common/scripts"
+KIRA_WORKSTATION="${KIRA_INFRA}/workstation"
 KIRA_INFRA_REPO="https://github.com/KiraCore/infra"
 GO_VERSION="1.14.2"
 NGINX_SERVICED_PATH="/etc/systemd/system/nginx.service.d"
@@ -38,7 +41,7 @@ else
     echo "Environment variables are already beeing sourced from $ETC_PROFILE"
 fi
 
-KIRA_SETUP_KIRA_ENV="$KIRA_SETUP/kira-env-v0.0.9" 
+KIRA_SETUP_KIRA_ENV="$KIRA_SETUP/kira-env-v0.0.12" 
 if [ ! -f "$KIRA_SETUP_KIRA_ENV" ] ; then
     echo "Setting up kira environment variables"
 
@@ -46,7 +49,10 @@ if [ ! -f "$KIRA_SETUP_KIRA_ENV" ] ; then
 
     echo "KIRA_SETUP=$KIRA_SETUP" >> $ETC_PROFILE
     echo "KIRA_INFRA=$KIRA_INFRA" >> $ETC_PROFILE
-    echo "KIRA_INFRA_SCRIPTS=$KIRA_INFRA_SCRIPTS" >> $ETC_PROFILE
+    echo "KIRA_SCRIPTS=$KIRA_SCRIPTS" >> $ETC_PROFILE
+    echo "KIRA_REGISTRY_PORT=$KIRA_REGISTRY_PORT" >> $ETC_PROFILE
+    echo "KIRA_REGISTRY=$KIRA_REGISTRY" >> $ETC_PROFILE
+    echo "KIRA_WORKSTATION=$KIRA_WORKSTATION" >> $ETC_PROFILE
     echo "NGINX_CONFIG=$NGINX_CONFIG"
     echo "NGINX_SERVICED_PATH=$NGINX_SERVICED_PATH" >> $ETC_PROFILE
     echo "GOROOT=$GOROOT" >> $ETC_PROFILE
@@ -81,7 +87,7 @@ else
     echo "Certs and refs were already installed."
 fi
 
-KIRA_SETUP_BASE_TOOLS="$KIRA_SETUP/base-tools-v0.0.2" 
+KIRA_SETUP_BASE_TOOLS="$KIRA_SETUP/base-tools-v0.0.4" 
 if [ ! -f "$KIRA_SETUP_BASE_TOOLS" ] ; then
     echo "APT Update, Upgrade and Intall basic tools and dependencies..."
     apt-get update -y --fix-missing
@@ -108,6 +114,7 @@ if [ ! -f "$KIRA_SETUP_BASE_TOOLS" ] ; then
         gnupg2 \
         groff \
         htop \
+        hashdeep \
         imagemagick \
         iputils-tracepath \
         iputils-ping \
@@ -227,7 +234,7 @@ fi
 KIRA_SETUP_DOTNET="$KIRA_SETUP/dotnet-v0.0.6" 
 if [ ! -f "$KIRA_SETUP_DOTNET" ] ; then
     echo "Installing .NET"
-    wget -q https://packages.microsoft.com/config/ubuntu/19.04/packages-microsoft-prod.deb -O packages-microsoft-prod.deb
+    wget -q https://packages.microsoft.com/config/ubuntu/20.04/packages-microsoft-prod.deb -O packages-microsoft-prod.deb
     dpkg -i packages-microsoft-prod.deb
     apt-get update -y --fix-missing
     apt-get install -y dotnet-runtime-deps-3.1
@@ -331,14 +338,30 @@ chmod -R 777 $KIRA_INFRA
 KIRA_SETUP_ASMOTOOLS="$KIRA_SETUP/asmodat-automation-tools-v0.0.3" 
 if [ ! -f "$KIRA_SETUP_ASMOTOOLS" ] ; then # this ensures that tools are updated only when requested, not when their version changes
     echo "Install Asmodat Automation helper tools"
-    ${KIRA_INFRA_SCRIPTS}/awshelper-update-v0.0.1.sh "v0.12.0"
+    ${KIRA_SCRIPTS}/awshelper-update.sh "v0.12.0"
     AWSHelper version
     
-    ${KIRA_INFRA_SCRIPTS}/cdhelper-update-v0.0.1.sh "v0.6.0"
+    ${KIRA_SCRIPTS}/cdhelper-update.sh "v0.6.0"
     CDHelper version
     touch $KIRA_SETUP_ASMOTOOLS
 else
     echo "Asmodat Automation Tools were already installed."
 fi
+
+# ensure docker registry exists
+if [[ $(${KIRA_SCRIPTS}/container-exists.sh "registry") == "False" ]] ; then
+    echo "Container 'registry' did NOT exist, creating..."
+docker run -d \
+ -p $KIRA_REGISTRY_PORT:$KIRA_REGISTRY_PORT \
+ --restart=always \
+ --name registry \
+ -e REGISTRY_STORAGE_DELETE_ENABLED=true \
+ registry:2.7.1
+else
+    echo "Container 'registry' already exists."
+    docker exec -it registry bin/registry --version
+fi
+
+docker ps # list containers
 
 # curl https://sh.rustup.rs -sSf | sh

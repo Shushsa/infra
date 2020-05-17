@@ -52,7 +52,7 @@ which git
 /usr/bin/git --version
 
 echo "Installing .NET"
-wget -q https://packages.microsoft.com/config/ubuntu/19.04/packages-microsoft-prod.deb -O packages-microsoft-prod.deb
+wget -q https://packages.microsoft.com/config/ubuntu/20.04/packages-microsoft-prod.deb -O packages-microsoft-prod.deb
 dpkg -i packages-microsoft-prod.deb
 apt-get update
 apt-get install -y dotnet-runtime-deps-3.1
