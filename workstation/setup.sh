@@ -15,6 +15,7 @@ KIRA_INFRA=/kira/infra
 KIRA_REGISTRY_PORT=5000
 KIRA_REGISTRY="localhost:$KIRA_REGISTRY_PORT"
 KIRA_SCRIPTS="${KIRA_INFRA}/common/scripts"
+KIRA_IMG="${KIRA_INFRA}/common/img"
 KIRA_WORKSTATION="${KIRA_INFRA}/workstation"
 KIRA_INFRA_REPO="https://github.com/KiraCore/infra"
 GO_VERSION="1.14.2"
@@ -25,6 +26,8 @@ GOPATH="/home/go"
 GOBIN="${GOROOT}/bin"
 RUSTFLAGS="-Ctarget-feature=+aes,+ssse3"
 DOTNET_ROOT="/usr/bin/dotnet"
+USER_SHORTCUTS="/home/$SUDO_USER/.local/share/applications"
+ROOT_SHORTCUTS="/root/.local/share/applications"
 
 mkdir -p $KIRA_SETUP 
 mkdir -p $KIRA_INFRA 
@@ -53,6 +56,8 @@ if [ ! -f "$KIRA_SETUP_KIRA_ENV" ] ; then
     echo "KIRA_REGISTRY_PORT=$KIRA_REGISTRY_PORT" >> $ETC_PROFILE
     echo "KIRA_REGISTRY=$KIRA_REGISTRY" >> $ETC_PROFILE
     echo "KIRA_WORKSTATION=$KIRA_WORKSTATION" >> $ETC_PROFILE
+    echo "USER_SHORTCUTS=$USER_SHORTCUTS" >> $ETC_PROFILE
+    echo "ROOT_SHORTCUTS=$ROOT_SHORTCUTS" >> $ETC_PROFILE
     echo "NGINX_CONFIG=$NGINX_CONFIG"
     echo "NGINX_SERVICED_PATH=$NGINX_SERVICED_PATH" >> $ETC_PROFILE
     echo "GOROOT=$GOROOT" >> $ETC_PROFILE
@@ -129,6 +134,7 @@ if [ ! -f "$KIRA_SETUP_BASE_TOOLS" ] ; then
         locales \
         make \
         nano \
+        nautilus-admin \
         nginx \
         netbase \
         netcat-openbsd \
@@ -363,5 +369,26 @@ else
 fi
 
 docker ps # list containers
+
+KIRA_SETUP_DESKTOP="$KIRA_SETUP/desktop-shortcuts-v0.0.1" 
+if [ ! -f "$KIRA_SETUP_DESKTOP" ] ; then
+    echo "Installing Desktop Shortcuts"
+
+    USER_START_SHORTCUT=$USER_SHORTCUTS/kira-start.desktop
+    rm -f -v $USER_START_SHORTCUT
+    cat > $USER_START_SHORTCUT << EOL
+[Desktop Entry]
+Type=Application
+Terminal=true
+Name=KIRA-START
+Icon=${KIRA_IMG}/kira-core-250.png
+Exec=gnome-terminal -e "bash -c '${KIRA_WORKSTATION}/start.sh;$SHELL'"
+Categories=Application;
+EOL
+
+    touch $KIRA_SETUP_DESKTOP
+else
+    echo "Desktop shortcuts were already installed"
+fi
 
 # curl https://sh.rustup.rs -sSf | sh

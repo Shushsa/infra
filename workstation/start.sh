@@ -7,6 +7,15 @@ set -x
 # Local Update Shortcut:
 # (rm -fv $KIRA_WORKSTATION/start.sh) && nano $KIRA_WORKSTATION/start.sh && chmod 777 $KIRA_WORKSTATION/start.sh
 
+echo "Updating repository and fetching changes..."
+cd $KIRA_INFRA
+git checkout master
+git fetch --all
+git reset --hard origin/master
+git pull
+chmod -R 777 ./
+
+$KIRA_WORKSTATION/setup.sh
 
 echo "Updating base image..."
 $KIRA_WORKSTATION/update-image "$KIRA_INFRA/docker/base-image" "base-image" "latest"
