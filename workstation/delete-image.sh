@@ -9,7 +9,7 @@ set -x
 # Use Example:
 # $KIRA_WORKSTATION/delete-image.sh "$KIRA_INFRA/docker/base-image" "base-image" "latest"
 
-source "/etc/profile"
+source "/etc/profile" &> /dev/null
 
 IMAGE_DIR=$1
 IMAGE_NAME=$2
@@ -18,7 +18,6 @@ IMAGE_TAG=$3
 [ -z "$IMAGE_TAG" ] && IMAGE_TAG="latest"
 
 KIRA_SETUP_FILE="$KIRA_SETUP/$IMAGE_NAME-$IMAGE_TAG"
-
 
 echo "------------------------------------------------"
 echo "|         STARTED: DELETE IMAGE v0.0.1         |"

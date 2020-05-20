@@ -9,14 +9,15 @@ set -x
 # Use Example:
 # $KIRA_WORKSTATION/update-image.sh "$KIRA_INFRA/docker/base-image" "base-image" "latest"
 
-source "/etc/profile" > /dev/null
+source "/etc/profile" &> /dev/null
 
 IMAGE_DIR=$1
 IMAGE_NAME=$2
 IMAGE_TAG=$3
-BUILD_ARG1=$4
-BUILD_ARG2=$5
-BUILD_ARG3=$6
+INTEGRITY=$4
+BUILD_ARG1=$5
+BUILD_ARG2=$6
+BUILD_ARG3=$7
 
 [ -z "$IMAGE_TAG" ] && IMAGE_TAG="latest"
 [ -z "$BUILD_ARG1" ] && BUILD_ARG1="BUILD_ARG1=none"
@@ -30,8 +31,9 @@ touch $KIRA_SETUP_FILE
 
 cd $IMAGE_DIR
 
-OLD_HASH=$(cat $KIRA_SETUP_FILE)
-NEW_HASH=$(hashdeep -r -l . | sort | md5sum | awk '{print $1}')
+# adding integrity to the hash enables user to update based on internal image state
+OLD_HASH="$(cat $KIRA_SETUP_FILE)-$INTEGRITY"
+NEW_HASH="$(hashdeep -r -l . | sort | md5sum | awk '{print $1}')-$INTEGRITY"
 
 echo "------------------------------------------------"
 echo "|         STARTED: IMAGE UPDATE v0.0.1         |"
@@ -46,23 +48,19 @@ echo "|     BUILD ARG 2: $BUILD_ARG2"
 echo "|     BUILD ARG 3: $BUILD_ARG3"
 echo "------------------------------------------------"
 
-CREATE_NEW_IMAGE="False"
-if [ ! -z $(docker images -q $IMAGE_NAME) ] ; then
-    echo "SUCCESS: Image '$IMAGE_DIR' was found"
-    if [ "$OLD_HASH" == "$NEW_HASH" ] ; then
-        echo "INFO: Image '$IMAGE_DIR' hash changed from $OLD_HASH to $NEW_HASH, removing old image..."
-        # NOTE: This script automaitcaly removes KIRA_SETUP_FILE file (rm -fv $KIRA_SETUP_FILE)
-        $KIRA_WORKSTATION/delete-image.sh "$KIRA_INFRA/docker/tools-image" "tools-image" "latest"
-        CREATE_NEW_IMAGE="True"
-    else
-        echo "INFO: Image hash $OLD_HASH did NOT changed"
-    fi
-else
-    echo "WARNING: Image '$IMAGE_DIR' was NOT found"
-    CREATE_NEW_IMAGE="True"
-fi
 
-if [ "$CREATE_NEW_IMAGE" == "True" ] ; then
+
+if [[ $($KIRA_WORKSTATION/image-updated.sh "$IMAGE_DIR" "$IMAGE_NAME" "$IMAGE_TAG" "$INTEGRITY") != "True" ]] ; then
+    
+    if [ "$OLD_HASH" != "$NEW_HASH" ] ; then
+        echo "WARNING: Image '$IMAGE_DIR' hash changed from $OLD_HASH to $NEW_HASH"
+    else
+        echo "INFO: Image hash $OLD_HASH did NOT changed, but imgage was not present"
+    fi
+
+    # NOTE: This script automaitcaly removes KIRA_SETUP_FILE file (rm -fv $KIRA_SETUP_FILE)
+    $KIRA_WORKSTATION/delete-image.sh "$KIRA_INFRA/docker/tools-image" "tools-image" "latest"
+
     # ensure cleanup
     docker exec -it registry sh -c "rm -rfv /var/lib/registry/docker/registry/v2/repositories/${IMAGE_NAME}"
     docker exec -it registry bin/registry garbage-collect /etc/docker/registry/config.yml -m

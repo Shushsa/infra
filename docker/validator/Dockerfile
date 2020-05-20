@@ -16,9 +16,9 @@ RUN ${SELF_SCRIPTS}/git-pull-v0.0.1.sh "${REPO}" "${BRANCH}" "${CHECKOUT}" "${SE
 RUN cd ${SEKAI} && make install
 RUN sekaid version --long
 
-ADD ./scripts ${SELF_SCRIPTS}
 ADD ./configs ${SELF_CONFIGS}
 ADD ./container ${SELF_CONTAINER}
+ADD ./scripts ${SELF_SCRIPTS}
 
 RUN chmod 777 -R ${SELF_HOME}
 
