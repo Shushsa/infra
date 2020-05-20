@@ -32,7 +32,7 @@ touch $KIRA_SETUP_FILE
 cd $IMAGE_DIR
 
 # adding integrity to the hash enables user to update based on internal image state
-OLD_HASH="$(cat $KIRA_SETUP_FILE)-$INTEGRITY"
+OLD_HASH=$(cat $KIRA_SETUP_FILE)
 NEW_HASH="$(hashdeep -r -l . | sort | md5sum | awk '{print $1}')-$INTEGRITY"
 
 echo "------------------------------------------------"
@@ -48,8 +48,6 @@ echo "|     BUILD ARG 2: $BUILD_ARG2"
 echo "|     BUILD ARG 3: $BUILD_ARG3"
 echo "------------------------------------------------"
 
-
-
 if [[ $($KIRA_WORKSTATION/image-updated.sh "$IMAGE_DIR" "$IMAGE_NAME" "$IMAGE_TAG" "$INTEGRITY") != "True" ]] ; then
     
     if [ "$OLD_HASH" != "$NEW_HASH" ] ; then
@@ -59,12 +57,7 @@ if [[ $($KIRA_WORKSTATION/image-updated.sh "$IMAGE_DIR" "$IMAGE_NAME" "$IMAGE_TA
     fi
 
     # NOTE: This script automaitcaly removes KIRA_SETUP_FILE file (rm -fv $KIRA_SETUP_FILE)
-    $KIRA_WORKSTATION/delete-image.sh "$KIRA_INFRA/docker/tools-image" "tools-image" "latest"
-
-    # ensure cleanup
-    docker exec -it registry sh -c "rm -rfv /var/lib/registry/docker/registry/v2/repositories/${IMAGE_NAME}"
-    docker exec -it registry bin/registry garbage-collect /etc/docker/registry/config.yml -m
-    docker exec -it registry sh -c "reboot" || echo "Docker Registry Reboot" && sleep 3
+    $KIRA_WORKSTATION/delete-image.sh "$IMAGE_DIR" "$IMAGE_NAME" "$IMAGE_TAG"
 
     echo "Creating new '$IMAGE_NAME' image..."
     docker build --tag $IMAGE_NAME ./ --build-arg BUILD_HASH=$NEW_HASH --build-arg $BUILD_ARG1 --build-arg $BUILD_ARG2 --build-arg $BUILD_ARG3
@@ -74,6 +67,8 @@ if [[ $($KIRA_WORKSTATION/image-updated.sh "$IMAGE_DIR" "$IMAGE_NAME" "$IMAGE_TA
     docker tag $IMAGE_NAME:$IMAGE_TAG $KIRA_REGISTRY/$IMAGE_NAME
     docker push $KIRA_REGISTRY/$IMAGE_NAME
     echo $NEW_HASH > $KIRA_SETUP_FILE
+else
+    echo "INFO: Image '$IMAGE_DIR' ($NEW_HASH) did NOT change" 
 fi
 
 curl localhost:5000/v2/_catalog

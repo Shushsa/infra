@@ -96,14 +96,14 @@ sed -i 's#tcp://127.0.0.1:26657#tcp://0.0.0.0:26657#g' $CONFIG_TOML_PATH
 sed -i "s/stake/$DENOM/g" $GENESIS_JSON_PATH
 sed -i 's/pruning = "syncable"/pruning = "nothing"/g' $APP_TOML_PATH
 
-$SELF_SCRIPTS/add-account.sh validator "$VALIDATOR_KEY" "" $KEYRINGPASS $PASSPHRASE
-$SELF_SCRIPTS/add-account.sh test "$TEST_KEY" "" $KEYRINGPASS $PASSPHRASE
+$SELF_SCRIPTS/add-account.sh validator "$VALIDATOR_KEY" $KEYRINGPASS $PASSPHRASE
+$SELF_SCRIPTS/add-account.sh test "$TEST_KEY" $KEYRINGPASS $PASSPHRASE
 
 echo ${KEYRINGPASS} | sekaicli keys list
 
 echo "Creating genesis file..."
 echo ${KEYRINGPASS} | sekaid add-genesis-account $(sekaicli keys show validator -a) 100000000000000$DENOM,10000000samoleans
-sekaid add-genesis-account $(sekaicli keys show test -a) 10000000000000000$DENOM,10000000samoleans
+echo ${KEYRINGPASS} | sekaid add-genesis-account $(sekaicli keys show test -a) 100000000000000$DENOM,10000000samoleans
 
 sekaid gentx --name validator --amount 90000000000000$DENOM << EOF
 $KEYRINGPASS

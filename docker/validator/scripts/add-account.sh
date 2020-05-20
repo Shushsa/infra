@@ -11,7 +11,13 @@ KEY=$2
 KEYRINGPASS=$3
 PASSPHRASE=$4
 
-[ ! -z "$KEY" ] && KEY="$SELF_CONFIGS/${KEY}.key"
+if [ ! -f "$KEY" ] && [ ! -z "$KEY" ] ; then # use key as key filename
+    KEY="$SELF_CONFIGS/${KEY}.key"
+fi
+
+if [ ! -f "$KEY" ] ; then # use name as key filename
+    KEY="$SELF_CONFIGS/${NAME}.key"
+fi
 
 if [ -f "$KEY" ] ; then
    echo "INFO: Key $NAME ($KEY) was found and will be imported..."

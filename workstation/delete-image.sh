@@ -35,6 +35,11 @@ docker images | grep "<none>" | awk '{print $3}' | xargs sudo docker rmi -f || e
 docker rmi -f $(docker images --format '{{.Repository}}:{{.Tag}}' --filter=reference="${IMAGE_NAME}:*") || echo "Image not found"
 docker rmi -f $(docker images --format '{{.Repository}}:{{.Tag}}' --filter=reference="${KIRA_REGISTRY}/${IMAGE_NAME}") || echo "Image not found"
 
+# ensure registry cleanup
+docker exec -it registry sh -c "rm -rfv /var/lib/registry/docker/registry/v2/repositories/${IMAGE_NAME}"
+docker exec -it registry bin/registry garbage-collect /etc/docker/registry/config.yml -m
+docker exec -it registry sh -c "reboot" || echo "Docker Registry Reboot" && sleep 1
+
 echo "------------------------------------------------"
 echo "|        FINISHED: IMAGE DELETE v0.0.1         |"
 echo "------------------------------------------------"
