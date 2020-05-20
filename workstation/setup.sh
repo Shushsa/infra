@@ -12,11 +12,13 @@ CARGO_ENV="/home/$SUDO_USER/.cargo/env"
 BASHRC=~/.bashrc
 KIRA_SETUP=/kira/setup
 KIRA_INFRA=/kira/infra
+KIRA_STATE=/kira/state
 KIRA_REGISTRY_PORT=5000
 KIRA_REGISTRY="localhost:$KIRA_REGISTRY_PORT"
 KIRA_SCRIPTS="${KIRA_INFRA}/common/scripts"
 KIRA_IMG="${KIRA_INFRA}/common/img"
 KIRA_WORKSTATION="${KIRA_INFRA}/workstation"
+KIRA_DOCKER="${KIRA_INFRA}/docker"
 KIRA_INFRA_REPO="https://github.com/KiraCore/infra"
 GO_VERSION="1.14.2"
 NGINX_SERVICED_PATH="/etc/systemd/system/nginx.service.d"
@@ -30,7 +32,8 @@ USER_SHORTCUTS="/home/$SUDO_USER/.local/share/applications"
 ROOT_SHORTCUTS="/root/.local/share/applications"
 
 mkdir -p $KIRA_SETUP 
-mkdir -p $KIRA_INFRA 
+mkdir -p $KIRA_INFRA
+mkdir -p $KIRA_STATE
 mkdir -p "/home/$SUDO_USER/.cargo"
 
 KIRA_SETUP_ROURCE_ENV="$KIRA_SETUP/source-env-v0.0.2" 
@@ -44,7 +47,7 @@ else
     echo "Environment variables are already beeing sourced from $ETC_PROFILE"
 fi
 
-KIRA_SETUP_KIRA_ENV="$KIRA_SETUP/kira-env-v0.0.12" 
+KIRA_SETUP_KIRA_ENV="$KIRA_SETUP/kira-env-v0.0.14" 
 if [ ! -f "$KIRA_SETUP_KIRA_ENV" ] ; then
     echo "Setting up kira environment variables"
 
@@ -52,10 +55,12 @@ if [ ! -f "$KIRA_SETUP_KIRA_ENV" ] ; then
 
     echo "KIRA_SETUP=$KIRA_SETUP" >> $ETC_PROFILE
     echo "KIRA_INFRA=$KIRA_INFRA" >> $ETC_PROFILE
+    echo "KIRA_STATE=$KIRA_STATE" >> $ETC_PROFILE
     echo "KIRA_SCRIPTS=$KIRA_SCRIPTS" >> $ETC_PROFILE
     echo "KIRA_REGISTRY_PORT=$KIRA_REGISTRY_PORT" >> $ETC_PROFILE
     echo "KIRA_REGISTRY=$KIRA_REGISTRY" >> $ETC_PROFILE
     echo "KIRA_WORKSTATION=$KIRA_WORKSTATION" >> $ETC_PROFILE
+    echo "KIRA_DOCKER=$KIRA_DOCKER" >> $ETC_PROFILE
     echo "USER_SHORTCUTS=$USER_SHORTCUTS" >> $ETC_PROFILE
     echo "ROOT_SHORTCUTS=$ROOT_SHORTCUTS" >> $ETC_PROFILE
     echo "NGINX_CONFIG=$NGINX_CONFIG"
@@ -341,13 +346,13 @@ cd $KIRA_INFRA
 git describe --all
 chmod -R 777 $KIRA_INFRA
 
-KIRA_SETUP_ASMOTOOLS="$KIRA_SETUP/asmodat-automation-tools-v0.0.3" 
+KIRA_SETUP_ASMOTOOLS="$KIRA_SETUP/asmodat-automation-tools-v0.0.4" 
 if [ ! -f "$KIRA_SETUP_ASMOTOOLS" ] ; then # this ensures that tools are updated only when requested, not when their version changes
     echo "Install Asmodat Automation helper tools"
     ${KIRA_SCRIPTS}/awshelper-update.sh "v0.12.0"
     AWSHelper version
     
-    ${KIRA_SCRIPTS}/cdhelper-update.sh "v0.6.0"
+    ${KIRA_SCRIPTS}/cdhelper-update.sh "v0.6.3"
     CDHelper version
     touch $KIRA_SETUP_ASMOTOOLS
 else
@@ -356,7 +361,8 @@ fi
 
 # ensure docker registry exists
 if [[ $(${KIRA_SCRIPTS}/container-exists.sh "registry") == "False" ]] ; then
-    echo "Container 'registry' did NOT exist, creating..."
+    echo "Container 'registry' does NOT exist, creating..."
+    ${KIRA_SCRIPTS}/container-delete.sh "registry"
 docker run -d \
  -p $KIRA_REGISTRY_PORT:$KIRA_REGISTRY_PORT \
  --restart=always \

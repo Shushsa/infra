@@ -4,6 +4,8 @@ exec 2>&1
 set -e
 set -x
 
+# (rm -fv $KIRA_INFRA/docker/validator/container/on_init.sh) && nano $KIRA_INFRA/docker/validator/container/on_init.sh
+
 echo "Staring on-init script..."
 SEKAID_HOME=$HOME/.sekaid
 SEKAID_CONFIG=$SEKAID_HOME/config
@@ -14,6 +16,11 @@ CONFIG_TOML_PATH=$SEKAID_CONFIG/config.toml
 INIT_START_FILE=$HOME/init_started
 INIT_END_FILE=$HOME/init_ended
 SEKAICLI_HOME=$HOME/.sekaicli
+SIGNING_KEY_PATH="$SEKAID_CONFIG/priv_validator_key.json"
+
+# key's can be passed from json in the config directory 
+[ ! -z "$NODE_KEY" ] && NODE_KEY="$SELF_CONFIGS/${NODE_KEY}.json"
+[ ! -z "$SIGNING_KEY" ] && SIGNING_KEY="$SELF_CONFIGS/${SIGNING_KEY}.key"
 
 # external variables: P2P_PROXY_PORT, RPC_PROXY_PORT, LCD_PROXY_PORT, RLY_PROXY_PORT
 P2P_LOCAL_PORT=26656
@@ -21,17 +28,16 @@ RPC_LOCAL_PORT=26657
 LCD_LOCAL_PORT=1317
 RLY_LOCAL_PORT=8000
 
-P2P_PROXY_PORT=10000
-RPC_PROXY_PORT=10001
-LCD_PROXY_PORT=10002
-RLY_PROXY_PORT=10003
-
-[ -z "$IMPORT_VALIDATOR_KEY" ] && IMPORT_VALIDATOR_KEY="False"
-[ -z "$VALIDATOR_KEY_PATH" ] && VALIDATOR_KEY_PATH="$SEKAID_CONFIG/priv_validator_key.json"
 [ -z "$NODE_ADDESS" ] && NODE_ADDESS="tcp://localhost:$RPC_LOCAL_PORT"
 [ -z "$CHAIN_JSON_FULL_PATH" ] && CHAIN_JSON_FULL_PATH="$SELF_CONFIGS/$CHAIN_ID.json"
 [ -z "$PASSPHRASE" ] && PASSPHRASE="1234567890"
 [ -z "$KEYRINGPASS" ] && KEYRINGPASS="1234567890"
+[ -z "$MONIKER" ] && MONIKER="Test Chain Moniker"
+
+[ -z "$P2P_PROXY_PORT" ] && P2P_PROXY_PORT="10000"
+[ -z "$RPC_PROXY_PORT" ] && RPC_PROXY_PORT="10001"
+[ -z "$LCD_PROXY_PORT" ] && LCD_PROXY_PORT="10002"
+[ -z "$RLY_PROXY_PORT" ] && RLY_PROXY_PORT="10003"
 
 if [ -f "$CHAIN_JSON_FULL_PATH" ] ; then
     echo "Chain configuration file was defined, loading JSON"
@@ -52,9 +58,6 @@ else
     echo "{\"key\":\"$RLYKEY\",\"chain-id\":\"$CHAIN_ID\",\"rpc-addr\":\"$RPC_ADDR\",\"account-prefix\":\"$ACCOUNT_PREFIX\",\"gas\":$GAS,\"gas-prices\":\"$GAS_PRICES\",\"default-denom\":\"$DENOM\",\"trusting-period\":\"$RLYTRUSTING\"}" > $CHAIN_ID.json
 fi
 
-[ -z "$VALIDATOR_SIGNING_KEY_PATH" ] && VALIDATOR_SIGNING_KEY_PATH="$SELF_CONFIGS/$CHAIN_ID-validator.key"
-[ -z "$NODE_KEY" ] && NODE_KEY=$(cat $SELF_CONFIGS/node_key.json) # default id: 46621e6aaf2287f5a99bb61eee420dd9dadf921d
-
 ##  NOTE: external variables RLYKEY_ADDRESS, RLYKEY_MNEMONIC
 #rly config init
 #
@@ -63,24 +66,29 @@ fi
 #rly keys restore $CHAIN_ID $RLYKEY "$RLYKEY_MNEMONIC"
 #rly keys list $CHAIN_ID
 
-sekaid init --chain-id $CHAIN_ID $CHAIN_ID
+sekaid init --chain-id $CHAIN_ID "$MONIKER"
 
-# NOTE: external variables: NODE_ID, NODE_KEY, VALIDATOR_KEY
+# NOTE: external variables: NODE_ID, NODE_KEY
 # setup node key and unescape
-# NOTE: to create new key delete $NODE_KEY_PATH and run sekaid start 
-rm -f -v $NODE_KEY_PATH && \
- echo $NODE_KEY > $NODE_KEY_PATH && \
- sed -i 's/\\\"/\"/g' $NODE_KEY_PATH
+# NOTE: to create new key delete $NODE_KEY_PATH and run sekaid start
+if [ -f "$NODE_KEY" ] ; then
+    echo "INFO: Node key was defined in the configuration, replacing auto-generated key..."
+    rm -f -v $NODE_KEY_PATH
+    cat $NODE_KEY > $NODE_KEY_PATH
+    sed -i 's/\\\"/\"/g' $NODE_KEY_PATH # unescape
+fi
+
+echo "INFO: Node ID: $(sekaid tendermint show-node-id)"
 
 # setup validator signing key and unescape
-# NOTE: to create new key delete $VALIDATOR_KEY_PATH and run sekaid start 
-if [ "$IMPORT_VALIDATOR_KEY" == "True" ]; then
-   echo "Validator key will be imported"
-   rm -f -v $VALIDATOR_KEY_PATH 
-   echo $VALIDATOR_KEY > $VALIDATOR_KEY_PATH
-   sed -i 's/\\\"/\"/g' $VALIDATOR_KEY_PATH
+# NOTE: to VALIDATOR_KEY new key delete $SIGNING_KEY_PATH and run sekaid start 
+if [ -f "$SIGNING_KEY" ] ; then
+    echo "INFO: Signing key was defined in the configuration, replacing auto-generated key..."
+    rm -f -v $SIGNING_KEY_PATH
+    cat $SIGNING_KEY > $SIGNING_KEY_PATH
+    sed -i 's/\\\"/\"/g' $SIGNING_KEY_PATH # unescape
 else
-   echo "Validator key will NOT be imported"
+   echo "Signing key will NOT be imported"
 fi
 
 # NOTE: ensure that the sekai rpc is open to all connections
@@ -88,30 +96,14 @@ sed -i 's#tcp://127.0.0.1:26657#tcp://0.0.0.0:26657#g' $CONFIG_TOML_PATH
 sed -i "s/stake/$DENOM/g" $GENESIS_JSON_PATH
 sed -i 's/pruning = "syncable"/pruning = "nothing"/g' $APP_TOML_PATH
 
-if [ "$VALIDATOR_SIGNING_KEY_PATH" == "True" ]; then
-   echo "Validator controller key will be imported"
-   #  NOTE: external variables: KEYRINGPASS, PASSPHRASE
-   #  NOTE: Exporting: sekaicli keys export validator -o text
-   #  NOTE: Deleting: sekaicli keys delete validator
-   #  NOTE: Importing (first time requires to input keyring password twice):
-   sekaicli keys import validator $VALIDATOR_SIGNING_KEY_PATH << EOF
-$PASSPHRASE
-$KEYRINGPASS
-$KEYRINGPASS
-EOF
-else
-   echo "Generating random validator controller key..."
-   sekaicli keys add validator << EOF
-$KEYRINGPASS
-$KEYRINGPASS
-EOF
-fi
+$SELF_SCRIPTS/add-account.sh validator "$VALIDATOR_KEY" "" $KEYRINGPASS $PASSPHRASE
+$SELF_SCRIPTS/add-account.sh test "$TEST_KEY" "" $KEYRINGPASS $PASSPHRASE
 
 echo ${KEYRINGPASS} | sekaicli keys list
 
 echo "Creating genesis file..."
 echo ${KEYRINGPASS} | sekaid add-genesis-account $(sekaicli keys show validator -a) 100000000000000$DENOM,10000000samoleans
-sekaid add-genesis-account $(rly chains addr $CHAIN_ID) 10000000000000000$DENOM,10000000samoleans
+sekaid add-genesis-account $(sekaicli keys show test -a) 10000000000000000$DENOM,10000000samoleans
 
 sekaid gentx --name validator --amount 90000000000000$DENOM << EOF
 $KEYRINGPASS
