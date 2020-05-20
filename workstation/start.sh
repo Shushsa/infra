@@ -7,6 +7,9 @@ set -x
 # Local Update Shortcut:
 # (rm -fv $KIRA_WORKSTATION/start.sh) && nano $KIRA_WORKSTATION/start.sh && chmod 777 $KIRA_WORKSTATION/start.sh
 
+VALIDATOR_CHECKOUT="ac24b13"
+VALIDATOR_BRANCH=""
+
 source "/etc/profile" > /dev/null
 
 echo "Updating repository and fetching changes..."
@@ -40,7 +43,7 @@ fi
 
 if [[ $($KIRA_WORKSTATION/image-updated.sh "$KIRA_INFRA/docker/validator" "validator") == "False" ]]; then
     echo "All imags were updated, starting validator image..."
-    $KIRA_WORKSTATION/update-image.sh "$KIRA_INFRA/docker/validator" "validator" "latest" "REPO=https://github.com/kiracore/sekai" "BRANCH=master" "CHECKOUT="
+    $KIRA_WORKSTATION/update-image.sh "$KIRA_INFRA/docker/validator" "validator" "latest" "REPO=https://github.com/kiracore/sekai" "BRANCH=$VALIDATOR_BRANCH" "CHECKOUT=$VALIDATOR_CHECKOUT"
 else
     echo "INFO: tools-image is up to date"
 fi
@@ -52,9 +55,9 @@ if [[ $(${KIRA_SCRIPTS}/container-exists.sh "validator-1") == "False" ]] ; then
     mkdir -p "${KIRA_STATE}/validator-1"
     docker run -d \
  --network="host" \
- --restart=no \
+ --restart=always \
  --name validator-1 \
- -v ${KIRA_STATE}/validator-1:/
+ -v /:${KIRA_STATE}/validator-1 \
  -e MONIKER="Kira Hub Validator 1" \
  -e P2P_PROXY_PORT=10000 \
  -e P2P_PROXY_PORT=10001 \
@@ -66,12 +69,15 @@ if [[ $(${KIRA_SCRIPTS}/container-exists.sh "validator-1") == "False" ]] ; then
  -e TEST_KEY="test-1" \
  validator:latest
 
+# docker exec -it $(docker ps -a -q --filter ancestor=validator) bash
+# docker run -it --entrypoint /bin/bash validator-1 -s
+
 #> Kira Validator container (HEAD): `docker logs --follow $(docker ps -a -q  --filter ancestor=${KIRA_REGISTRY}/validator)`
 #> Kira Validator container (TAIL): `docker logs --tail 50 --follow --timestamps $(docker ps -a -q  --filter ancestor=${KIRA_REGISTRY}/validator)`
     
     #${KIRA_REGISTRY}/${IMAGE_NAME}
 # docker cp validator-1:/self/logs/init_script_output.txt .
-# docker run -it --entrypoint /bin/bash validator-1 -s
+
 else
     echo "Container 'validator-1' already exists."
     docker exec -it validator-1 sekaid version

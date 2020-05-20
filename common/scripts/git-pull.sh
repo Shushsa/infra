@@ -4,6 +4,9 @@ exec 2>&1
 set -e
 set -x
 
+# Local Update Shortcut:
+# (rm -fv $KIRA_SCRIPTS/git-pull.sh) && nano $KIRA_SCRIPTS/git-pull.sh && chmod 777 $KIRA_SCRIPTS/git-pull.sh
+
 REPO=$1
 BRANCH=$2
 CHECKOUT=$3
@@ -18,6 +21,7 @@ echo "|  CHECKOUT:   $CHECKOUT"
 echo "|  OUTPUT:     $OUTPUT"
 echo "------------------------------------------------"
 
+rm -rf $OUTPUT
 mkdir -p $(dirname $OUTPUT)
 
 if [ ! -z "$BRANCH" ]
@@ -34,8 +38,8 @@ then
     git checkout $CHECKOUT
 fi   
 
-git describe --tags || true
-git describe --all
+git describe --tags || echo "No tags were found"
+git describe --all --always
 
 echo "------------------------------------------------"
 echo "|         FINISHED: GIT PULL v0.0.1            |"

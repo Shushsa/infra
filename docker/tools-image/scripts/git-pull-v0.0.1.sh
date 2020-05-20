@@ -34,8 +34,8 @@ then
     git checkout $CHECKOUT
 fi   
 
-git describe --tags || true
-git describe --all
+git describe --tags || echo "No tags were found"
+git describe --all --always
 
 echo "------------------------------------------------"
 echo "|         FINISHED: GIT PULL v0.0.1            |"
