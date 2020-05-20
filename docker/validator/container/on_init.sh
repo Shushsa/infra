@@ -58,29 +58,20 @@ else
     echo "{\"key\":\"$RLYKEY\",\"chain-id\":\"$CHAIN_ID\",\"rpc-addr\":\"$RPC_ADDR\",\"account-prefix\":\"$ACCOUNT_PREFIX\",\"gas\":$GAS,\"gas-prices\":\"$GAS_PRICES\",\"default-denom\":\"$DENOM\",\"trusting-period\":\"$RLYTRUSTING\"}" > $CHAIN_ID.json
 fi
 
-##  NOTE: external variables RLYKEY_ADDRESS, RLYKEY_MNEMONIC
-#rly config init
-#
-## NOTE: you will want to save the content from this JSON file
-#rly chains add -f $CHAIN_ID.json
-#rly keys restore $CHAIN_ID $RLYKEY "$RLYKEY_MNEMONIC"
-#rly keys list $CHAIN_ID
-
 sekaid init --chain-id $CHAIN_ID "$MONIKER"
 
-# NOTE: external variables: NODE_ID, NODE_KEY
-# setup node key and unescape
+# import node key from file (if present)
 # NOTE: to create new key delete $NODE_KEY_PATH and run sekaid start
 if [ -f "$NODE_KEY" ] ; then
     echo "INFO: Node key was defined in the configuration, replacing auto-generated key..."
     rm -f -v $NODE_KEY_PATH
     cat $NODE_KEY > $NODE_KEY_PATH
-    sed -i 's/\\\"/\"/g' $NODE_KEY_PATH # unescape
+    sed -i 's/\\\"/\"/g' $NODE_KEY_PATH # unescape if needed
 fi
 
 echo "INFO: Node ID: $(sekaid tendermint show-node-id)"
 
-# setup validator signing key and unescape
+# import validator signing key from file (if present)
 # NOTE: to VALIDATOR_KEY new key delete $SIGNING_KEY_PATH and run sekaid start 
 if [ -f "$SIGNING_KEY" ] ; then
     echo "INFO: Signing key was defined in the configuration, replacing auto-generated key..."

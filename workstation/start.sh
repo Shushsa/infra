@@ -7,8 +7,8 @@ set -x
 # Local Update Shortcut:
 # (rm -fv $KIRA_WORKSTATION/start.sh) && nano $KIRA_WORKSTATION/start.sh && chmod 777 $KIRA_WORKSTATION/start.sh
 
-VALIDATOR_CHECKOUT="8fac848"
-VALIDATOR_BRANCH=""
+VALIDATOR_CHECKOUT=""
+VALIDATOR_BRANCH="master"
 VALIDATOR_INTEGRITY="_${VALIDATOR_BRANCH}_${VALIDATOR_CHECKOUT}"
 
 source "/etc/profile" &> /dev/null
@@ -66,18 +66,12 @@ if [[ $(${KIRA_SCRIPTS}/container-exists.sh "validator-1") == "False" ]] ; then
  -e TEST_KEY="test-1" \
  validator:latest
 
-# -v /:${KIRA_STATE}/validator-1 \
-
 # docker exec -it $(docker ps -a -q --filter ancestor=validator) bash
 # docker run -it --entrypoint /bin/bash validator-1 -s
-
 #> Kira Validator container (HEAD): `docker logs --follow $(docker ps -a -q  --filter ancestor=validator)`
-#> Kira Validator container (TAIL): `docker logs --tail 50 --follow --timestamps $(docker ps -a -q  --filter ancestor=${KIRA_REGISTRY}/validator)`
+#> Kira Validator container (TAIL): `docker logs --tail 50 --follow --timestamps $(docker ps -a -q  --filter ancestor=validator)`
     
-    #${KIRA_REGISTRY}/${IMAGE_NAME}
-# docker cp validator-1:/self/logs/init_script_output.txt .
-# docker cp validator-1:/self/logs/init_script_output.txt .
-# docker cp validator-1:/self/home/success_end .
+
 
 else
     echo "Container 'validator-1' already exists."

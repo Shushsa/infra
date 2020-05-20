@@ -30,6 +30,7 @@ RUSTFLAGS="-Ctarget-feature=+aes,+ssse3"
 DOTNET_ROOT="/usr/bin/dotnet"
 USER_SHORTCUTS="/home/$SUDO_USER/.local/share/applications"
 ROOT_SHORTCUTS="/root/.local/share/applications"
+SMTP_SECRET='{"host":"smtp.gmail.com","port":"587","ssl":true,"login":"noreply.example.email@gmail.com","password":"wpzpjrfsfznyeohs"}'
 
 mkdir -p $KIRA_SETUP 
 mkdir -p $KIRA_INFRA
@@ -91,6 +92,7 @@ if [ ! -f "$KIRA_SETUP_CERTS" ] ; then
     curl https://packages.microsoft.com/keys/microsoft.asc | apt-key add -
     echo "deb http://archive.ubuntu.com/ubuntu/ bionic universe" | tee /etc/apt/sources.list.d/bionic.list
     echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" | tee /etc/apt/sources.list.d/google.list
+    echo "deb http://security.debian.org/debian-security jessie/updates main" >> /etc/apt/sources.list
     add-apt-repository "deb [arch=amd64] https://packages.microsoft.com/repos/vscode stable main"
     touch $KIRA_SETUP_CERTS
 else
