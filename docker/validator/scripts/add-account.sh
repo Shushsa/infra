@@ -8,7 +8,7 @@ set -x
 
 NAME=$1
 KEY=$2
-KEYRING=$3
+KEYRINGPASS=$3
 PASSPHRASE=$4
 
 [ ! -z "$KEY" ] && KEY="$SELF_CONFIGS/${KEY}.key"

@@ -15,14 +15,6 @@ source "/etc/profile" &> /dev/null
 
 echo "Updating repository and fetching changes..."
 cd $KIRA_INFRA
-git checkout master
-git fetch --all
-git reset --hard origin/master
-git pull
-git describe --tags || echo "No tags were found"
-git describe --all --always
-chmod -R 777 ./
-
 $KIRA_WORKSTATION/setup.sh
 
 if [[ $($KIRA_WORKSTATION/image-updated.sh "$KIRA_INFRA/docker/base-image" "base-image") == "False" ]]; then
