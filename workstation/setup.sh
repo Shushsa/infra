@@ -37,8 +37,6 @@ fi
 
 source $ETC_PROFILE &> /dev/null
 
-[ -z "$USER_SHORTCUTS" ] && KIRA_SETUP="/home/$SUDO_USER/.local/share/applications"
-
 CARGO_ENV="/home/$SUDO_USER/.cargo/env"
 
 KIRA_SETUP=/kira/setup
@@ -94,12 +92,12 @@ else
     echo "Certs and refs were already installed."
 fi
 
-KIRA_SETUP_KIRA_ENV="$KIRA_SETUP/kira-env-v0.0.18" 
+KIRA_SETUP_KIRA_ENV="$KIRA_SETUP/kira-env-v0.0.19" 
 if [ ! -f "$KIRA_SETUP_KIRA_ENV" ] ; then
     echo "Setting up kira environment variables"
     touch $CARGO_ENV
 
-    [ -z "$USER_SHORTCUTS" ] && CDHelper text lineswap --insert="KIRA_SETUP=/home/$SUDO_USER/.local/share/applications" --prefix="USER_SHORTCUTS=" --path=$ETC_PROFILE --append-if-found-not=True
+    [ -z "$USER_SHORTCUTS" ] && CDHelper text lineswap --insert="USER_SHORTCUTS=/home/$SUDO_USER/.local/share/applications" --prefix="USER_SHORTCUTS=" --path=$ETC_PROFILE --append-if-found-not=True
     [ -z "$ROOT_SHORTCUTS" ] && CDHelper text lineswap --insert="ROOT_SHORTCUTS=/root/.local/share/applications" --prefix="ROOT_SHORTCUTS=" --path=$ETC_PROFILE --append-if-found-not=True
     # SMTP_SECRET Should be user defined. Example is provided to simplify the process, to set this up - follow repo instructions
     [ -z "$SMTP_SECRET" ] && CDHelper text lineswap --insert='SMTP_SECRET={"host":"smtp.gmail.com","port":"587","ssl":true,"login":"noreply.example.email@gmail.com","password":"wpzpjrfsfznyeohs"}' --prefix="SMTP_SECRET=" --path=$ETC_PROFILE --append-if-found-not=True
@@ -113,8 +111,6 @@ if [ ! -f "$KIRA_SETUP_KIRA_ENV" ] ; then
     CDHelper text lineswap --insert="KIRA_REGISTRY=$KIRA_REGISTRY" --prefix="KIRA_REGISTRY=" --path=$ETC_PROFILE --append-if-found-not=True
     CDHelper text lineswap --insert="KIRA_WORKSTATION=$KIRA_WORKSTATION" --prefix="KIRA_WORKSTATION=" --path=$ETC_PROFILE --append-if-found-not=True
     CDHelper text lineswap --insert="KIRA_DOCKER=$KIRA_DOCKER" --prefix="KIRA_DOCKER=" --path=$ETC_PROFILE --append-if-found-not=True
-    CDHelper text lineswap --insert="USER_SHORTCUTS=$USER_SHORTCUTS" --prefix="USER_SHORTCUTS=" --path=$ETC_PROFILE --append-if-found-not=True
-    CDHelper text lineswap --insert="ROOT_SHORTCUTS=$ROOT_SHORTCUTS" --prefix="ROOT_SHORTCUTS=" --path=$ETC_PROFILE --append-if-found-not=True
     CDHelper text lineswap --insert="NGINX_CONFIG=$NGINX_CONFIG" --prefix="NGINX_CONFIG=" --path=$ETC_PROFILE --append-if-found-not=True
     CDHelper text lineswap --insert="NGINX_SERVICED_PATH=$NGINX_SERVICED_PATH" --prefix="NGINX_SERVICED_PATH=" --path=$ETC_PROFILE --append-if-found-not=True
     CDHelper text lineswap --insert="GOROOT=$GOROOT" --prefix="GOROOT=" --path=$ETC_PROFILE --append-if-found-not=True
