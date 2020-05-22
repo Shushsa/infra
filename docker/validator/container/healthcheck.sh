@@ -89,7 +89,7 @@ else
 # --html="false" || true
     fi
     sleep 120 # allow user to grab log output
-    rm -f ${SELF_LOGS}/healthcheck_script_output.txt # remove old log to save space
+    rm -f $SELF_LOGS/healthcheck_script_output.txt # remove old log to save space
 fi
 
 echo "INFO: Healthcheck => STOP"

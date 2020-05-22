@@ -22,7 +22,7 @@ echo "|  OUTPUT:     $OUTPUT"
 echo "------------------------------------------------"
 
 rm -rf $OUTPUT
-mkdir -p $(dirname $OUTPUT)
+mkdir -p $OUTPUT
 
 if [ ! -z "$BRANCH" ]
 then
