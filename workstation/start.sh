@@ -14,34 +14,34 @@ VALIDATOR_INTEGRITY="_${VALIDATOR_BRANCH}_${VALIDATOR_CHECKOUT}"
 source "/etc/profile" &> /dev/null
 
 echo "Updating repository and fetching changes..."
-cd $KIRA_INFRA
 $KIRA_WORKSTATION/setup.sh
+cd $KIRA_WORKSTATION
 
-if [[ $($KIRA_WORKSTATION/image-updated.sh "$KIRA_INFRA/docker/base-image" "base-image") == "False" ]]; then
-    ${KIRA_SCRIPTS}/container-delete.sh "validator-1"
-    $KIRA_WORKSTATION/delete-image.sh "$KIRA_INFRA/docker/tools-image" "tools-image"
-    $KIRA_WORKSTATION/delete-image.sh "$KIRA_INFRA/docker/validator" "validator"
+if [[ $(./image-updated.sh "$KIRA_INFRA/docker/base-image" "base-image") == "False" ]]; then
+    $KIRA_SCRIPTS/container-delete.sh "validator-1"
+    ./delete-image.sh "$KIRA_INFRA/docker/tools-image" "tools-image"
+    ./delete-image.sh "$KIRA_INFRA/docker/validator" "validator"
 
     echo "Updating base image..."
-    $KIRA_WORKSTATION/update-image.sh "$KIRA_INFRA/docker/base-image" "base-image"
+    ./update-image.sh "$KIRA_INFRA/docker/base-image" "base-image"
 else
     echo "INFO: base-image is up to date"
 fi
 
-if [[ $($KIRA_WORKSTATION/image-updated.sh "$KIRA_INFRA/docker/tools-image" "tools-image") == "False" ]]; then
-    ${KIRA_SCRIPTS}/container-delete.sh "validator-1"
-    $KIRA_WORKSTATION/delete-image.sh "$KIRA_INFRA/docker/validator" "validator"
+if [[ $(./image-updated.sh "$KIRA_INFRA/docker/tools-image" "tools-image") == "False" ]]; then
+    $KIRA_SCRIPTS/container-delete.sh "validator-1"
+    ./delete-image.sh "$KIRA_INFRA/docker/validator" "validator"
 
     echo "Updating tools image..."
-    $KIRA_WORKSTATION/update-image.sh "$KIRA_INFRA/docker/tools-image" "tools-image"
+    ./update-image.sh "$KIRA_INFRA/docker/tools-image" "tools-image"
 else
     echo "INFO: tools-image is up to date"
 fi
 
-if [[ $($KIRA_WORKSTATION/image-updated.sh "$KIRA_INFRA/docker/validator" "validator" "latest" "$VALIDATOR_INTEGRITY") == "False" ]]; then
+if [[ $(./image-updated.sh "$KIRA_INFRA/docker/validator" "validator" "latest" "$VALIDATOR_INTEGRITY") == "False" ]]; then
     echo "All imags were updated, starting validator image..."
-    ${KIRA_SCRIPTS}/container-delete.sh "validator-1"
-    $KIRA_WORKSTATION/update-image.sh "$KIRA_INFRA/docker/validator" "validator" "latest" "$VALIDATOR_INTEGRITY" "REPO=https://github.com/kiracore/sekai" "BRANCH=$VALIDATOR_BRANCH" "CHECKOUT=$VALIDATOR_CHECKOUT"
+    $KIRA_SCRIPTS/container-delete.sh "validator-1"
+    ./update-image.sh "$KIRA_INFRA/docker/validator" "validator" "latest" "$VALIDATOR_INTEGRITY" "REPO=https://github.com/kiracore/sekai" "BRANCH=$VALIDATOR_BRANCH" "CHECKOUT=$VALIDATOR_CHECKOUT"
 else
     echo "INFO: tools-image is up to date"
 fi
@@ -71,8 +71,6 @@ if [[ $(${KIRA_SCRIPTS}/container-exists.sh "validator-1") == "False" ]] ; then
 #> Kira Validator container (HEAD): `docker logs --follow $(docker ps -a -q  --filter ancestor=validator)`
 #> Kira Validator container (TAIL): `docker logs --tail 50 --follow --timestamps $(docker ps -a -q  --filter ancestor=validator)`
     
-
-
 else
     echo "Container 'validator-1' already exists."
     docker exec -it validator-1 sekaid version

@@ -384,7 +384,7 @@ docker images ls
 echo "Updating Desktop Shortcuts..."
 USER_START_SHORTCUT=$USER_SHORTCUTS/kira-start.desktop
 rm -f -v $USER_START_SHORTCUT
-    cat > $USER_START_SHORTCUT << EOL
+cat > $USER_START_SHORTCUT << EOL
 [Desktop Entry]
 Type=Application
 Terminal=true
