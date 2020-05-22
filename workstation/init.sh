@@ -41,6 +41,7 @@ chmod -R 777 $KIRA_INFRA
 ${KIRA_SCRIPTS}/cdhelper-update.sh "v0.6.10"
 CDHelper version
 
+cd /kira
 source $KIRA_WORKSTATION/setup.sh $BRANCH
 
 

@@ -7,6 +7,14 @@ set -x
 # Local Update Shortcut:
 # (rm -fv $KIRA_WORKSTATION/start.sh) && nano $KIRA_WORKSTATION/start.sh && chmod 777 $KIRA_WORKSTATION/start.sh
 
+BRANCH=$1
+CHECKOUT=$2
+SKIP_UPDATE=$3
+
+[ -z "$BRANCH" ] && BRANCH="master"
+[ -z "$CHECKOUT" ] && CHECKOUT=""
+[ -z "$SKIP_UPDATE" ] && SKIP_UPDATE="False"
+
 VALIDATOR_CHECKOUT=""
 VALIDATOR_BRANCH="master"
 VALIDATOR_INTEGRITY="_${VALIDATOR_BRANCH}_${VALIDATOR_CHECKOUT}"
@@ -14,7 +22,10 @@ VALIDATOR_INTEGRITY="_${VALIDATOR_BRANCH}_${VALIDATOR_CHECKOUT}"
 source "/etc/profile" &> /dev/null
 
 echo "Updating repository and fetching changes..."
-$KIRA_WORKSTATION/setup.sh
+$KIRA_WORKSTATION/setup.sh "$BRANCH" "$CHECKOUT" $SKIP_UPDATE
+
+source "/etc/profile" &> /dev/null
+
 cd $KIRA_WORKSTATION
 
 BASE_IMAGE_EXISTS=$(./image-updated.sh "$KIRA_DOCKER/base-image" "base-image" || echo "error")
