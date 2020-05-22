@@ -25,7 +25,7 @@ if [ "$SKIP_UPDATE" == "True" ] ; then
     echo "INFO: Updating Infra..."
     $KIRA_SCRIPTS/git-pull.sh "$KIRA_INFRA_REPO" "$BRANCH" "$CHECKOUT" "$KIRA_INFRA"
     $KIRA_WORKSTATION/setup.sh  "$BRANCH" "$CHECKOUT" "True"
-elif [ "$SKIP_UPDATE" == "True" ] ; then
+elif [ "$SKIP_UPDATE" == "False" ] ; then
     echo "INFO: Skipping Infra Update..."
 else
     echo "ERROR: SKIP_UPDATE propoerty is invalid or undefined"
