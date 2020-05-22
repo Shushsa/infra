@@ -7,8 +7,6 @@ set -x
 # Local Update
 # (rm -fv $KIRA_INFRA/docker/base-image/container/deployment.sh) && nano $KIRA_INFRA/docker/base-image/container/deployment.sh
 
-echo "nameserver 1.1.1.1" | tee /etc/resolvconf/resolv.conf.d/base > /dev/null
-
 apt-get update -y
 apt-get upgrade -y
 apt-get install -y --allow-unauthenticated --allow-downgrades --allow-remove-essential --allow-change-held-packages \
