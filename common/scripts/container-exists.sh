@@ -2,7 +2,9 @@
 
 exec 2>&1
 set -e
-set -x
+
+# Local Update Shortcut:
+# (rm -fv $KIRA_SCRIPTS/container-exists.sh) && nano $KIRA_SCRIPTS/container-exists.sh && chmod 777 $KIRA_SCRIPTS/container-exists.sh
 
 name=$1
 
