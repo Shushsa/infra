@@ -70,7 +70,7 @@ else
 fi
 
 CONTAINER_EXISTS=$($KIRA_SCRIPTS/container-exists.sh "validator-1" || echo "error")
-if [ "$CONTAINER_EXISTS"== "False" ] ; then
+if [ "$CONTAINER_EXISTS" == "False" ] ; then
     echo "Container 'validator-1' does NOT exist, creating..."
     ${KIRA_SCRIPTS}/container-delete.sh "validator-1"
     rm -fr "${KIRA_STATE}/validator-1"
@@ -94,7 +94,7 @@ if [ "$CONTAINER_EXISTS"== "False" ] ; then
 # docker run -it --entrypoint /bin/bash validator-1 -s
 #> Kira Validator container (HEAD): `docker logs --follow $(docker ps -a -q  --filter ancestor=validator)`
 #> Kira Validator container (TAIL): `docker logs --tail 50 --follow --timestamps $(docker ps -a -q  --filter ancestor=validator)`
-elif [ "$CONTAINER_EXISTS" == "True" ]; then
+elif [ "$CONTAINER_EXISTS" == "True" ] ; then
     echo "INFO: container validator-1 is running"
     docker exec -it validator-1 sekaid version
 else
