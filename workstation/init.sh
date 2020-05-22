@@ -6,7 +6,7 @@ set -e
 set -x
 
 # Local Update Shortcut:
-# (rm -fv $KIRA_WORKSTATION/init.sh) && nano $KIRA_WORKSTATION/init.sh && chmod 777 $KIRA_WORKSTATION/init.sh
+# (rm -fv /tmp/init.sh) && nano /tmp/init.sh && chmod 777 /tmp/init.sh
 
 BRANCH=$1
 REPO=$2
@@ -41,7 +41,7 @@ chmod -R 777 $KIRA_INFRA
 ${KIRA_SCRIPTS}/cdhelper-update.sh "v0.6.8"
 CDHelper version
 
-$KIRA_WORKSTATION/setup.sh $BRANCH
+source $KIRA_WORKSTATION/setup.sh $BRANCH
 
 
 

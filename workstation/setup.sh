@@ -3,7 +3,6 @@
 exec 2>&1
 set -e
 set -x
-source $ETC_PROFILE &> /dev/null
 
 # Local Update Shortcut:
 # (rm -fv $KIRA_WORKSTATION/setup.sh) && nano $KIRA_WORKSTATION/setup.sh && chmod 777 $KIRA_WORKSTATION/setup.sh
@@ -16,6 +15,7 @@ SKIP_UPDATE=$3
 [ -z "$CHECKOUT" ] && CHECKOUT=""
 [ -z "$SKIP_UPDATE" ] && SKIP_UPDATE="False"
 
+ETC_PROFILE="/etc/profile"
 KIRA_INFRA=/kira/infra
 KIRA_INFRA_REPO="https://github.com/KiraCore/infra"
 KIRA_SCRIPTS="$KIRA_INFRA/common/scripts"
@@ -32,7 +32,9 @@ else
     exit 1
 fi
 
-ETC_PROFILE="/etc/profile"
+source $ETC_PROFILE &> /dev/null
+
+
 CARGO_ENV="/home/$SUDO_USER/.cargo/env"
 BASHRC=~/.bashrc
 KIRA_SETUP=/kira/setup
