@@ -92,7 +92,7 @@ else
     echo "Certs and refs were already installed."
 fi
 
-KIRA_SETUP_KIRA_ENV="$KIRA_SETUP/kira-env-v0.0.17" 
+KIRA_SETUP_KIRA_ENV="$KIRA_SETUP/kira-env-v0.0.18" 
 if [ ! -f "$KIRA_SETUP_KIRA_ENV" ] ; then
     echo "Setting up kira environment variables"
     touch $CARGO_ENV
