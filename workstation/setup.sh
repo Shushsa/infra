@@ -95,7 +95,7 @@ else
     echo "Certs and refs were already installed."
 fi
 
-KIRA_SETUP_KIRA_ENV="$KIRA_SETUP/kira-env-v0.0.14" 
+KIRA_SETUP_KIRA_ENV="$KIRA_SETUP/kira-env-v0.0.15" 
 if [ ! -f "$KIRA_SETUP_KIRA_ENV" ] ; then
     echo "Setting up kira environment variables"
     touch $CARGO_ENV
@@ -389,9 +389,11 @@ cat > $USER_START_SHORTCUT << EOL
 Type=Application
 Terminal=true
 Name=KIRA-START
-Icon=${KIRA_IMG}/kira-core-250.png
-Exec=gnome-terminal -e "bash -c '${KIRA_WORKSTATION}/start.sh ${BRANCH} \"${CHECKOUT}\" False;$SHELL'"
+Icon=$KIRA_IMG/kira-core-250.png
+Exec=pkexec env DISPLAY=$DISPLAY XAUTHORITY=$XAUTHORITY gnome-terminal -- bash -c '$0/start.sh "$1" "$2" "$3" ; $SHELL' "$KIRA_WORKSTATION" "$BRANCH" "$CHECKOUT" "False"
 Categories=Application;
 EOL
 
 # curl https://sh.rustup.rs -sSf | sh
+
+# gnome-terminal -- bash -c 'echo $0 ; echo $1 ; $SHELL' a b

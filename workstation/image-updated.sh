@@ -28,7 +28,7 @@ OLD_HASH=$(cat $KIRA_SETUP_FILE)
 NEW_HASH="$(hashdeep -r -l . | sort | md5sum | awk '{print $1}')-$INTEGRITY"
 
 CREATE_NEW_IMAGE="False"
-if [ -z $(docker images -q $IMAGE_NAME) ] || [ "$OLD_HASH" != "$NEW_HASH" ] ; then
+if [ -z $(docker images -q $IMAGE_NAME || "") ] || [ "$OLD_HASH" != "$NEW_HASH" ] ; then
     echo "False"
 else
     echo "True"
