@@ -15,7 +15,9 @@ SKIP_UPDATE=$3
 [ -z "$CHECKOUT" ] && CHECKOUT=""
 [ -z "$SKIP_UPDATE" ] && SKIP_UPDATE="False"
 
+BASHRC=~/.bashrc
 ETC_PROFILE="/etc/profile"
+
 KIRA_INFRA=/kira/infra
 KIRA_INFRA_REPO="https://github.com/KiraCore/infra"
 KIRA_SCRIPTS="$KIRA_INFRA/common/scripts"
@@ -34,17 +36,14 @@ fi
 
 source $ETC_PROFILE &> /dev/null
 
-
 CARGO_ENV="/home/$SUDO_USER/.cargo/env"
-BASHRC=~/.bashrc
-KIRA_SETUP=/kira/setup
 
+KIRA_SETUP=/kira/setup
 KIRA_STATE=/kira/state
 KIRA_REGISTRY_PORT=5000
 KIRA_REGISTRY="localhost:$KIRA_REGISTRY_PORT"
 
 KIRA_IMG="${KIRA_INFRA}/common/img"
-
 KIRA_DOCKER="${KIRA_INFRA}/docker"
 
 GO_VERSION="1.14.2"
@@ -55,9 +54,6 @@ GOPATH="/home/go"
 GOBIN="${GOROOT}/bin"
 RUSTFLAGS="-Ctarget-feature=+aes,+ssse3"
 DOTNET_ROOT="/usr/bin/dotnet"
-USER_SHORTCUTS="/home/$SUDO_USER/.local/share/applications"
-ROOT_SHORTCUTS="/root/.local/share/applications"
-SMTP_SECRET='{"host":"smtp.gmail.com","port":"587","ssl":true,"login":"noreply.example.email@gmail.com","password":"wpzpjrfsfznyeohs"}'
 SOURCES_LIST="/etc/apt/sources.list.d"
 
 mkdir -p $KIRA_SETUP 
@@ -100,6 +96,12 @@ if [ ! -f "$KIRA_SETUP_KIRA_ENV" ] ; then
     echo "Setting up kira environment variables"
     touch $CARGO_ENV
 
+    [ -z "$USER_SHORTCUTS" ] && CDHelper text lineswap --insert="KIRA_SETUP=/home/$SUDO_USER/.local/share/applications" --prefix="USER_SHORTCUTS=" --path=$ETC_PROFILE --append-if-found-not=True
+    [ -z "$ROOT_SHORTCUTS" ] && CDHelper text lineswap --insert="/root/.local/share/applications" --prefix="ROOT_SHORTCUTS=" --path=$ETC_PROFILE --append-if-found-not=True
+    # SMTP_SECRET Should be user defined. Example is provided to simplify the process, to set this up - follow repo instructions
+    [ -z "$SMTP_SECRET" ] && CDHelper text lineswap --insert='{"host":"smtp.gmail.com","port":"587","ssl":true,"login":"noreply.example.email@gmail.com","password":"wpzpjrfsfznyeohs"}' --prefix="SMTP_SECRET=" --path=$ETC_PROFILE --append-if-found-not=True
+    
+    CDHelper text lineswap --insert="ETC_PROFILE=$ETC_PROFILE" --prefix="ETC_PROFILE=" --path=$ETC_PROFILE --append-if-found-not=True
     CDHelper text lineswap --insert="KIRA_SETUP=$KIRA_SETUP" --prefix="KIRA_SETUP=" --path=$ETC_PROFILE --append-if-found-not=True
     CDHelper text lineswap --insert="KIRA_INFRA=$KIRA_INFRA" --prefix="KIRA_INFRA=" --path=$ETC_PROFILE --append-if-found-not=True
     CDHelper text lineswap --insert="KIRA_STATE=$KIRA_STATE" --prefix="KIRA_STATE=" --path=$ETC_PROFILE --append-if-found-not=True
@@ -126,11 +128,13 @@ if [ ! -f "$KIRA_SETUP_KIRA_ENV" ] ; then
     CDHelper text lineswap --insert="PATH=$PATH:$GOROOT" --prefix="PATH=" --and-contains-not=":$GOROOT" --path=$ETC_PROFILE
     source $ETC_PROFILE &> /dev/null
     CDHelper text lineswap --insert="PATH=$PATH:$GOBIN" --prefix="PATH=" --and-contains-not=":$GOBIN" --path=$ETC_PROFILE
+    source $ETC_PROFILE
+    chmod 777 $ETC_PROFILE
 
     CDHelper text lineswap --insert="source $ETC_PROFILE" --prefix="source $ETC_PROFILE" --path=$BASHRC --append-if-found-not=True
     CDHelper text lineswap --insert="source $CARGO_ENV" --prefix="source $CARGO_ENV" --path=$BASHRC --append-if-found-not=True
-
-    source $ETC_PROFILE
+    chmod 777 $BASHRC
+    
     touch $KIRA_SETUP_KIRA_ENV
 else
     echo "Kira environment variables were already set"
