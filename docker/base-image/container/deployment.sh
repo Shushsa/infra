@@ -7,15 +7,19 @@ set -x
 # Local Update
 # (rm -fv $KIRA_INFRA/docker/base-image/container/deployment.sh) && nano $KIRA_INFRA/docker/base-image/container/deployment.sh
 
-apt-get update -y --fix-missing
-apt-get upgrade -y --allow-unauthenticated --allow-downgrades --allow-remove-essential --allow-change-held-packages
-apt-get install -y software-properties-common apt-transport-https ca-certificates gnupg curl wget
+echo "nameserver 1.1.1.1" | sudo tee /etc/resolvconf/resolv.conf.d/base > /dev/null
+
+apt-get update -y
+apt-get upgrade -y
+apt-get install -y --allow-unauthenticated --allow-downgrades --allow-remove-essential --allow-change-held-packages \
+    software-properties-common apt-transport-https ca-certificates gnupg curl wget
 
 curl https://packages.cloud.google.com/apt/doc/apt-key.gpg | apt-key add -
 curl https://dl-ssl.google.com/linux/linux_signing_key.pub | apt-key add -
 curl https://packages.microsoft.com/keys/microsoft.asc | apt-key add -
-echo "deb http://archive.ubuntu.com/ubuntu/ bionic universe" | tee /etc/apt/sources.list.d/bionic.list
-echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" | tee /etc/apt/sources.list.d/google.list
+
+add-apt-repository "deb [arch=amd64] http://archive.ubuntu.com/ubuntu/ bionic universe"
+add-apt-repository "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main"
 add-apt-repository "deb [arch=amd64] https://packages.microsoft.com/repos/vscode stable main"
 
 echo "APT Update, Upfrade and Intall..."
