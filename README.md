@@ -16,6 +16,10 @@ For the purpose of setting up development environment we will
 1. Install [VMWare Workstation 15.5+](https://www.vmware.com/products/workstation-player/workstation-player-evaluation.html)
 2. Download [Ubuntu 20.04 LTS](https://releases.ubuntu.com/20.04/)
 3. Boot your machine, and ensure latest updates are applied using `Software Updater`
+
+![picture 1](https://i.imgur.com/7SX2g7y.png)  
+
+
 4. Reboot & Open terminal to setup your environment
 
 ```

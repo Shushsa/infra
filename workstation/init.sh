@@ -24,7 +24,8 @@ mkdir -p $KIRA_INFRA
 
 apt-get update -y --fix-missing
 apt-get upgrade -y --allow-unauthenticated --allow-downgrades --allow-remove-essential --allow-change-held-packages
-apt-get install -y software-properties-common apt-transport-https ca-certificates gnupg curl wget
+apt-get install -y --allow-unauthenticated --allow-downgrades --allow-remove-essential --allow-change-held-packages \
+    software-properties-common apt-transport-https ca-certificates gnupg curl wget git
 
 ln -s /usr/bin/git /bin/git || echo "Symlink already Created"
 git --version
