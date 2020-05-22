@@ -3,23 +3,48 @@
 exec 2>&1
 set -e
 set -x
+source $ETC_PROFILE &> /dev/null
 
 # Local Update Shortcut:
 # (rm -fv $KIRA_WORKSTATION/setup.sh) && nano $KIRA_WORKSTATION/setup.sh && chmod 777 $KIRA_WORKSTATION/setup.sh
+
+BRANCH=$1
+CHECKOUT=$2
+SKIP_UPDATE=$3
+
+[ -z "$BRANCH" ] && BRANCH="master"
+[ -z "$CHECKOUT" ] && CHECKOUT=""
+[ -z "$SKIP_UPDATE" ] && SKIP_UPDATE="False"
+
+KIRA_INFRA=/kira/infra
+KIRA_INFRA_REPO="https://github.com/KiraCore/infra"
+KIRA_SCRIPTS="$KIRA_INFRA/common/scripts"
+KIRA_WORKSTATION="$KIRA_INFRA/workstation"
+
+if [ "$SKIP_UPDATE" == "True" ] ; then
+    echo "INFO: Updating Infra..."
+    $KIRA_SCRIPTS/git-pull.sh "$KIRA_INFRA_REPO" "$BRANCH" "$CHECKOUT" "$KIRA_INFRA"
+    $KIRA_WORKSTATION/setup.sh  "$BRANCH" "$CHECKOUT" "True"
+elif [ "$SKIP_UPDATE" == "True" ] ; then
+    echo "INFO: Skipping Infra Update..."
+else
+    echo "ERROR: SKIP_UPDATE propoerty is invalid or undefined"
+    exit 1
+fi
 
 ETC_PROFILE="/etc/profile"
 CARGO_ENV="/home/$SUDO_USER/.cargo/env"
 BASHRC=~/.bashrc
 KIRA_SETUP=/kira/setup
-KIRA_INFRA=/kira/infra
+
 KIRA_STATE=/kira/state
 KIRA_REGISTRY_PORT=5000
 KIRA_REGISTRY="localhost:$KIRA_REGISTRY_PORT"
-KIRA_SCRIPTS="${KIRA_INFRA}/common/scripts"
+
 KIRA_IMG="${KIRA_INFRA}/common/img"
-KIRA_WORKSTATION="${KIRA_INFRA}/workstation"
+
 KIRA_DOCKER="${KIRA_INFRA}/docker"
-KIRA_INFRA_REPO="https://github.com/KiraCore/infra"
+
 GO_VERSION="1.14.2"
 NGINX_SERVICED_PATH="/etc/systemd/system/nginx.service.d"
 NGINX_CONFIG="/etc/nginx/nginx.conf"
@@ -31,71 +56,82 @@ DOTNET_ROOT="/usr/bin/dotnet"
 USER_SHORTCUTS="/home/$SUDO_USER/.local/share/applications"
 ROOT_SHORTCUTS="/root/.local/share/applications"
 SMTP_SECRET='{"host":"smtp.gmail.com","port":"587","ssl":true,"login":"noreply.example.email@gmail.com","password":"wpzpjrfsfznyeohs"}'
+SOURCES_LIST="/etc/apt/sources.list.d"
 
 mkdir -p $KIRA_SETUP 
 mkdir -p $KIRA_INFRA
 mkdir -p $KIRA_STATE
 mkdir -p "/home/$SUDO_USER/.cargo"
+mkdir -p $SOURCES_LIST
+chmod 777 $ETC_PROFILE
 
-KIRA_SETUP_ROURCE_ENV="$KIRA_SETUP/source-env-v0.0.2" 
-if [ ! -f "$KIRA_SETUP_ROURCE_ENV" ] ; then
-    echo "Setting up sourcing of environment variables from $ETC_PROFILE"
-    echo "source $ETC_PROFILE" >> $BASHRC
-    touch $CARGO_ENV
-    echo "source $CARGO_ENV" >> $BASHRC
-    touch $KIRA_SETUP_ROURCE_ENV
+${KIRA_SCRIPTS}/cdhelper-update.sh "v0.6.8"
+CDHelper version
+
+${KIRA_SCRIPTS}/awshelper-update.sh "v0.12.0"
+AWSHelper version
+
+KIRA_SETUP_CERTS="$KIRA_SETUP/certs-v0.0.4" 
+if [ ! -f "$KIRA_SETUP_CERTS" ] ; then
+    echo "Installing certificates and package references..."
+    apt-get update -y --fix-missing
+    apt-get upgrade -y --allow-unauthenticated --allow-downgrades --allow-remove-essential --allow-change-held-packages
+    curl https://packages.cloud.google.com/apt/doc/apt-key.gpg | apt-key add -
+    curl https://dl-ssl.google.com/linux/linux_signing_key.pub | apt-key add -
+    curl https://packages.microsoft.com/keys/microsoft.asc | apt-key add -
+
+    #touch $SOURCES_LIST/bionic.list
+    #touch $SOURCES_LIST/google.list
+    #CDHelper text lineswap --insert="deb http://archive.ubuntu.com/ubuntu/ bionic universe" --contains="deb http://archive.ubuntu.com/ubuntu" --path="$SOURCES_LIST/bionic.list" --append-if-found-not=True
+    #CDHelper text lineswap --insert="deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" --contains="http://dl.google.com/linux/chrome/deb/" --path="$SOURCES_LIST/google.list" --append-if-found-not=True
+
+    add-apt-repository "deb [arch=amd64] http://archive.ubuntu.com/ubuntu/ bionic universe"
+    add-apt-repository "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main"
+    add-apt-repository "deb [arch=amd64] https://packages.microsoft.com/repos/vscode stable main"
+    touch $KIRA_SETUP_CERTS
 else
-    echo "Environment variables are already beeing sourced from $ETC_PROFILE"
+    echo "Certs and refs were already installed."
 fi
 
 KIRA_SETUP_KIRA_ENV="$KIRA_SETUP/kira-env-v0.0.14" 
 if [ ! -f "$KIRA_SETUP_KIRA_ENV" ] ; then
     echo "Setting up kira environment variables"
+    touch $CARGO_ENV
 
-    PATH="$PATH:$GOBIN:$GOROOT:$GOPATH:/usr/local/bin/CDHelper:/usr/local/bin/AWSHelper"
+    CDHelper text lineswap --insert="KIRA_SETUP=$KIRA_SETUP" --prefix="KIRA_SETUP=" --path=$ETC_PROFILE --append-if-found-not=True
+    CDHelper text lineswap --insert="KIRA_INFRA=$KIRA_INFRA" --prefix="KIRA_INFRA=" --path=$ETC_PROFILE --append-if-found-not=True
+    CDHelper text lineswap --insert="KIRA_STATE=$KIRA_STATE" --prefix="KIRA_STATE=" --path=$ETC_PROFILE --append-if-found-not=True
+    CDHelper text lineswap --insert="KIRA_SCRIPTS=$KIRA_SCRIPTS" --prefix="KIRA_SCRIPTS=" --path=$ETC_PROFILE --append-if-found-not=True
+    CDHelper text lineswap --insert="KIRA_REGISTRY_PORT=$KIRA_REGISTRY_PORT" --prefix="KIRA_REGISTRY_PORT=" --path=$ETC_PROFILE --append-if-found-not=True
+    CDHelper text lineswap --insert="KIRA_REGISTRY=$KIRA_REGISTRY" --prefix="KIRA_REGISTRY=" --path=$ETC_PROFILE --append-if-found-not=True
+    CDHelper text lineswap --insert="KIRA_WORKSTATION=$KIRA_WORKSTATION" --prefix="KIRA_WORKSTATION=" --path=$ETC_PROFILE --append-if-found-not=True
+    CDHelper text lineswap --insert="KIRA_DOCKER=$KIRA_DOCKER" --prefix="KIRA_DOCKER=" --path=$ETC_PROFILE --append-if-found-not=True
+    CDHelper text lineswap --insert="USER_SHORTCUTS=$USER_SHORTCUTS" --prefix="USER_SHORTCUTS=" --path=$ETC_PROFILE --append-if-found-not=True
+    CDHelper text lineswap --insert="ROOT_SHORTCUTS=$ROOT_SHORTCUTS" --prefix="ROOT_SHORTCUTS=" --path=$ETC_PROFILE --append-if-found-not=True
+    CDHelper text lineswap --insert="NGINX_CONFIG=$NGINX_CONFIG" --prefix="NGINX_CONFIG=" --path=$ETC_PROFILE --append-if-found-not=True
+    CDHelper text lineswap --insert="NGINX_SERVICED_PATH=$NGINX_SERVICED_PATH" --prefix="NGINX_SERVICED_PATH=" --path=$ETC_PROFILE --append-if-found-not=True
+    CDHelper text lineswap --insert="GOROOT=$GOROOT" --prefix="GOROOT=" --path=$ETC_PROFILE --append-if-found-not=True
+    CDHelper text lineswap --insert="GOPATH=$GOPATH" --prefix="GOPATH=" --path=$ETC_PROFILE --append-if-found-not=True
+    CDHelper text lineswap --insert="GOBIN=$GOBIN" --prefix="GOBIN=" --path=$ETC_PROFILE --append-if-found-not=True
+    CDHelper text lineswap --insert="GO111MODULE=on=" --prefix="GO111MODULE=" --path=$ETC_PROFILE --append-if-found-not=True
+    CDHelper text lineswap --insert="RUSTFLAGS=$RUSTFLAGS" --prefix="RUSTFLAGS=" --path=$ETC_PROFILE --append-if-found-not=True
+    CDHelper text lineswap --insert="DOTNET_ROOT=$DOTNET_ROOT" --prefix="DOTNET_ROOT=" --path=$ETC_PROFILE --append-if-found-not=True
+    CDHelper text lineswap --insert="PATH=$PATH" --prefix="PATH=" --path=$ETC_PROFILE --append-if-found-not=True
 
-    echo "KIRA_SETUP=$KIRA_SETUP" >> $ETC_PROFILE
-    echo "KIRA_INFRA=$KIRA_INFRA" >> $ETC_PROFILE
-    echo "KIRA_STATE=$KIRA_STATE" >> $ETC_PROFILE
-    echo "KIRA_SCRIPTS=$KIRA_SCRIPTS" >> $ETC_PROFILE
-    echo "KIRA_REGISTRY_PORT=$KIRA_REGISTRY_PORT" >> $ETC_PROFILE
-    echo "KIRA_REGISTRY=$KIRA_REGISTRY" >> $ETC_PROFILE
-    echo "KIRA_WORKSTATION=$KIRA_WORKSTATION" >> $ETC_PROFILE
-    echo "KIRA_DOCKER=$KIRA_DOCKER" >> $ETC_PROFILE
-    echo "USER_SHORTCUTS=$USER_SHORTCUTS" >> $ETC_PROFILE
-    echo "ROOT_SHORTCUTS=$ROOT_SHORTCUTS" >> $ETC_PROFILE
-    echo "NGINX_CONFIG=$NGINX_CONFIG"
-    echo "NGINX_SERVICED_PATH=$NGINX_SERVICED_PATH" >> $ETC_PROFILE
-    echo "GOROOT=$GOROOT" >> $ETC_PROFILE
-    echo "GOPATH=$GOPATH" >> $ETC_PROFILE
-    echo "GOBIN=$GOBIN" >> $ETC_PROFILE
-    echo "GO111MODULE=on" >> $ETC_PROFILE
-    echo "RUSTFLAGS=$RUSTFLAGS" >> $ETC_PROFILE
-    echo "DOTNET_ROOT=$DOTNET_ROOT" >> $ETC_PROFILE
+    source $ETC_PROFILE &> /dev/null
+    CDHelper text lineswap --insert="PATH=$PATH:$GOPATH" --prefix="PATH=" --and-contains-not=":$GOPATH" --path=$ETC_PROFILE
+    source $ETC_PROFILE &> /dev/null
+    CDHelper text lineswap --insert="PATH=$PATH:$GOROOT" --prefix="PATH=" --and-contains-not=":$GOROOT" --path=$ETC_PROFILE
+    source $ETC_PROFILE &> /dev/null
+    CDHelper text lineswap --insert="PATH=$PATH:$GOBIN" --prefix="PATH=" --and-contains-not=":$GOBIN" --path=$ETC_PROFILE
 
-    echo "PATH=$PATH" >> $ETC_PROFILE
+    CDHelper text lineswap --insert="source $ETC_PROFILE" --prefix="source $ETC_PROFILE" --path=$BASHRC --append-if-found-not=True
+    CDHelper text lineswap --insert="source $CARGO_ENV" --prefix="source $CARGO_ENV" --path=$BASHRC --append-if-found-not=True
 
     source $ETC_PROFILE
     touch $KIRA_SETUP_KIRA_ENV
 else
     echo "Kira environment variables were already set"
-fi
-
-KIRA_SETUP_CERTS="$KIRA_SETUP/certs-v0.0.3" 
-if [ ! -f "$KIRA_SETUP_CERTS" ] ; then
-    echo "Installing certificates and package references..."
-    apt-get update -y --fix-missing
-    apt-get upgrade -y --allow-unauthenticated --allow-downgrades --allow-remove-essential --allow-change-held-packages
-    apt-get install -y software-properties-common apt-transport-https ca-certificates gnupg curl wget
-    curl https://packages.cloud.google.com/apt/doc/apt-key.gpg | apt-key add -
-    curl https://dl-ssl.google.com/linux/linux_signing_key.pub | apt-key add -
-    curl https://packages.microsoft.com/keys/microsoft.asc | apt-key add -
-    echo "deb http://archive.ubuntu.com/ubuntu/ bionic universe" | tee /etc/apt/sources.list.d/bionic.list
-    echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" | tee /etc/apt/sources.list.d/google.list
-    add-apt-repository "deb [arch=amd64] https://packages.microsoft.com/repos/vscode stable main"
-    touch $KIRA_SETUP_CERTS
-else
-    echo "Certs and refs were already installed."
 fi
 
 KIRA_SETUP_BASE_TOOLS="$KIRA_SETUP/base-tools-v0.0.4" 
@@ -229,20 +265,6 @@ else
     echo "Rust tools were already installed."
 fi
 
-KIRA_SETUP_GIT_SIMLINK="$KIRA_SETUP/git-simlink-v0.0.1" 
-if [ ! -f "$KIRA_SETUP_GIT_SIMLINK" ] ; then
-    echo "Creating GIT simlink and global setup"
-    ln -s /usr/bin/git /bin/git || echo "Symlink already Created"
-    
-    which git
-    /usr/bin/git --version
-    
-    git config --global url.https://github.com/.insteadOf git://github.com/
-    touch $KIRA_SETUP_GIT_SIMLINK
-else
-    echo "Git simlink was already installed."
-fi
-
 KIRA_SETUP_DOTNET="$KIRA_SETUP/dotnet-v0.0.6" 
 if [ ! -f "$KIRA_SETUP_DOTNET" ] ; then
     echo "Installing .NET"
@@ -339,25 +361,19 @@ else
     echo "Visual Studio Code $(code --version --user-data-dir=~/.config/Code/) was already installed."
 fi
 
-echo "Updating Infra Repository..."
-rm -rfv $KIRA_INFRA
-mkdir -p $KIRA_INFRA
-git clone --branch "master" $KIRA_INFRA_REPO $KIRA_INFRA
-cd $KIRA_INFRA
-git describe --all
-chmod -R 777 $KIRA_INFRA
-
-KIRA_SETUP_ASMOTOOLS="$KIRA_SETUP/asmodat-automation-tools-v0.0.4" 
-if [ ! -f "$KIRA_SETUP_ASMOTOOLS" ] ; then # this ensures that tools are updated only when requested, not when their version changes
-    echo "Install Asmodat Automation helper tools"
-    ${KIRA_SCRIPTS}/awshelper-update.sh "v0.12.0"
-    AWSHelper version
-    
-    ${KIRA_SCRIPTS}/cdhelper-update.sh "v0.6.3"
-    CDHelper version
-    touch $KIRA_SETUP_ASMOTOOLS
+# ensure docker registry exists
+if [[ $(${KIRA_SCRIPTS}/container-exists.sh "registry") == "False" ]] ; then
+    echo "Container 'registry' does NOT exist, creating..."
+    ${KIRA_SCRIPTS}/container-delete.sh "registry"
+docker run -d \
+ -p $KIRA_REGISTRY_PORT:$KIRA_REGISTRY_PORT \
+ --restart=always \
+ --name registry \
+ -e REGISTRY_STORAGE_DELETE_ENABLED=true \
+ registry:2.7.1
 else
-    echo "Asmodat Automation Tools were already installed."
+    echo "Container 'registry' already exists."
+    docker exec -it registry bin/registry --version
 fi
 
 # ensure docker registry exists
@@ -376,6 +392,7 @@ else
 fi
 
 docker ps # list containers
+docker images ls
 
 KIRA_SETUP_DESKTOP="$KIRA_SETUP/desktop-shortcuts-v0.0.1" 
 if [ ! -f "$KIRA_SETUP_DESKTOP" ] ; then
@@ -389,7 +406,7 @@ Type=Application
 Terminal=true
 Name=KIRA-START
 Icon=${KIRA_IMG}/kira-core-250.png
-Exec=gnome-terminal -e "bash -c '${KIRA_WORKSTATION}/start.sh;$SHELL'"
+Exec=gnome-terminal -e "bash -c '${KIRA_WORKSTATION}/start.sh ${BRANCH} \"${CHECKOUT}\" False;$SHELL'"
 Categories=Application;
 EOL
 

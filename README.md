@@ -15,15 +15,16 @@ For the purpose of setting up development environment we will
 
 1. Install [VMWare Workstation 15.5+](https://www.vmware.com/products/workstation-player/workstation-player-evaluation.html)
 2. Download [Ubuntu 20.04 LTS](https://releases.ubuntu.com/20.04/)
-3. Boot your machine, open terminal and setup your environment
+3. Boot your machine, and ensure latest updates are applied using `Software Updater`
+4. Reboot & Open terminal to setup your environment
 
 ```
 sudo -s
 
-rm -frv $HOME/kira && mkdir -p $HOME/kira && cd $HOME/kira && wget https://raw.githubusercontent.com/KiraCore/infra/master/workstation/setup.sh && chmod -R 777 $HOME/kira && ./setup.sh && /etc/profile
+rm -fv /tmp/init.sh && cd /tmp && wget https://raw.githubusercontent.com/KiraCore/infra/master/workstation/init.sh && chmod 777 ./init.sh && ./init.sh "master" && /etc/profile
 ```
 
-_NOTE: `setup.sh` script is used to ensure your working environment has all necessary dependencies to fetch the latest changes to the infa repository and deploy the local infrastructure._
+_NOTE: `setup.sh` script which is executed after `init.sh` is used to ensure your working environment has all necessary dependencies to fetch the latest changes from the infra repository and deploy the local infrastructure._
 
 
 

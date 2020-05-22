@@ -4,35 +4,55 @@ exec 2>&1
 set -e
 set -x
 
-CDHelperVersion=$(CDHelper version --silent || echo "none")
+# Local Update Shortcut:
+# (rm -fv /kira/infra/common/scripts/cdhelper-update.sh) && nano /kira/infra/common/scripts/cdhelper-update.sh && chmod 777 /kira/infra/common/scripts/cdhelper-update.sh
+
 VERSION=$1
+SCHEDULER=$2
+INSTALL_DIR=$3
+SERVICE_FILE=$4
 
-echo "------------------------------------------------"
-echo " STARTED: CDHELPER UPDATE v0.0.1"
-echo "------------------------------------------------"
-echo "OLD-VERSION: $CDHelperVersion"
-echo "NEW-VERSION: $VERSION"
-echo "------------------------------------------------"
+CDHelperVersion=$(CDHelper version --silent=true || echo "v0.0.0")
+VEREQ=$(CDHelper text vereq --old="$CDHelperVersion" --new="$VERSION" --silent=true || echo "-1")
 
-if [ "$VERSION" == "$CDHelperVersion" ]; then
-    echo "CDHelper will not be updated, new and old versions are the same."
+[ -z "$SCHEDULER" ] && SCHEDULER="False"
+[ -z "$INSTALL_DIR" ] && INSTALL_DIR="/usr/local/bin"
+[ -z "$SERVICE_FILE" ] && SERVICE_FILE="/etc/systemd/system/scheduler.service"
+
+INSTALL_DIR=$INSTALL_DIR/CDHelper
+INSTALL_PATH=$INSTALL_DIR/CDHelper
+echo "------------------------------------------------"
+echo "|       STARTED: CDHELPER UPDATE v0.0.1        |"
+echo "|----------------------------------------------|"
+echo "|    OLD VERSION: $CDHelperVersion"
+echo "|    NEW VERSION: $VERSION"
+echo "| VERSIONS EQUAL: $VEREQ"
+echo "|      SCHEDULER: $SCHEDULER"
+echo "|   SERVICE FILE: $SERVICE_FILE"
+echo "|    INSTALL DIR: $INSTALL_DIR"
+echo "|_______________________________________________"
+
+if [ "$VEREQ" == "1" ] || [ "$VEREQ" == "0" ]; then
+    echo "CDHelper will not be updated, old version is older or equal to new."
     exit 0
 else
     echo "New version detected, installing..."
 fi
 
-cd /usr/local/src
+cd /tmp
 rm -f -v ./CDHelper-linux-x64.zip
 wget https://github.com/asmodat/CDHelper/releases/download/$VERSION/CDHelper-linux-x64.zip
-rm -rfv /usr/local/bin/CDHelper
-unzip CDHelper-linux-x64.zip -d /usr/local/bin/CDHelper
-chmod -R -v 555 /usr/local/bin/CDHelper
+rm -rfv $INSTALL_DIR
+unzip CDHelper-linux-x64.zip -d $INSTALL_DIR
+chmod -R -v 777 $INSTALL_DIR
 
-SERVICE_FILE="/etc/systemd/system/scheduler.service"
+ln -s $INSTALL_PATH /bin/CDHelper || echo "CDHelper symlink already exists"
 
-rm -f -v $SERVICE_FILE
+CDHelper version
 
-cat > $SERVICE_FILE << EOL
+if [ "$SCHEDULER" == "True" ] ; then
+    rm -f -v $SERVICE_FILE
+    cat > $SERVICE_FILE << EOL
 [Unit]
 Description=Asmodat Deployment Scheduler
 After=network.target
@@ -40,7 +60,7 @@ After=network.target
 Type=simple
 User=root
 EnvironmentFile=/etc/environment
-ExecStart=/usr/local/bin/CDHelper/CDHelper scheduler github
+ExecStart=$INSTALL_PATH scheduler github
 WorkingDirectory=/root
 Restart=on-failure
 RestartSec=5
@@ -48,11 +68,9 @@ LimitNOFILE=4096
 [Install]
 WantedBy=multi-user.target
 EOL
-
-systemctl2 enable scheduler.service
-
-CDHelper version
+    systemctl enable scheduler.service || systemctl2 enable scheduler.service || echo "Failed to enable systemd service" && exit 1
+fi
 
 echo "------------------------------------------------"
-echo " FINISHED: CDHELPER UPDATE v0.0.1"
+echo "|     FINISHED: CDHELPER UPDATE v0.0.1         |"
 echo "------------------------------------------------"
