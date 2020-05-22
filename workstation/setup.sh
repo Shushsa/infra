@@ -95,7 +95,7 @@ else
     echo "Certs and refs were already installed."
 fi
 
-KIRA_SETUP_KIRA_ENV="$KIRA_SETUP/kira-env-v0.0.15" 
+KIRA_SETUP_KIRA_ENV="$KIRA_SETUP/kira-env-v0.0.16" 
 if [ ! -f "$KIRA_SETUP_KIRA_ENV" ] ; then
     echo "Setting up kira environment variables"
     touch $CARGO_ENV
@@ -115,7 +115,7 @@ if [ ! -f "$KIRA_SETUP_KIRA_ENV" ] ; then
     CDHelper text lineswap --insert="GOROOT=$GOROOT" --prefix="GOROOT=" --path=$ETC_PROFILE --append-if-found-not=True
     CDHelper text lineswap --insert="GOPATH=$GOPATH" --prefix="GOPATH=" --path=$ETC_PROFILE --append-if-found-not=True
     CDHelper text lineswap --insert="GOBIN=$GOBIN" --prefix="GOBIN=" --path=$ETC_PROFILE --append-if-found-not=True
-    CDHelper text lineswap --insert="GO111MODULE=on=" --prefix="GO111MODULE=" --path=$ETC_PROFILE --append-if-found-not=True
+    CDHelper text lineswap --insert="GO111MODULE=on" --prefix="GO111MODULE=" --path=$ETC_PROFILE --append-if-found-not=True
     CDHelper text lineswap --insert="RUSTFLAGS=$RUSTFLAGS" --prefix="RUSTFLAGS=" --path=$ETC_PROFILE --append-if-found-not=True
     CDHelper text lineswap --insert="DOTNET_ROOT=$DOTNET_ROOT" --prefix="DOTNET_ROOT=" --path=$ETC_PROFILE --append-if-found-not=True
     CDHelper text lineswap --insert="PATH=$PATH" --prefix="PATH=" --path=$ETC_PROFILE --append-if-found-not=True
@@ -390,7 +390,7 @@ Type=Application
 Terminal=true
 Name=KIRA-START
 Icon=$KIRA_IMG/kira-core-250.png
-Exec=pkexec env DISPLAY=$DISPLAY XAUTHORITY=$XAUTHORITY gnome-terminal -- bash -c '$0/start.sh "$1" "$2" "$3" ; $SHELL' "$KIRA_WORKSTATION" "$BRANCH" "$CHECKOUT" "False"
+Exec=pkexec env DISPLAY=$DISPLAY XAUTHORITY=$XAUTHORITY gnome-terminal -- bash -c '\$0/start.sh "\$1" "\$2" "\$3" ; $SHELL' "$KIRA_WORKSTATION" "$BRANCH" "$CHECKOUT" "False"
 Categories=Application;
 EOL
 

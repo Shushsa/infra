@@ -21,7 +21,7 @@ For the purpose of setting up development environment we will
 ```
 sudo -s
 
-rm -fv /tmp/init.sh && cd /tmp && wget https://raw.githubusercontent.com/KiraCore/infra/master/workstation/init.sh && chmod 777 ./init.sh && ./init.sh "master" && /etc/profile
+rm -fv /tmp/init.sh && cd /tmp && wget https://raw.githubusercontent.com/KiraCore/infra/master/workstation/init.sh && chmod 777 ./init.sh && ./init.sh "master" && source /etc/profile
 ```
 
 _NOTE: `setup.sh` script which is executed after `init.sh` is used to ensure your working environment has all necessary dependencies to fetch the latest changes from the infra repository and deploy the local infrastructure._
