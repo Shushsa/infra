@@ -23,11 +23,11 @@ KIRA_INFRA_REPO="https://github.com/KiraCore/infra"
 KIRA_SCRIPTS="$KIRA_INFRA/common/scripts"
 KIRA_WORKSTATION="$KIRA_INFRA/workstation"
 
-if [ "$SKIP_UPDATE" == "True" ] ; then
+if [ "$SKIP_UPDATE" == "False" ] ; then
     echo "INFO: Updating Infra..."
     $KIRA_SCRIPTS/git-pull.sh "$KIRA_INFRA_REPO" "$BRANCH" "$CHECKOUT" "$KIRA_INFRA"
     $KIRA_WORKSTATION/setup.sh  "$BRANCH" "$CHECKOUT" "True"
-elif [ "$SKIP_UPDATE" == "False" ] ; then
+elif [ "$SKIP_UPDATE" == "True" ] ; then
     echo "INFO: Skipping Infra Update..."
 else
     echo "ERROR: SKIP_UPDATE propoerty is invalid or undefined"
