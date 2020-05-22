@@ -37,6 +37,8 @@ fi
 
 source $ETC_PROFILE &> /dev/null
 
+[ -z "$USER_SHORTCUTS" ] && KIRA_SETUP="/home/$SUDO_USER/.local/share/applications"
+
 CARGO_ENV="/home/$SUDO_USER/.cargo/env"
 
 KIRA_SETUP=/kira/setup
