@@ -26,6 +26,7 @@ KIRA_WORKSTATION="$KIRA_INFRA/workstation"
 if [ "$SKIP_UPDATE" == "False" ] ; then
     echo "INFO: Updating Infra..."
     $KIRA_SCRIPTS/git-pull.sh "$KIRA_INFRA_REPO" "$BRANCH" "$CHECKOUT" "$KIRA_INFRA"
+    chmod -R 777 $KIRA_INFRA
     $KIRA_WORKSTATION/setup.sh  "$BRANCH" "$CHECKOUT" "True"
 elif [ "$SKIP_UPDATE" == "True" ] ; then
     echo "INFO: Skipping Infra Update..."
