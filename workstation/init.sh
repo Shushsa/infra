@@ -38,7 +38,7 @@ cd $KIRA_INFRA
 git describe --all --always
 chmod -R 777 $KIRA_INFRA
 
-${KIRA_SCRIPTS}/cdhelper-update.sh "v0.6.8"
+${KIRA_SCRIPTS}/cdhelper-update.sh "v0.6.10"
 CDHelper version
 
 source $KIRA_WORKSTATION/setup.sh $BRANCH

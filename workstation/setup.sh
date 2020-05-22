@@ -364,22 +364,7 @@ else
 fi
 
 # ensure docker registry exists
-if [[ $(${KIRA_SCRIPTS}/container-exists.sh "registry") == "False" ]] ; then
-    echo "Container 'registry' does NOT exist, creating..."
-    ${KIRA_SCRIPTS}/container-delete.sh "registry"
-docker run -d \
- -p $KIRA_REGISTRY_PORT:$KIRA_REGISTRY_PORT \
- --restart=always \
- --name registry \
- -e REGISTRY_STORAGE_DELETE_ENABLED=true \
- registry:2.7.1
-else
-    echo "Container 'registry' already exists."
-    docker exec -it registry bin/registry --version
-fi
-
-# ensure docker registry exists
-if [[ $(${KIRA_SCRIPTS}/container-exists.sh "registry") == "False" ]] ; then
+if [[ $(${KIRA_SCRIPTS}/container-exists.sh "registry") != "True" ]] ; then
     echo "Container 'registry' does NOT exist, creating..."
     ${KIRA_SCRIPTS}/container-delete.sh "registry"
 docker run -d \
@@ -396,12 +381,9 @@ fi
 docker ps # list containers
 docker images ls
 
-KIRA_SETUP_DESKTOP="$KIRA_SETUP/desktop-shortcuts-v0.0.1" 
-if [ ! -f "$KIRA_SETUP_DESKTOP" ] ; then
-    echo "Installing Desktop Shortcuts"
-
-    USER_START_SHORTCUT=$USER_SHORTCUTS/kira-start.desktop
-    rm -f -v $USER_START_SHORTCUT
+echo "Updating Desktop Shortcuts..."
+USER_START_SHORTCUT=$USER_SHORTCUTS/kira-start.desktop
+rm -f -v $USER_START_SHORTCUT
     cat > $USER_START_SHORTCUT << EOL
 [Desktop Entry]
 Type=Application
@@ -411,10 +393,5 @@ Icon=${KIRA_IMG}/kira-core-250.png
 Exec=gnome-terminal -e "bash -c '${KIRA_WORKSTATION}/start.sh ${BRANCH} \"${CHECKOUT}\" False;$SHELL'"
 Categories=Application;
 EOL
-
-    touch $KIRA_SETUP_DESKTOP
-else
-    echo "Desktop shortcuts were already installed"
-fi
 
 # curl https://sh.rustup.rs -sSf | sh
