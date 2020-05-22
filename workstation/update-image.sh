@@ -60,7 +60,7 @@ if [[ $($KIRA_WORKSTATION/image-updated.sh "$IMAGE_DIR" "$IMAGE_NAME" "$IMAGE_TA
     $KIRA_WORKSTATION/delete-image.sh "$IMAGE_DIR" "$IMAGE_NAME" "$IMAGE_TAG"
 
     echo "Creating new '$IMAGE_NAME' image..."
-    docker build --tag $IMAGE_NAME ./ --build-arg BUILD_HASH=$NEW_HASH --build-arg $BUILD_ARG1 --build-arg $BUILD_ARG2 --build-arg $BUILD_ARG3
+    docker build --network=host --tag $IMAGE_NAME ./ --build-arg BUILD_HASH=$NEW_HASH --build-arg $BUILD_ARG1 --build-arg $BUILD_ARG2 --build-arg $BUILD_ARG3
 
     docker image ls # list docker images
 
