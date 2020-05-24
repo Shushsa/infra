@@ -64,7 +64,7 @@ mkdir -p "/home/$SUDO_USER/.cargo"
 mkdir -p $SOURCES_LIST
 chmod 777 $ETC_PROFILE
 
-${KIRA_SCRIPTS}/cdhelper-update.sh "v0.6.8"
+${KIRA_SCRIPTS}/cdhelper-update.sh "v0.6.11"
 CDHelper version
 
 ${KIRA_SCRIPTS}/awshelper-update.sh "v0.12.0"
@@ -78,12 +78,6 @@ if [ ! -f "$KIRA_SETUP_CERTS" ] ; then
     curl https://packages.cloud.google.com/apt/doc/apt-key.gpg | apt-key add -
     curl https://dl-ssl.google.com/linux/linux_signing_key.pub | apt-key add -
     curl https://packages.microsoft.com/keys/microsoft.asc | apt-key add -
-
-    #touch $SOURCES_LIST/bionic.list
-    #touch $SOURCES_LIST/google.list
-    #CDHelper text lineswap --insert="deb http://archive.ubuntu.com/ubuntu/ bionic universe" --contains="deb http://archive.ubuntu.com/ubuntu" --path="$SOURCES_LIST/bionic.list" --append-if-found-not=True
-    #CDHelper text lineswap --insert="deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" --contains="http://dl.google.com/linux/chrome/deb/" --path="$SOURCES_LIST/google.list" --append-if-found-not=True
-
     add-apt-repository "deb [arch=amd64] http://archive.ubuntu.com/ubuntu/ bionic universe"
     add-apt-repository "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main"
     add-apt-repository "deb [arch=amd64] https://packages.microsoft.com/repos/vscode stable main"
@@ -92,7 +86,7 @@ else
     echo "Certs and refs were already installed."
 fi
 
-KIRA_SETUP_KIRA_ENV="$KIRA_SETUP/kira-env-v0.0.19" 
+KIRA_SETUP_KIRA_ENV="$KIRA_SETUP/kira-env-v0.0.20" 
 if [ ! -f "$KIRA_SETUP_KIRA_ENV" ] ; then
     echo "Setting up kira environment variables"
     touch $CARGO_ENV
@@ -100,6 +94,7 @@ if [ ! -f "$KIRA_SETUP_KIRA_ENV" ] ; then
     [ -z "$USER_SHORTCUTS" ] && CDHelper text lineswap --insert="USER_SHORTCUTS=/home/$SUDO_USER/.local/share/applications" --prefix="USER_SHORTCUTS=" --path=$ETC_PROFILE --append-if-found-not=True
     [ -z "$ROOT_SHORTCUTS" ] && CDHelper text lineswap --insert="ROOT_SHORTCUTS=/root/.local/share/applications" --prefix="ROOT_SHORTCUTS=" --path=$ETC_PROFILE --append-if-found-not=True
     # SMTP_SECRET Should be user defined. Example is provided to simplify the process, to set this up - follow repo instructions
+    [ -z "$EMAIL_NOTIFY" ] && CDHelper text lineswap --insert='EMAIL_NOTIFY=noreply.example.email@gmail.com' --prefix="EMAIL_NOTIFY=" --path=$ETC_PROFILE --append-if-found-not=True
     [ -z "$SMTP_SECRET" ] && CDHelper text lineswap --insert='SMTP_SECRET={"host":"smtp.gmail.com","port":"587","ssl":true,"login":"noreply.example.email@gmail.com","password":"wpzpjrfsfznyeohs"}' --prefix="SMTP_SECRET=" --path=$ETC_PROFILE --append-if-found-not=True
     
     CDHelper text lineswap --insert="ETC_PROFILE=$ETC_PROFILE" --prefix="ETC_PROFILE=" --path=$ETC_PROFILE --append-if-found-not=True

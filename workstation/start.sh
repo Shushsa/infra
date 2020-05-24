@@ -79,11 +79,13 @@ if [ "$CONTAINER_EXISTS" == "False" ] ; then
  --network="host" \
  --restart=always \
  --name validator-1 \
- -e MONIKER="Kira Hub Validator 1" \
+ -e MONIKER="Local Kira Hub Validator 1" \
  -e P2P_PROXY_PORT=10000 \
  -e P2P_PROXY_PORT=10001 \
  -e P2P_PROXY_PORT=10002 \
  -e P2P_PROXY_PORT=10003 \
+ -e EMAIL_NOTIFY="$EMAIL_NOTIFY" \
+ -e SMTP_SECRET="$SMTP_SECRET" \
  -e NODE_KEY="node-key-1" \
  -e SIGNING_KEY="signing-1" \
  -e VALIDATOR_KEY="validator-1" \

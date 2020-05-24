@@ -30,8 +30,9 @@ RPC_CATCHING_UP="$(echo $RPC_STATUS | jq -r '.result.sync_info.catching_up')" ||
 STATUS_NGINX="$(systemctl2 is-active nginx.service)" || STATUS_RELAYER="unknown"
 STATUS_SEKAI="$(systemctl2 is-active sekaid.service)" || STATUS_SEKAI="unknown"
 STATUS_LCD="$(systemctl2 is-active lcd.service)" || STATUS_LCD="unknown"
-STATUS_FAUCET="active" #"$(systemctl2 is-active faucet.service)" || STATUS_FAUCET="unknown"
+STATUS_FAUCET="$(systemctl2 is-active faucet.service)" || STATUS_FAUCET="unknown"
 
+# if [ "${STATUS_SEKAI}" != "active" ] || [ "${STATUS_LCD}" != "active" ] || [ "${STATUS_NGINX}" != "active" ] || [ "${STATUS_FAUCET}" != "active" ] ; then
 if [ "${STATUS_SEKAI}" != "active" ] || [ "${STATUS_LCD}" != "active" ] || [ "${STATUS_NGINX}" != "active" ] ; then
     echo "ERROR: One of the services is NOT active: Sekai($STATUS_SEKAI), LCD($STATUS_LCD), Faucet($STATUS_FAUCET) or NGINX($STATUS_NGINX)"
 
@@ -53,25 +54,24 @@ if [ "${STATUS_SEKAI}" != "active" ] || [ "${STATUS_LCD}" != "active" ] || [ "${
         systemctl2 restart nginx || systemctl2 status nginx.service || echo "Failed to re-start nginx service" || true
     fi
 
-    if [ "${STATUS_FAUCET}" != "active" ]  ; then
-        echo ">> Faucet log:"
-        tail -n 100 /var/log/journal/faucet.nginx.log || true
-        systemctl2 restart faucet || systemctl2 status faucet.service || echo "Failed to re-start faucet service" || true
-    fi
+    #if [ "${STATUS_FAUCET}" != "active" ]  ; then
+    #    echo ">> Faucet log:"
+    #    tail -n 100 /var/log/journal/faucet.nginx.log || true
+    #    systemctl2 restart faucet || systemctl2 status faucet.service || echo "Failed to re-start faucet service" || true
+    #fi
 
     if [ -f "$EMAIL_SENT" ]; then
         echo "Notification Email was already sent."
     else
         echo "Sending Healthcheck Notification Email..."
         touch $EMAIL_SENT
-#CDHelper email send \
-# --from="noreply@kiracore.com" \
-# --to="asmodat@gmail.com" \
-# --subject="[GoZ] $(curl -H 'Metadata-Flavor: Google' http://metadata/computeMetadata/v1/instance/name 2>/dev/null) Healthcheck Raised" \
-# --body="[$(date)] Sekai($STATUS_SEKAI), Faucet($STATUS_FAUCET) LCD($STATUS_LCD) or NGINX($STATUS_NGINX) Failed => Attached $(find $SELF_LOGS -type f | wc -l) Log Files. RPC Status => $RPC_STATUS" \
-# --html="false" \
-# --recursive="true" \
-# --attachments="$SELF_LOGS,/var/log/journal"
+CDHelper email send \
+ --to="$EMAIL_NOTIFY" \
+ --subject="[$MONIKER] Healthcheck Raised" \
+ --body="[$(date)] Sekai($STATUS_SEKAI), Faucet($STATUS_FAUCET) LCD($STATUS_LCD) or NGINX($STATUS_NGINX) Failed => Attached $(find $SELF_LOGS -type f | wc -l) Log Files. RPC Status => $RPC_STATUS" \
+ --html="false" \
+ --recursive="true" \
+ --attachments="$SELF_LOGS,$JOURNAL_LOGS"
         sleep 120 # allow user to grab log output
         rm -f ${SELF_LOGS}/healthcheck_script_output.txt # remove old log to save space
     fi
@@ -81,12 +81,11 @@ else
     if [ -f "$EMAIL_SENT" ]; then
         echo "INFO: Sending confirmation email, that service recovered!"
         rm -f $EMAIL_SENT # if email was sent then remove and send new one
-#CDHelper email send \
-# --from="noreply@kiracore.com" \
-# --to="asmodat@gmail.com" \
-# --subject="[GoZ] $(curl -H 'Metadata-Flavor: Google' http://metadata/computeMetadata/v1/instance/name 2>/dev/null) Healthcheck Rerovered" \
-# --body="[$(date)] Sekai($STATUS_SEKAI), Faucet($STATUS_FAUCET), LCD($STATUS_LCD) and NGINX($STATUS_NGINX) suceeded. RPC Status => $RPC_STATUS" \
-# --html="false" || true
+CDHelper email send \
+ --to="$EMAIL_NOTIFY" \
+ --subject="[$MONIKER] Healthcheck Rerovered" \
+ --body="[$(date)] Sekai($STATUS_SEKAI), Faucet($STATUS_FAUCET), LCD($STATUS_LCD) and NGINX($STATUS_NGINX) suceeded. RPC Status => $RPC_STATUS" \
+ --html="false" || true
     fi
     sleep 120 # allow user to grab log output
     rm -f $SELF_LOGS/healthcheck_script_output.txt # remove old log to save space

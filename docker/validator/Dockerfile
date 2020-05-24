@@ -12,7 +12,7 @@ ENV SEKAICLI_BIN="${GOBIN}/sekaicli"
 
 RUN echo "Build hash: ${BUILD_HASH}"
 
-RUN ${SELF_SCRIPTS}/git-pull-v0.0.1.sh "${REPO}" "${BRANCH}" "${CHECKOUT}" "${SEKAI}"
+RUN ${SELF_SCRIPTS}/git-pull.sh "${REPO}" "${BRANCH}" "${CHECKOUT}" "${SEKAI}"
 RUN cd ${SEKAI} && make install
 RUN sekaid version --long
 

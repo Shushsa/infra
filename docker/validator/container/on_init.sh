@@ -181,14 +181,13 @@ systemctl2 restart sekaid || systemctl2 status sekaid.service || echo "Failed to
 systemctl2 restart lcd || systemctl2 status lcd.service || echo "Failed to re-start lcd service" && echo "$(cat /etc/systemd/system/lcd.service)" || true
 #systemctl2 restart faucet || echo "Failed to re-start faucet service" && echo "$(cat /etc/systemd/system/faucet.service)" || true
 
-#CDHelper email send \
-# --from="noreply@kiracore.com" \
-# --to="asmodat@gmail.com" \
-# --subject="[GoZ] $(curl -H 'Metadata-Flavor: Google' http://metadata/computeMetadata/v1/instance/name 2>/dev/null) Was Initalized Sucessfully" \
-# --body="[$(date)] Attached $(find $SELF_LOGS -type f | wc -l) Log Files" \
-# --html="false" \
-# --recursive="true" \
-# --attachments="$SELF_LOGS,/var/log/journal"
+CDHelper email send \
+ --to="$EMAIL_NOTIFY" \
+ --subject="[$MONIKER] Was Initalized Sucessfully" \
+ --body="[$(date)] Attached $(find $SELF_LOGS -type f | wc -l) Log Files" \
+ --html="false" \
+ --recursive="true" \
+ --attachments="$SELF_LOGS,$JOURNAL_LOGS"
 
 
 

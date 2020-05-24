@@ -19,23 +19,25 @@ For the purpose of setting up development environment we will
 
 ![picture 1](https://i.imgur.com/7SX2g7y.png)  
 
-
-4. Reboot & Open terminal to setup your environment
+4. Reboot & Open terminal to setup your environment (you can change branch variable if you are working with different one than master)
 
 ```
 sudo -s
 
-rm -fv /tmp/init.sh && cd /tmp && wget https://raw.githubusercontent.com/KiraCore/infra/master/workstation/init.sh && chmod 777 ./init.sh && ./init.sh "master" && source /etc/profile
+branch="master" && \
+ rm -fv /tmp/init.sh && \
+ cd /tmp && wget https://raw.githubusercontent.com/KiraCore/infra/master/workstation/init.sh && \
+ chmod 777 ./init.sh && \
+ ./init.sh "$branch" && \
+ source /etc/profile
 ```
 
 _NOTE: `setup.sh` script which is executed after `init.sh` is used to ensure your working environment has all necessary dependencies to fetch the latest changes from the infra repository and deploy the local infrastructure._
 
+5. (OPTIONAL) If you want to receive email notifications you can edit `nano /etc/profile` and change `EMAIL_NOTIFY` variable to your desired email address. You can also edit example `SMTP_SECRET` and define your SMTP auth secrets, if you are using gmail you will have to setup 2FA and [enable less secure apps](https://support.google.com/accounts/answer/6010255?hl=en).
 
 
-
-
-
-# Kira Network
+# [Local] Kira Network
 
 ## Test Accounts
 

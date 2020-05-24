@@ -18,6 +18,7 @@ echo "|  CHECKOUT:   $CHECKOUT"
 echo "|  OUTPUT:     $OUTPUT"
 echo "------------------------------------------------"
 
+rm -rf $OUTPUT
 mkdir -p $OUTPUT
 
 if [ ! -z "$BRANCH" ]

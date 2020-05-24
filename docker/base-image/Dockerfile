@@ -5,6 +5,7 @@ FROM ubuntu:20.04
 
 ENV PROFILE_PATH="/etc/profile"
 ENV BASHRC_PATH="/root/.bashrc"
+ENV JOURNAL_LOGS="/var/log/journal"
 
 # Env necessary for the individual child container setup
 ENV SELF_HOME=/self/home

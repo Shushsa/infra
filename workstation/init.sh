@@ -39,7 +39,7 @@ cd $KIRA_INFRA
 git describe --all --always
 chmod -R 777 $KIRA_INFRA
 
-${KIRA_SCRIPTS}/cdhelper-update.sh "v0.6.10"
+${KIRA_SCRIPTS}/cdhelper-update.sh "v0.6.11"
 CDHelper version
 
 cd /kira
