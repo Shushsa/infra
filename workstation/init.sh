@@ -35,6 +35,8 @@ echo "|         SEKAI REPO: $SEKAI_REPO"
 echo "| NOTIFICATION EMAIL: $EMAIL_NOTIFY"
 echo "|_______________________________________________"
 
+read  -d'' -s -n1 -p "Press [ENTER] to confirm or any other key to exit" ACCEPT </dev/tty
+[ ! -z $"$ACCEPT" ] && exit 1
 
 KIRA_INFRA=/kira/infra
 KIRA_WORKSTATION="${KIRA_INFRA}/workstation"
@@ -70,7 +72,7 @@ CDHelper text lineswap --insert="INFRA_REPO=$INFRA_REPO" --prefix="INFRA_REPO=" 
 CDHelper text lineswap --insert="SEKAI_REPO=$SEKAI_REPO" --prefix="SEKAI_REPO=" --path=$ETC_PROFILE --append-if-found-not=True
 
 cd /kira
-source $KIRA_WORKSTATION/setup.sh $INFRA_BRANCH
+source $KIRA_WORKSTATION/setup.sh "False"
 
 echo "------------------------------------------------"
 echo "|       FINISHED: KIRA INFRA INIT v0.0.1       |"
