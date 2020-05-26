@@ -10,8 +10,8 @@ if [ ! -f "$KIRA_SETUP_VMTOOLS" ] ; then
     apt purge open-vm-tools -y || echo "Open vm tools not found"
     apt update
     apt install open-vm-tools open-vm-tools-desktop -y
-    systemctl daemon-reload
-    systemctl restart open-vm-tools.service || echo "VM Tools service is not present"
+    systemctl2 daemon-reload
+    systemctl2 restart open-vm-tools.service || echo "VM Tools service is not present"
     touch $KIRA_SETUP_VMTOOLS
 else
     echo "VM Tools were already installed."
@@ -20,7 +20,7 @@ fi
 > This solution does not work
 
 ```
-systemctl edit open-vm-tools.service  
+systemctl2 edit open-vm-tools.service  
 
 [Unit]
 Requires=graphical.target

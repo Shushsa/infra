@@ -8,15 +8,30 @@ REPO=$1
 BRANCH=$2
 CHECKOUT=$3
 OUTPUT=$4
+RWXMOD=$5
+
+[ -z "$RWXMOD" ] && RWXMOD=777
 
 echo "------------------------------------------------"
 echo "|         STARTED: GIT PULL v0.0.1             |"
 echo "------------------------------------------------"
-echo "|  REPO:       $REPO"
-echo "|  BRANCH:     $BRANCH"
+echo "|      REPO:   $REPO"
+echo "|    BRANCH:   $BRANCH"
 echo "|  CHECKOUT:   $CHECKOUT"
-echo "|  OUTPUT:     $OUTPUT"
+echo "|    OUTPUT:   $OUTPUT"
+echo "| R/W/X MOD:   $RWXMOD"
 echo "------------------------------------------------"
+
+if [[ (! -z "$REPO") && ( (! -z "$BRANCH") || (! -z "$CHECKOUT") ) && (! -z "$OUTPUT") ]] ; then
+    echo "INFO: Valid repo details were specified, removing $OUTPUT and starting git pull..."
+else
+    [ -z "$REPO" ] && REPO=undefined
+    [ -z "$BRANCH" ] && BRANCH=undefined
+    [ -z "$CHECKOUT" ] && CHECKOUT=undefined
+    [ -z "$OUTPUT" ] && OUTPUT=undefined
+    echo "ERROR: REPO($REPO), BRANCH($BRANCH), CHECKOUT($CHECKOUT) or OUTPUT($OUTPUT) was NOT defined"
+    exit 1
+fi
 
 rm -rf $OUTPUT
 mkdir -p $OUTPUT
@@ -33,10 +48,12 @@ cd $OUTPUT
 if [ ! -z "$CHECKOUT" ]
 then
     git checkout $CHECKOUT
-fi   
+fi
 
 git describe --tags || echo "No tags were found"
 git describe --all --always
+
+chmod -R $RWXMOD $OUTPUT
 
 echo "------------------------------------------------"
 echo "|         FINISHED: GIT PULL v0.0.1            |"

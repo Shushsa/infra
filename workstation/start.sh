@@ -7,24 +7,36 @@ set -x
 # Local Update Shortcut:
 # (rm -fv $KIRA_WORKSTATION/start.sh) && nano $KIRA_WORKSTATION/start.sh && chmod 777 $KIRA_WORKSTATION/start.sh
 
-BRANCH=$1
-CHECKOUT=$2
-SKIP_UPDATE=$3
+SKIP_UPDATE=$1
 
-[ -z "$BRANCH" ] && BRANCH="master"
-[ -z "$CHECKOUT" ] && CHECKOUT=""
 [ -z "$SKIP_UPDATE" ] && SKIP_UPDATE="False"
 
-VALIDATOR_CHECKOUT=""
-VALIDATOR_BRANCH="master"
-VALIDATOR_INTEGRITY="_${VALIDATOR_BRANCH}_${VALIDATOR_CHECKOUT}"
+ETC_PROFILE="/etc/profile"
 
-source "/etc/profile" &> /dev/null
+source $ETC_PROFILE &> /dev/null
 
-echo "Updating repository and fetching changes..."
-$KIRA_WORKSTATION/setup.sh "$BRANCH" "$CHECKOUT" $SKIP_UPDATE
+echo "------------------------------------------------"
+echo "|       STARTED: KIRA INFRA START v0.0.1       |"
+echo "|----------------------------------------------|"
+echo "|       INFRA BRANCH: $INFRA_BRANCH"
+echo "|       SEKAI BRANCH: $SEKAI_BRANCH"
+echo "|         INFRA REPO: $INFRA_REPO"
+echo "|         SEKAI REPO: $SEKAI_REPO"
+echo "| NOTIFICATION EMAIL: $EMAIL_NOTIFY"
+echo "|        SKIP UPDATE: $SKIP_UPDATE"
+echo "|_______________________________________________"
 
-source "/etc/profile" &> /dev/null
+[ -z "$INFRA_BRANCH" ] && echo "ERROR: INFRA_BRANCH env was not defined" && exit 1
+[ -z "$SEKAI_BRANCH" ] && echo "ERROR: SEKAI_BRANCH env was not defined" && exit 1
+[ -z "$INFRA_REPO" ] && echo "ERROR: INFRA_REPO env was not defined" && exit 1
+[ -z "$SEKAI_REPO" ] && echo "ERROR: SEKAI_REPO env was not defined" && exit 1
+[ -z "$EMAIL_NOTIFY" ] && echo "ERROR: EMAIL_NOTIFY env was not defined" && exit 1
+
+SEKAI_INTEGRITY="_${SEKAI_REPO}_${SEKAI_BRANCH}"
+
+echo "INFO: Updating infra repository and fetching changes..."
+$KIRA_WORKSTATION/setup.sh "$SKIP_UPDATE"
+source $ETC_PROFILE &> /dev/null
 
 cd $KIRA_WORKSTATION
 
@@ -34,7 +46,7 @@ if [ "$BASE_IMAGE_EXISTS" == "False" ]; then
     ./delete-image.sh "$KIRA_DOCKER/tools-image" "tools-image"
     ./delete-image.sh "$KIRA_DOCKER/validator" "validator"
 
-    echo "Updating base image..."
+    echo "INFO: Updating base image..."
     ./update-image.sh "$KIRA_DOCKER/base-image" "base-image"
 elif [ "$BASE_IMAGE_EXISTS" == "True" ]; then
     echo "INFO: base-image is up to date"
@@ -48,7 +60,7 @@ if [ "$TOOLS_IMAGE_EXISTS" == "False" ]; then
     $KIRA_SCRIPTS/container-delete.sh "validator-1"
     ./delete-image.sh "$KIRA_DOCKER/validator" "validator"
 
-    echo "Updating tools image..."
+    echo "INFO: Updating tools image..."
     ./update-image.sh "$KIRA_DOCKER/tools-image" "tools-image"
 elif [ "$TOOLS_IMAGE_EXISTS" == "True" ]; then
     echo "INFO: tools-image is up to date"
@@ -57,11 +69,11 @@ else
     exit 1
 fi
 
-VALIDATOR_IMAGE_EXISTS=$(./image-updated.sh "$KIRA_DOCKER/validator" "validator" || echo "error")
+VALIDATOR_IMAGE_EXISTS=$(./image-updated.sh "$KIRA_DOCKER/validator" "validator" "latest" "$SEKAI_INTEGRITY" || echo "error")
 if [ "$VALIDATOR_IMAGE_EXISTS" == "False" ]; then
     echo "All imags were updated, starting validator image..."
     $KIRA_SCRIPTS/container-delete.sh "validator-1"
-    ./update-image.sh "$KIRA_DOCKER/validator" "validator" "latest" "$VALIDATOR_INTEGRITY" "REPO=https://github.com/kiracore/sekai" "BRANCH=$VALIDATOR_BRANCH" "CHECKOUT=$VALIDATOR_CHECKOUT"
+    ./update-image.sh "$KIRA_DOCKER/validator" "validator" "latest" "$SEKAI_INTEGRITY" "REPO=$SEKAI_REPO" "BRANCH=$SEKAI_BRANCH"
 elif [ "$VALIDATOR_IMAGE_EXISTS" == "True" ]; then
     echo "INFO: validator-image is up to date"
 else
@@ -69,13 +81,18 @@ else
     exit 1
 fi
 
-CONTAINER_EXISTS=$($KIRA_SCRIPTS/container-exists.sh "validator-1" || echo "error")
-if [ "$CONTAINER_EXISTS" == "False" ] ; then
-    echo "Container 'validator-1' does NOT exist, creating..."
-    ${KIRA_SCRIPTS}/container-delete.sh "validator-1"
-    rm -fr "${KIRA_STATE}/validator-1"
-    mkdir -p "${KIRA_STATE}/validator-1"
-    docker run -d \
+$KIRA_SCRIPTS/container-delete.sh "validator-1"
+VALIDATOR_1_EXISTS=$($KIRA_SCRIPTS/container-exists.sh "validator-1" || echo "error")
+
+if [ "$VALIDATOR_1_EXISTS" != "False" ] ; then
+    echo "ERROR: Failed to delete validator-1 container, status: ${VALIDATOR_1_EXISTS}"
+    exit 1
+fi
+
+echo "INFO: Creating 'validator-1' container..."
+rm -fr "${KIRA_STATE}/validator-1"
+mkdir -p "${KIRA_STATE}/validator-1"
+docker run -d \
  --network="host" \
  --restart=always \
  --name validator-1 \
@@ -92,14 +109,24 @@ if [ "$CONTAINER_EXISTS" == "False" ] ; then
  -e TEST_KEY="test-1" \
  validator:latest
 
+echo "INFO: Witing for validator-1 to start..."
+sleep 5
+
 # docker exec -it $(docker ps -a -q --filter ancestor=validator) bash
 # docker run -it --entrypoint /bin/bash validator-1 -s
 #> Kira Validator container (HEAD): `docker logs --follow $(docker ps -a -q  --filter ancestor=validator)`
 #> Kira Validator container (TAIL): `docker logs --tail 50 --follow --timestamps $(docker ps -a -q  --filter ancestor=validator)`
-elif [ "$CONTAINER_EXISTS" == "True" ] ; then
-    echo "INFO: container validator-1 is running"
-    docker exec -it validator-1 sekaid version
-else
-    echo "ERROR: Failed to test if validator-1 container is running"
-    exit 1
-fi
+# elif [ "$CONTAINER_EXISTS" == "True" ] ; then
+#     echo "INFO: container validator-1 is running"
+#     docker exec -it validator-1 sekaid version
+# else
+#     echo "ERROR: Failed to test if validator-1 container is running"
+#     exit 1
+# fi
+
+echo "INFO: Inspecting if validator-1 is running..."
+docker exec -it validator-1 sekaid version || echo "ERROR: sekai not found"
+
+echo "------------------------------------------------"
+echo "|      FINISHED: KIRA INFRA START v0.0.1       |"
+echo "------------------------------------------------"

@@ -3,7 +3,6 @@ FROM localhost:5000/tools-image:latest
 
 ARG BUILD_HASH
 ARG BRANCH
-ARG CHECKOUT
 ARG REPO
 
 ENV SEKAI="${GOPATH}/src/github.com/kiracore/sekai"
@@ -12,7 +11,7 @@ ENV SEKAICLI_BIN="${GOBIN}/sekaicli"
 
 RUN echo "Build hash: ${BUILD_HASH}"
 
-RUN ${SELF_SCRIPTS}/git-pull.sh "${REPO}" "${BRANCH}" "${CHECKOUT}" "${SEKAI}"
+RUN ${SELF_SCRIPTS}/git-pull.sh "${REPO}" "${BRANCH}" "${SEKAI}"
 RUN cd ${SEKAI} && make install
 RUN sekaid version --long
 

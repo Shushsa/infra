@@ -65,7 +65,7 @@ LimitNOFILE=4096
 [Install]
 WantedBy=multi-user.target
 EOL
-    systemctl enable scheduler.service || systemctl2 enable scheduler.service || echo "Failed to enable systemd service" && exit 1
+    systemctl2 enable scheduler.service || echo "Failed to enable systemd service" && exit 1
 fi
 
 echo "------------------------------------------------"

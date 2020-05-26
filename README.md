@@ -14,34 +14,33 @@ _NOTE: To maintain consistency among all working environments we will utilise `U
 For the purpose of setting up development environment we will 
 
 1. Install [VMWare Workstation 15.5+](https://www.vmware.com/products/workstation-player/workstation-player-evaluation.html)
-2. Download [Ubuntu 20.04 LTS](https://releases.ubuntu.com/20.04/)
+   
+2. Download and Install [Ubuntu 20.04 LTS](https://releases.ubuntu.com/20.04/) with VMWare
+   * Recommended VM Setup
+     * CPU: 2 virtualized cores
+     * RAM: 8 GB
+     * Disk: 64 GB (SSD or NVMe)
 3. Boot your machine, and ensure latest updates are applied using `Software Updater`
 
-![picture 1](https://i.imgur.com/7SX2g7y.png)  
+   ![picture 1](https://i.imgur.com/7SX2g7y.png)
 
-4. Reboot & Open terminal to setup your environment (you can change branch variable if you are working with different one than master)
+4. Reboot & Open terminal to execute following command
+
+
+    _NOTE: You will be prompted to input branch names you are working with as well as email address where you will receive notifications_
 
 ```
-sudo -s
-
-branch="master" && \
- rm -fv /tmp/init.sh && \
- cd /tmp && wget https://raw.githubusercontent.com/KiraCore/infra/master/workstation/init.sh && \
- chmod 777 ./init.sh && \
- ./init.sh "$branch" && \
- source /etc/profile
+cd /tmp && wget -O - https://raw.githubusercontent.com/KiraCore/infra/master/workstation/init.sh | sudo bash
 ```
 
-_NOTE: `setup.sh` script which is executed after `init.sh` is used to ensure your working environment has all necessary dependencies to fetch the latest changes from the infra repository and deploy the local infrastructure._
-
-5. (OPTIONAL) If you want to receive email notifications you can edit `nano /etc/profile` and change `EMAIL_NOTIFY` variable to your desired email address. You can also edit example `SMTP_SECRET` and define your SMTP auth secrets, if you are using gmail you will have to setup 2FA and [enable less secure apps](https://support.google.com/accounts/answer/6010255?hl=en).
+5. (OPTIONAL) If you want to receive email notifications you can edit `nano /etc/profile` and edit `SMTP_SECRET` environment variable by defining your SMTP auth secrets. If you are using gmail you will have to setup 2FA and [enable less secure apps](https://support.google.com/accounts/answer/6010255?hl=en).
 
 
-# [Local] Kira Network
+# [ Local ] Kira Network
 
 ## Test Accounts
 
-_NOTE: Nodes are seeded with existing accounts and demo tokens. Test accounts can be used for general purpose, consensus or governance tests_
+_NOTE: Nodes are seeded with existing accounts and demo tokens. Test accounts can be used for general purpose, consensus or governance tests. Default password is `1234567890`_
 
 * test-1: `kira1ufak8sc7g6w7pnlmalq9adqmj7cktcrk073ctz`
 * test-2: `kira14fx5q9su3h2ptevmxv7y3lnmn07dfdkdlujdd9`

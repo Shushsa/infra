@@ -7,35 +7,49 @@ set -x
 # Local Update Shortcut:
 # (rm -fv $KIRA_WORKSTATION/setup.sh) && nano $KIRA_WORKSTATION/setup.sh && chmod 777 $KIRA_WORKSTATION/setup.sh
 
-BRANCH=$1
-CHECKOUT=$2
-SKIP_UPDATE=$3
+SKIP_UPDATE=$1
 
-[ -z "$BRANCH" ] && BRANCH="master"
-[ -z "$CHECKOUT" ] && CHECKOUT=""
 [ -z "$SKIP_UPDATE" ] && SKIP_UPDATE="False"
 
 BASHRC=~/.bashrc
 ETC_PROFILE="/etc/profile"
 
+source $ETC_PROFILE &> /dev/null
+
+echo "------------------------------------------------"
+echo "|       STARTED: KIRA INFRA SETUP v0.0.1       |"
+echo "|----------------------------------------------|"
+echo "|       INFRA BRANCH: $INFRA_BRANCH"
+echo "|       SEKAI BRANCH: $SEKAI_BRANCH"
+echo "|         INFRA REPO: $INFRA_REPO"
+echo "|         SEKAI REPO: $SEKAI_REPO"
+echo "| NOTIFICATION EMAIL: $EMAIL_NOTIFY"
+echo "|        SKIP UPDATE: $SKIP_UPDATE"
+echo "|_______________________________________________"
+
+[ -z "$INFRA_BRANCH" ] && echo "ERROR: INFRA_BRANCH env was not defined" && exit 1
+[ -z "$SEKAI_BRANCH" ] && echo "ERROR: SEKAI_BRANCH env was not defined" && exit 1
+[ -z "$INFRA_REPO" ] && echo "ERROR: INFRA_REPO env was not defined" && exit 1
+[ -z "$SEKAI_REPO" ] && echo "ERROR: SEKAI_REPO env was not defined" && exit 1
+[ -z "$EMAIL_NOTIFY" ] && echo "ERROR: EMAIL_NOTIFY env was not defined" && exit 1
+
+mkdir -p /kira && cd /kira
+
 KIRA_INFRA=/kira/infra
-KIRA_INFRA_REPO="https://github.com/KiraCore/infra"
 KIRA_SCRIPTS="$KIRA_INFRA/common/scripts"
 KIRA_WORKSTATION="$KIRA_INFRA/workstation"
 
 if [ "$SKIP_UPDATE" == "False" ] ; then
     echo "INFO: Updating Infra..."
-    $KIRA_SCRIPTS/git-pull.sh "$KIRA_INFRA_REPO" "$BRANCH" "$CHECKOUT" "$KIRA_INFRA"
+    $KIRA_SCRIPTS/git-pull.sh "$INFRA_REPO" "$INFRA_BRANCH" "$KIRA_INFRA"
     chmod -R 777 $KIRA_INFRA
-    $KIRA_WORKSTATION/setup.sh  "$BRANCH" "$CHECKOUT" "True"
+    $KIRA_WORKSTATION/setup.sh "True"
 elif [ "$SKIP_UPDATE" == "True" ] ; then
     echo "INFO: Skipping Infra Update..."
 else
     echo "ERROR: SKIP_UPDATE propoerty is invalid or undefined"
     exit 1
 fi
-
-source $ETC_PROFILE &> /dev/null
 
 CARGO_ENV="/home/$SUDO_USER/.cargo/env"
 
@@ -61,6 +75,7 @@ mkdir -p $KIRA_SETUP
 mkdir -p $KIRA_INFRA
 mkdir -p $KIRA_STATE
 mkdir -p "/home/$SUDO_USER/.cargo"
+mkdir -p "/home/root"
 mkdir -p $SOURCES_LIST
 chmod 777 $ETC_PROFILE
 
@@ -74,7 +89,7 @@ KIRA_SETUP_CERTS="$KIRA_SETUP/certs-v0.0.4"
 if [ ! -f "$KIRA_SETUP_CERTS" ] ; then
     echo "Installing certificates and package references..."
     apt-get update -y --fix-missing
-    apt-get upgrade -y --allow-unauthenticated --allow-downgrades --allow-remove-essential --allow-change-held-packages
+    # apt-get upgrade -y --allow-unauthenticated --allow-downgrades --allow-remove-essential --allow-change-held-packages
     curl https://packages.cloud.google.com/apt/doc/apt-key.gpg | apt-key add -
     curl https://dl-ssl.google.com/linux/linux_signing_key.pub | apt-key add -
     curl https://packages.microsoft.com/keys/microsoft.asc | apt-key add -
@@ -94,7 +109,6 @@ if [ ! -f "$KIRA_SETUP_KIRA_ENV" ] ; then
     [ -z "$USER_SHORTCUTS" ] && CDHelper text lineswap --insert="USER_SHORTCUTS=/home/$SUDO_USER/.local/share/applications" --prefix="USER_SHORTCUTS=" --path=$ETC_PROFILE --append-if-found-not=True
     [ -z "$ROOT_SHORTCUTS" ] && CDHelper text lineswap --insert="ROOT_SHORTCUTS=/root/.local/share/applications" --prefix="ROOT_SHORTCUTS=" --path=$ETC_PROFILE --append-if-found-not=True
     # SMTP_SECRET Should be user defined. Example is provided to simplify the process, to set this up - follow repo instructions
-    [ -z "$EMAIL_NOTIFY" ] && CDHelper text lineswap --insert='EMAIL_NOTIFY=noreply.example.email@gmail.com' --prefix="EMAIL_NOTIFY=" --path=$ETC_PROFILE --append-if-found-not=True
     [ -z "$SMTP_SECRET" ] && CDHelper text lineswap --insert='SMTP_SECRET={"host":"smtp.gmail.com","port":"587","ssl":true,"login":"noreply.example.email@gmail.com","password":"wpzpjrfsfznyeohs"}' --prefix="SMTP_SECRET=" --path=$ETC_PROFILE --append-if-found-not=True
     
     CDHelper text lineswap --insert="ETC_PROFILE=$ETC_PROFILE" --prefix="ETC_PROFILE=" --path=$ETC_PROFILE --append-if-found-not=True
@@ -138,7 +152,7 @@ KIRA_SETUP_BASE_TOOLS="$KIRA_SETUP/base-tools-v0.0.4"
 if [ ! -f "$KIRA_SETUP_BASE_TOOLS" ] ; then
     echo "APT Update, Upgrade and Intall basic tools and dependencies..."
     apt-get update -y --fix-missing
-    apt-get upgrade -y --allow-unauthenticated --allow-downgrades --allow-remove-essential --allow-change-held-packages
+    # apt-get upgrade -y --allow-unauthenticated --allow-downgrades --allow-remove-essential --allow-change-held-packages
     apt-get install -y --allow-unauthenticated --allow-downgrades --allow-remove-essential --allow-change-held-packages \
         autoconf \
         automake \
@@ -281,12 +295,24 @@ else
     echo ".NET $(dotnet --version) was already installed."
 fi
 
+KIRA_SETUP_SYSCTL="$KIRA_SETUP/systemctl-v0.0.1" 
+if [ ! -f "$KIRA_SETUP_SYSCTL" ] ; then
+    echo "Installing custom systemctl..."
+    wget https://raw.githubusercontent.com/gdraheim/docker-systemctl-replacement/master/files/docker/systemctl.py -O /usr/local/bin/systemctl2
+    chmod -v 777 /usr/local/bin/systemctl2
+    
+    systemctl2 --version
+    touch $KIRA_SETUP_SYSCTL
+else
+    echo "systemctl2 was already installed."
+fi
+
 KIRA_SETUP_DOCKER="$KIRA_SETUP/docker-v0.0.1" 
 if [ ! -f "$KIRA_SETUP_DOCKER" ] ; then
     echo "Install Docker"
     apt-get update
     apt install docker.io -y
-    systemctl enable --now docker
+    systemctl2 enable --now docker
     docker -v
     touch $KIRA_SETUP_DOCKER
 else
@@ -303,18 +329,6 @@ if [ ! -f "$KIRA_SETUP_GO" ] ; then
     touch $KIRA_SETUP_GO
 else
     echo "Go $(go version) was already installed."
-fi
-
-KIRA_SETUP_SYSCTL="$KIRA_SETUP/systemctl-v0.0.1" 
-if [ ! -f "$KIRA_SETUP_SYSCTL" ] ; then
-    echo "Installing custom systemctl..."
-    wget https://raw.githubusercontent.com/gdraheim/docker-systemctl-replacement/master/files/docker/systemctl.py -O /usr/local/bin/systemctl2
-    chmod -v 777 /usr/local/bin/systemctl2
-    
-    systemctl2 --version
-    touch $KIRA_SETUP_SYSCTL
-else
-    echo "systemctl2 was already installed."
 fi
 
 KIRA_SETUP_NGINX="$KIRA_SETUP/nginx-v0.0.1" 
@@ -352,8 +366,8 @@ fi
 KIRA_SETUP_VSCODE="$KIRA_SETUP/vscode-v0.0.2" 
 if [ ! -f "$KIRA_SETUP_VSCODE" ] ; then
     echo "Installing Visual Studio Code..."
-    apt update
-    apt upgrade
+    apt update -y
+    # apt upgrade
     apt install code -y
     code --version --user-data-dir=~/.config/Code/
     touch $KIRA_SETUP_VSCODE
@@ -380,18 +394,76 @@ docker ps # list containers
 docker images ls
 
 echo "Updating Desktop Shortcuts..."
-USER_START_SHORTCUT=$USER_SHORTCUTS/kira-start.desktop
-rm -f -v $USER_START_SHORTCUT
-cat > $USER_START_SHORTCUT << EOL
-[Desktop Entry]
+GKSUDO_PATH=/usr/local/bin/gksudo
+echo "pkexec env DISPLAY=\$DISPLAY XAUTHORITY=\$XAUTHORITY \$@" > $GKSUDO_PATH
+chmod 777 $GKSUDO_PATH
+
+KIRA_INIT_SCRIPT=/kira/init.sh
+KIRA_START_SCRIPT=/kira/start.sh
+KIRA_DELETE_SCRIPT=/kira/start.sh
+
+echo "gnome-terminal --working-directory=/kira -- bash -c '$KIRA_WORKSTATION/start.sh \"\$0\" ; $SHELL' \"False\"" > $KIRA_START_SCRIPT
+echo "gnome-terminal --working-directory=/kira -- bash -c '$KIRA_WORKSTATION/init.sh ; $SHELL'" > $KIRA_INIT_SCRIPT
+echo "gnome-terminal --working-directory=/kira -- bash -c '$KIRA_WORKSTATION/delete.sh ; $SHELL'" > $KIRA_DELETE_SCRIPT
+
+chmod 777 $KIRA_INIT_SCRIPT
+chmod 777 $KIRA_START_SCRIPT
+chmod 777 $KIRA_DELETE_SCRIPT
+
+USER_INIT_FAVOURITE=$USER_SHORTCUTS/kira-init.desktop
+USER_START_FAVOURITE=$USER_SHORTCUTS/kira-start.desktop
+USER_DELETE_FAVOURITE=$USER_SHORTCUTS/kira-delete.desktop
+
+KIRA_INIT_ENTRY="[Desktop Entry]
 Type=Application
-Terminal=true
+Terminal=false
+Name=KIRA-INIT
+Icon=${KIRA_IMG}/init.png
+Exec=gksudo $KIRA_INIT_SCRIPT
+Categories=Application;"
+
+KIRA_START_ENTRY="[Desktop Entry]
+Type=Application
+Terminal=false
 Name=KIRA-START
-Icon=$KIRA_IMG/kira-core-250.png
-Exec=pkexec env DISPLAY=$DISPLAY XAUTHORITY=$XAUTHORITY gnome-terminal -- bash -c '\$0/start.sh "\$1" "\$2" "\$3" ; $SHELL' "$KIRA_WORKSTATION" "$BRANCH" "$CHECKOUT" "False"
-Categories=Application;
-EOL
+Icon=${KIRA_IMG}/start.png
+Exec=gksudo $KIRA_START_SCRIPT
+Categories=Application;"
 
-# curl https://sh.rustup.rs -sSf | sh
+KIRA_DELETE_ENTRY="[Desktop Entry]
+Type=Application
+Terminal=false
+Name=KIRA-DELETE
+Icon=${KIRA_IMG}/delete.png
+Exec=gksudo $KIRA_DELETE_SCRIPT
+Categories=Application;"
 
-# gnome-terminal -- bash -c 'echo $0 ; echo $1 ; $SHELL' a b
+cat > $USER_INIT_FAVOURITE <<< $KIRA_INIT_ENTRY
+cat > $USER_START_FAVOURITE <<< $KIRA_START_ENTRY
+cat > $USER_DELETE_FAVOURITE <<< $KIRA_DELETE_ENTRY
+
+chmod +x $USER_INIT_FAVOURITE
+chmod +x $USER_START_FAVOURITE
+chmod +x $USER_DELETE_FAVOURITE
+
+if [ ! -z "$SUDO_USER" ] then
+    USER_INIT_DESKTOP="/home/$SUDO_USER/Desktop/KIRA-INIT.desktop"
+    USER_START_DESKTOP="/home/$SUDO_USER/Desktop/KIRA-START.desktop"
+    USER_DELETE_DESKTOP="/home/$SUDO_USER/Desktop/KIRA-DELETE.desktop"
+else
+    USER_INIT_DESKTOP="/home/root/Desktop/KIRA-INIT.desktop"
+    USER_START_DESKTOP="/home/root/Desktop/KIRA-START.desktop"
+    USER_DELETE_DESKTOP="/home/root/Desktop/KIRA-DELETE.desktop"
+fi
+
+cat > $USER_INIT_DESKTOP <<< $KIRA_START_ENTRY
+cat > $USER_START_DESKTOP <<< $KIRA_START_ENTRY
+cat > $USER_DELETE_DESKTOP <<< $KIRA_START_ENTRY
+
+chmod +x $USER_INIT_DESKTOP 
+chmod +x $USER_START_DESKTOP 
+chmod +x $USER_DELETE_DESKTOP 
+
+echo "------------------------------------------------"
+echo "|      FINISHED: KIRA INFRA SETUP v0.0.1       |"
+echo "------------------------------------------------"

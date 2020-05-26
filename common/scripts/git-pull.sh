@@ -9,8 +9,14 @@ set -x
 
 REPO=$1
 BRANCH=$2
-CHECKOUT=$3
-OUTPUT=$4
+OUTPUT=$3
+
+if [[ $BRANCH =~ ^[0-9A-Fa-f]{1,}$ ]] ; then
+    CHECKOUT=$BRANCH
+    BRANCH="master"
+else
+    CHECKOUT=""
+fi
 
 echo "------------------------------------------------"
 echo "|         STARTED: GIT PULL v0.0.1             |"

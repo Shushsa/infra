@@ -32,6 +32,8 @@ Categories=Application;
 
 dconf write /org/gnome/shell/favorite-apps "['org.gnome.Nautilus.desktop', 'org.gnome.Terminal.desktop', 'google-chrome.desktop', 'test.desktop']"
 
+su - $SUDO_USER -c "dconf write \"/org/gnome/shell/favorite-apps\" \"['org.gnome.Nautilus.desktop', 'org.gnome.Terminal.desktop', 'google-chrome.desktop', 'test.desktop']\""
+
 
 # /usr/bin/gsettings set org.gnome.shell favorite-apps "['org.gnome.Nautilus.desktop', 'org.gnome.Terminal.desktop', 'google-chrome.desktop', 'test.desktop']"
 
