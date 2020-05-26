@@ -3,7 +3,6 @@
 
 exec 2>&1
 set -e
-set -x
 
 # Local Update Shortcut:
 # (rm -fv /tmp/init.sh) && nano /tmp/init.sh && chmod 777 /tmp/init.sh
@@ -17,14 +16,13 @@ source $ETC_PROFILE &> /dev/null
 [ -z "$INFRA_REPO" ] && INFRA_REPO="https://github.com/KiraCore/infra"
 [ -z "$SEKAI_REPO" ] && SEKAI_REPO="https://github.com/KiraCore/sekai"
 
-
-read -p "Provide INFRA reposiotry branch (press ENTER if '$INFRA_BRANCH'): " NEW_INFRA_BRANCH
+read -p "Provide INFRA reposiotry branch (press ENTER if '$INFRA_BRANCH'): " NEW_INFRA_BRANCH </dev/tty
 [ ! -z "$NEW_INFRA_BRANCH" ] && INFRA_BRANCH=$NEW_INFRA_BRANCH
 
-read -p "Provide SEKAI reposiotry branch (press ENTER if '$SEKAI_BRANCH'): " NEW_SEKAI_BRANCH
+read -p "Provide SEKAI reposiotry branch (press ENTER if '$SEKAI_BRANCH'): " NEW_SEKAI_BRANCH </dev/tty
 [ ! -z "$NEW_SEKAI_BRANCH" ] && SEKAI_BRANCH=$NEW_SEKAI_BRANCH
 
-read -p "Provide SEKAI reposiotry branch (press ENTER if '$EMAIL_NOTIFY'): " NEW_NOTIFY_EMAIL
+read -p "Provide SEKAI reposiotry branch (press ENTER if '$EMAIL_NOTIFY'): " NEW_NOTIFY_EMAIL </dev/tty
 [ ! -z "$NEW_NOTIFY_EMAIL" ] && EMAIL_NOTIFY=$NEW_NOTIFY_EMAIL
 
 echo "------------------------------------------------"
