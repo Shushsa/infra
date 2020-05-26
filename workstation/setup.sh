@@ -51,6 +51,7 @@ else
     exit 1
 fi
 
+[ -z "$SUDO_USER" ] && SUDO_USER="root"
 CARGO_ENV="/home/$SUDO_USER/.cargo/env"
 
 KIRA_SETUP=/kira/setup
@@ -75,7 +76,6 @@ mkdir -p $KIRA_SETUP
 mkdir -p $KIRA_INFRA
 mkdir -p $KIRA_STATE
 mkdir -p "/home/$SUDO_USER/.cargo"
-mkdir -p "/home/root"
 mkdir -p $SOURCES_LIST
 chmod 777 $ETC_PROFILE
 
@@ -410,10 +410,6 @@ chmod 777 $KIRA_INIT_SCRIPT
 chmod 777 $KIRA_START_SCRIPT
 chmod 777 $KIRA_DELETE_SCRIPT
 
-USER_INIT_FAVOURITE=$USER_SHORTCUTS/kira-init.desktop
-USER_START_FAVOURITE=$USER_SHORTCUTS/kira-start.desktop
-USER_DELETE_FAVOURITE=$USER_SHORTCUTS/kira-delete.desktop
-
 KIRA_INIT_ENTRY="[Desktop Entry]
 Type=Application
 Terminal=false
@@ -438,6 +434,10 @@ Icon=${KIRA_IMG}/delete.png
 Exec=gksudo $KIRA_DELETE_SCRIPT
 Categories=Application;"
 
+USER_INIT_FAVOURITE=$USER_SHORTCUTS/kira-init.desktop
+USER_START_FAVOURITE=$USER_SHORTCUTS/kira-start.desktop
+USER_DELETE_FAVOURITE=$USER_SHORTCUTS/kira-delete.desktop
+
 cat > $USER_INIT_FAVOURITE <<< $KIRA_INIT_ENTRY
 cat > $USER_START_FAVOURITE <<< $KIRA_START_ENTRY
 cat > $USER_DELETE_FAVOURITE <<< $KIRA_DELETE_ENTRY
@@ -446,15 +446,9 @@ chmod +x $USER_INIT_FAVOURITE
 chmod +x $USER_START_FAVOURITE
 chmod +x $USER_DELETE_FAVOURITE
 
-if [ ! -z "$SUDO_USER" ] then
-    USER_INIT_DESKTOP="/home/$SUDO_USER/Desktop/KIRA-INIT.desktop"
-    USER_START_DESKTOP="/home/$SUDO_USER/Desktop/KIRA-START.desktop"
-    USER_DELETE_DESKTOP="/home/$SUDO_USER/Desktop/KIRA-DELETE.desktop"
-else
-    USER_INIT_DESKTOP="/home/root/Desktop/KIRA-INIT.desktop"
-    USER_START_DESKTOP="/home/root/Desktop/KIRA-START.desktop"
-    USER_DELETE_DESKTOP="/home/root/Desktop/KIRA-DELETE.desktop"
-fi
+USER_INIT_DESKTOP="/home/$SUDO_USER/Desktop/KIRA-INIT.desktop"
+USER_START_DESKTOP="/home/$SUDO_USER/Desktop/KIRA-START.desktop"
+USER_DELETE_DESKTOP="/home/$SUDO_USER/Desktop/KIRA-DELETE.desktop"
 
 cat > $USER_INIT_DESKTOP <<< $KIRA_START_ENTRY
 cat > $USER_START_DESKTOP <<< $KIRA_START_ENTRY
