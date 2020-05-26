@@ -8,7 +8,9 @@ set -x
 # Local Update Shortcut:
 # (rm -fv /tmp/init.sh) && nano /tmp/init.sh && chmod 777 /tmp/init.sh
 
-source "/etc/profile" &> /dev/null
+ETC_PROFILE="/etc/profile"
+
+source $ETC_PROFILE &> /dev/null
 [ -z "$INFRA_BRANCH" ] && INFRA_BRANCH="master"
 [ -z "$SEKAI_BRANCH" ] && SEKAI_BRANCH="master"
 [ -z "$EMAIL_NOTIFY" ] && EMAIL_NOTIFY="noreply.example.email@gmail.com"
