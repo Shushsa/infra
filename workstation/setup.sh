@@ -400,7 +400,7 @@ chmod 777 $GKSUDO_PATH
 
 KIRA_INIT_SCRIPT=/kira/init.sh
 KIRA_START_SCRIPT=/kira/start.sh
-KIRA_DELETE_SCRIPT=/kira/start.sh
+KIRA_DELETE_SCRIPT=/kira/delete.sh
 
 echo "gnome-terminal --working-directory=/kira -- bash -c '$KIRA_WORKSTATION/start.sh \"\$0\" ; $SHELL' \"False\"" > $KIRA_START_SCRIPT
 echo "gnome-terminal --working-directory=/kira -- bash -c '$KIRA_WORKSTATION/init.sh ; $SHELL'" > $KIRA_INIT_SCRIPT
@@ -450,9 +450,9 @@ USER_INIT_DESKTOP="/home/$SUDO_USER/Desktop/KIRA-INIT.desktop"
 USER_START_DESKTOP="/home/$SUDO_USER/Desktop/KIRA-START.desktop"
 USER_DELETE_DESKTOP="/home/$SUDO_USER/Desktop/KIRA-DELETE.desktop"
 
-cat > $USER_INIT_DESKTOP <<< $KIRA_START_ENTRY
+cat > $USER_INIT_DESKTOP <<< $KIRA_INIT_ENTRY
 cat > $USER_START_DESKTOP <<< $KIRA_START_ENTRY
-cat > $USER_DELETE_DESKTOP <<< $KIRA_START_ENTRY
+cat > $USER_DELETE_DESKTOP <<< $KIRA_DELETE_ENTRY
 
 chmod +x $USER_INIT_DESKTOP 
 chmod +x $USER_START_DESKTOP 
