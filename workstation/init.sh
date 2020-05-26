@@ -7,6 +7,10 @@ set -e
 # Local Update Shortcut:
 # (rm -fv /tmp/init.sh) && nano /tmp/init.sh && chmod 777 /tmp/init.sh
 
+SKIP_UPDATE=$1
+
+[ -z "$SKIP_UPDATE" ] && SKIP_UPDATE="False"
+
 ETC_PROFILE="/etc/profile"
 
 source $ETC_PROFILE &> /dev/null
@@ -15,6 +19,7 @@ source $ETC_PROFILE &> /dev/null
 [ -z "$EMAIL_NOTIFY" ] && EMAIL_NOTIFY="noreply.example.email@gmail.com"
 [ -z "$INFRA_REPO" ] && INFRA_REPO="https://github.com/KiraCore/infra"
 [ -z "$SEKAI_REPO" ] && SEKAI_REPO="https://github.com/KiraCore/sekai"
+[ ! -z "$SUDO_USER" ] && KIRA_USER=$SUDO_USER
 
 read -p "Provide INFRA reposiotry branch (press ENTER if '$INFRA_BRANCH'): " NEW_INFRA_BRANCH
 [ ! -z "$NEW_INFRA_BRANCH" ] && INFRA_BRANCH=$NEW_INFRA_BRANCH
@@ -33,6 +38,7 @@ echo "|       SEKAI BRANCH: $SEKAI_BRANCH"
 echo "|         INFRA REPO: $INFRA_REPO"
 echo "|         SEKAI REPO: $SEKAI_REPO"
 echo "| NOTIFICATION EMAIL: $EMAIL_NOTIFY"
+echo "|          KIRA USER: $KIRA_USER"
 echo "|_______________________________________________"
 
 read  -d'' -s -n1 -p "Press [ENTER] to confirm or any other key to exit" ACCEPT
@@ -65,7 +71,7 @@ chmod -R 777 $KIRA_INFRA
 ${KIRA_SCRIPTS}/cdhelper-update.sh "v0.6.11"
 CDHelper version
 
-[ ! -z "$SUDO_USER" ] && CDHelper text lineswap --insert="KIRA_USER=$SUDO_USER" --prefix="KIRA_USER=" --path=$ETC_PROFILE --append-if-found-not=True
+CDHelper text lineswap --insert="KIRA_USER=$KIRA_USER" --prefix="KIRA_USER=" --path=$ETC_PROFILE --append-if-found-not=True
 CDHelper text lineswap --insert="EMAIL_NOTIFY=$EMAIL_NOTIFY" --prefix="EMAIL_NOTIFY=" --path=$ETC_PROFILE --append-if-found-not=True
 CDHelper text lineswap --insert="INFRA_BRANCH=$INFRA_BRANCH" --prefix="INFRA_BRANCH=" --path=$ETC_PROFILE --append-if-found-not=True
 CDHelper text lineswap --insert="SEKAI_BRANCH=$SEKAI_BRANCH" --prefix="SEKAI_BRANCH=" --path=$ETC_PROFILE --append-if-found-not=True
@@ -73,7 +79,7 @@ CDHelper text lineswap --insert="INFRA_REPO=$INFRA_REPO" --prefix="INFRA_REPO=" 
 CDHelper text lineswap --insert="SEKAI_REPO=$SEKAI_REPO" --prefix="SEKAI_REPO=" --path=$ETC_PROFILE --append-if-found-not=True
 
 cd /kira
-source $KIRA_WORKSTATION/setup.sh "False"
+source $KIRA_WORKSTATION/setup.sh "True"
 
 echo "------------------------------------------------"
 echo "|       FINISHED: KIRA INFRA INIT v0.0.1       |"
