@@ -16,6 +16,8 @@ ETC_PROFILE="/etc/profile"
 
 source $ETC_PROFILE &> /dev/null
 
+[ -z "$SUDO_USER" ] && SUDO_USER="root"
+
 echo "------------------------------------------------"
 echo "|       STARTED: KIRA INFRA SETUP v0.0.1       |"
 echo "|----------------------------------------------|"
@@ -25,6 +27,7 @@ echo "|         INFRA REPO: $INFRA_REPO"
 echo "|         SEKAI REPO: $SEKAI_REPO"
 echo "| NOTIFICATION EMAIL: $EMAIL_NOTIFY"
 echo "|        SKIP UPDATE: $SKIP_UPDATE"
+echo "|          SUDO USER: $SUDO_USER"
 echo "|_______________________________________________"
 
 [ -z "$INFRA_BRANCH" ] && echo "ERROR: INFRA_BRANCH env was not defined" && exit 1
@@ -51,7 +54,7 @@ else
     exit 1
 fi
 
-[ -z "$SUDO_USER" ] && SUDO_USER="root"
+
 CARGO_ENV="/home/$SUDO_USER/.cargo/env"
 
 KIRA_SETUP=/kira/setup
