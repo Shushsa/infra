@@ -16,8 +16,6 @@ ETC_PROFILE="/etc/profile"
 
 source $ETC_PROFILE &> /dev/null
 
-[ -z "$SUDO_USER" ] && SUDO_USER="root"
-
 echo "------------------------------------------------"
 echo "|       STARTED: KIRA INFRA SETUP v0.0.1       |"
 echo "|----------------------------------------------|"
@@ -27,7 +25,7 @@ echo "|         INFRA REPO: $INFRA_REPO"
 echo "|         SEKAI REPO: $SEKAI_REPO"
 echo "| NOTIFICATION EMAIL: $EMAIL_NOTIFY"
 echo "|        SKIP UPDATE: $SKIP_UPDATE"
-echo "|          SUDO USER: $SUDO_USER"
+echo "|          KIRA USER: $KIRA_USER"
 echo "|_______________________________________________"
 
 [ -z "$INFRA_BRANCH" ] && echo "ERROR: INFRA_BRANCH env was not defined" && exit 1
@@ -35,6 +33,7 @@ echo "|_______________________________________________"
 [ -z "$INFRA_REPO" ] && echo "ERROR: INFRA_REPO env was not defined" && exit 1
 [ -z "$SEKAI_REPO" ] && echo "ERROR: SEKAI_REPO env was not defined" && exit 1
 [ -z "$EMAIL_NOTIFY" ] && echo "ERROR: EMAIL_NOTIFY env was not defined" && exit 1
+[ -z "$KIRA_USER" ] && echo "ERROR: KIRA_USER env was not defined" && exit 1
 
 mkdir -p /kira && cd /kira
 
@@ -55,7 +54,7 @@ else
 fi
 
 
-CARGO_ENV="/home/$SUDO_USER/.cargo/env"
+CARGO_ENV="/home/$KIRA_USER/.cargo/env"
 
 KIRA_SETUP=/kira/setup
 KIRA_STATE=/kira/state
@@ -78,7 +77,8 @@ SOURCES_LIST="/etc/apt/sources.list.d"
 mkdir -p $KIRA_SETUP 
 mkdir -p $KIRA_INFRA
 mkdir -p $KIRA_STATE
-mkdir -p "/home/$SUDO_USER/.cargo"
+mkdir -p "/home/$KIRA_USER/.cargo"
+mkdir -p "/home/$KIRA_USER/Desktop"
 mkdir -p $SOURCES_LIST
 chmod 777 $ETC_PROFILE
 
@@ -109,7 +109,7 @@ if [ ! -f "$KIRA_SETUP_KIRA_ENV" ] ; then
     echo "Setting up kira environment variables"
     touch $CARGO_ENV
 
-    [ -z "$USER_SHORTCUTS" ] && CDHelper text lineswap --insert="USER_SHORTCUTS=/home/$SUDO_USER/.local/share/applications" --prefix="USER_SHORTCUTS=" --path=$ETC_PROFILE --append-if-found-not=True
+    [ -z "$USER_SHORTCUTS" ] && CDHelper text lineswap --insert="USER_SHORTCUTS=/home/$KIRA_USER/.local/share/applications" --prefix="USER_SHORTCUTS=" --path=$ETC_PROFILE --append-if-found-not=True
     [ -z "$ROOT_SHORTCUTS" ] && CDHelper text lineswap --insert="ROOT_SHORTCUTS=/root/.local/share/applications" --prefix="ROOT_SHORTCUTS=" --path=$ETC_PROFILE --append-if-found-not=True
     # SMTP_SECRET Should be user defined. Example is provided to simplify the process, to set this up - follow repo instructions
     [ -z "$SMTP_SECRET" ] && CDHelper text lineswap --insert='SMTP_SECRET={"host":"smtp.gmail.com","port":"587","ssl":true,"login":"noreply.example.email@gmail.com","password":"wpzpjrfsfznyeohs"}' --prefix="SMTP_SECRET=" --path=$ETC_PROFILE --append-if-found-not=True
@@ -449,9 +449,9 @@ chmod +x $USER_INIT_FAVOURITE
 chmod +x $USER_START_FAVOURITE
 chmod +x $USER_DELETE_FAVOURITE
 
-USER_INIT_DESKTOP="/home/$SUDO_USER/Desktop/KIRA-INIT.desktop"
-USER_START_DESKTOP="/home/$SUDO_USER/Desktop/KIRA-START.desktop"
-USER_DELETE_DESKTOP="/home/$SUDO_USER/Desktop/KIRA-DELETE.desktop"
+USER_INIT_DESKTOP="/home/$KIRA_USER/Desktop/KIRA-INIT.desktop"
+USER_START_DESKTOP="/home/$KIRA_USER/Desktop/KIRA-START.desktop"
+USER_DELETE_DESKTOP="/home/$KIRA_USER/Desktop/KIRA-DELETE.desktop"
 
 cat > $USER_INIT_DESKTOP <<< $KIRA_INIT_ENTRY
 cat > $USER_START_DESKTOP <<< $KIRA_START_ENTRY

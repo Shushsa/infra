@@ -65,6 +65,7 @@ chmod -R 777 $KIRA_INFRA
 ${KIRA_SCRIPTS}/cdhelper-update.sh "v0.6.11"
 CDHelper version
 
+[ ! -z "$SUDO_USER" ] && CDHelper text lineswap --insert="KIRA_USER=$SUDO_USER" --prefix="KIRA_USER=" --path=$ETC_PROFILE --append-if-found-not=True
 CDHelper text lineswap --insert="EMAIL_NOTIFY=$EMAIL_NOTIFY" --prefix="EMAIL_NOTIFY=" --path=$ETC_PROFILE --append-if-found-not=True
 CDHelper text lineswap --insert="INFRA_BRANCH=$INFRA_BRANCH" --prefix="INFRA_BRANCH=" --path=$ETC_PROFILE --append-if-found-not=True
 CDHelper text lineswap --insert="SEKAI_BRANCH=$SEKAI_BRANCH" --prefix="SEKAI_BRANCH=" --path=$ETC_PROFILE --append-if-found-not=True
