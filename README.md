@@ -32,7 +32,7 @@ For the purpose of setting up development environment we will
 ```
 sudo -s
 
-cd /tmp && wget -O - https://raw.githubusercontent.com/KiraCore/infra/master/workstation/init.sh | bash -s "True" <(cat) </dev/tty
+cd /tmp && wget -O - https://raw.githubusercontent.com/KiraCore/infra/master/workstation/init.sh | bash <(cat) </dev/tty
 ```
 
 5. (OPTIONAL) If you want to receive email notifications you can edit `nano /etc/profile` and edit `SMTP_SECRET` environment variable by defining your SMTP auth secrets. If you are using gmail you will have to setup 2FA and [enable less secure apps](https://support.google.com/accounts/answer/6010255?hl=en).

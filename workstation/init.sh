@@ -7,10 +7,6 @@ set -e
 # Local Update Shortcut:
 # (rm -fv /tmp/init.sh) && nano /tmp/init.sh && chmod 777 /tmp/init.sh
 
-SKIP_UPDATE=$1
-
-[ -z "$SKIP_UPDATE" ] && SKIP_UPDATE="False"
-
 ETC_PROFILE="/etc/profile"
 
 source $ETC_PROFILE &> /dev/null
