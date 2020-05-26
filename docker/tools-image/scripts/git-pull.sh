@@ -2,13 +2,18 @@
 
 exec 2>&1
 set -e
-set -x
 
 REPO=$1
 BRANCH=$2
-CHECKOUT=$3
-OUTPUT=$4
-RWXMOD=$5
+OUTPUT=$3
+RWXMOD=$4
+
+if [[ $BRANCH =~ ^[0-9A-Fa-f]{1,}$ ]] ; then
+    CHECKOUT=$BRANCH
+    BRANCH="master"
+else
+    CHECKOUT=""
+fi
 
 [ -z "$RWXMOD" ] && RWXMOD=777
 
