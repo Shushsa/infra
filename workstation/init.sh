@@ -16,6 +16,7 @@ source $ETC_PROFILE &> /dev/null
 [ -z "$INFRA_REPO" ] && INFRA_REPO="https://github.com/KiraCore/infra"
 [ -z "$SEKAI_REPO" ] && SEKAI_REPO="https://github.com/KiraCore/sekai"
 [ ! -z "$SUDO_USER" ] && KIRA_USER=$SUDO_USER
+[ -z "$KIRA_USER" ] && KIRA_USER=$USER
 
 read -p "Provide INFRA reposiotry branch (press ENTER if '$INFRA_BRANCH'): " NEW_INFRA_BRANCH
 [ ! -z "$NEW_INFRA_BRANCH" ] && INFRA_BRANCH=$NEW_INFRA_BRANCH
@@ -68,6 +69,7 @@ ${KIRA_SCRIPTS}/cdhelper-update.sh "v0.6.11"
 CDHelper version
 
 CDHelper text lineswap --insert="KIRA_USER=$KIRA_USER" --prefix="KIRA_USER=" --path=$ETC_PROFILE --append-if-found-not=True
+CDHelper text lineswap --insert="USER_SHORTCUTS=/home/$KIRA_USER/.local/share/applications" --prefix="USER_SHORTCUTS=" --path=$ETC_PROFILE --append-if-found-not=True
 CDHelper text lineswap --insert="EMAIL_NOTIFY=$EMAIL_NOTIFY" --prefix="EMAIL_NOTIFY=" --path=$ETC_PROFILE --append-if-found-not=True
 CDHelper text lineswap --insert="INFRA_BRANCH=$INFRA_BRANCH" --prefix="INFRA_BRANCH=" --path=$ETC_PROFILE --append-if-found-not=True
 CDHelper text lineswap --insert="SEKAI_BRANCH=$SEKAI_BRANCH" --prefix="SEKAI_BRANCH=" --path=$ETC_PROFILE --append-if-found-not=True
