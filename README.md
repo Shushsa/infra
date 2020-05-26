@@ -30,7 +30,9 @@ For the purpose of setting up development environment we will
     _NOTE: You will be prompted to input branch names you are working with as well as email address where you will receive notifications_
 
 ```
-cd /tmp && wget -O - https://raw.githubusercontent.com/KiraCore/infra/master/workstation/init.sh | sudo bash
+sudo -s
+
+cd /tmp && wget -O - https://raw.githubusercontent.com/KiraCore/infra/master/workstation/init.sh | bash </dev/tty
 ```
 
 5. (OPTIONAL) If you want to receive email notifications you can edit `nano /etc/profile` and edit `SMTP_SECRET` environment variable by defining your SMTP auth secrets. If you are using gmail you will have to setup 2FA and [enable less secure apps](https://support.google.com/accounts/answer/6010255?hl=en).

@@ -16,13 +16,13 @@ source $ETC_PROFILE &> /dev/null
 [ -z "$INFRA_REPO" ] && INFRA_REPO="https://github.com/KiraCore/infra"
 [ -z "$SEKAI_REPO" ] && SEKAI_REPO="https://github.com/KiraCore/sekai"
 
-read -p "Provide INFRA reposiotry branch (press ENTER if '$INFRA_BRANCH'): " NEW_INFRA_BRANCH </dev/tty
+read -p "Provide INFRA reposiotry branch (press ENTER if '$INFRA_BRANCH'): " NEW_INFRA_BRANCH
 [ ! -z "$NEW_INFRA_BRANCH" ] && INFRA_BRANCH=$NEW_INFRA_BRANCH
 
-read -p "Provide SEKAI reposiotry branch (press ENTER if '$SEKAI_BRANCH'): " NEW_SEKAI_BRANCH </dev/tty
+read -p "Provide SEKAI reposiotry branch (press ENTER if '$SEKAI_BRANCH'): " NEW_SEKAI_BRANCH
 [ ! -z "$NEW_SEKAI_BRANCH" ] && SEKAI_BRANCH=$NEW_SEKAI_BRANCH
 
-read -p "Provide SEKAI reposiotry branch (press ENTER if '$EMAIL_NOTIFY'): " NEW_NOTIFY_EMAIL </dev/tty
+read -p "Provide desired notification email (press ENTER if '$EMAIL_NOTIFY'): " NEW_NOTIFY_EMAIL
 [ ! -z "$NEW_NOTIFY_EMAIL" ] && EMAIL_NOTIFY=$NEW_NOTIFY_EMAIL
 
 echo "------------------------------------------------"
@@ -35,7 +35,7 @@ echo "|         SEKAI REPO: $SEKAI_REPO"
 echo "| NOTIFICATION EMAIL: $EMAIL_NOTIFY"
 echo "|_______________________________________________"
 
-read  -d'' -s -n1 -p "Press [ENTER] to confirm or any other key to exit" ACCEPT </dev/tty
+read  -d'' -s -n1 -p "Press [ENTER] to confirm or any other key to exit" ACCEPT
 [ ! -z $"$ACCEPT" ] && exit 1
 
 KIRA_INFRA=/kira/infra
