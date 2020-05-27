@@ -6,6 +6,7 @@ set -e
 # Local Update Shortcut:
 # (rm -fv $KIRA_WORKSTATION/start.sh) && nano $KIRA_WORKSTATION/start.sh && chmod 777 $KIRA_WORKSTATION/start.sh
 
+ETC_PROFILE="/etc/profile"
 source $ETC_PROFILE &> /dev/null
 
 VALIDATOR_1_DUPM="/home/$KIRA_USER/Desktop/validator-1-DUMP"
@@ -13,7 +14,7 @@ mkdir -p $VALIDATOR_1_DUPM
 
 VALIDATOR_1_EXISTS=$($KIRA_SCRIPTS/container-exists.sh "validator-1" || echo "Error")
 
-clear && printf '\e[3J'
+clear
 
 echo "------------------------------------------------"
 echo "|         KIRA NETWORK MANAGER v0.0.1          |"
