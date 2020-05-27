@@ -44,6 +44,7 @@ KIRA_WORKSTATION="$KIRA_INFRA/workstation"
 if [ "$SKIP_UPDATE" == "False" ] ; then
     echo "INFO: Updating Infra..."
     $KIRA_SCRIPTS/git-pull.sh "$INFRA_REPO" "$INFRA_BRANCH" "$KIRA_INFRA"
+    $KIRA_SCRIPTS/git-pull.sh "$SEKAI_REPO" "$SEKAI_BRANCH" "$KIRA_INFRA/sekai"
     chmod -R 777 $KIRA_INFRA
     $KIRA_WORKSTATION/setup.sh "True"
 elif [ "$SKIP_UPDATE" == "True" ] ; then
@@ -367,13 +368,14 @@ fi
 KIRA_SETUP_VSCODE="$KIRA_SETUP/vscode-v0.0.2" 
 if [ ! -f "$KIRA_SETUP_VSCODE" ] ; then
     echo "Installing Visual Studio Code..."
+    mkdir -p /usr/code
     apt update -y
     # apt upgrade
     apt install code -y
-    code --version --user-data-dir=~/.config/Code/
+    code --version --user-data-dir=/usr/code
     touch $KIRA_SETUP_VSCODE
 else
-    echo "Visual Studio Code $(code --version --user-data-dir=~/.config/Code/) was already installed."
+    echo "Visual Studio Code $(code --version --user-data-dir=/usr/code) was already installed."
 fi
 
 # ensure docker registry exists
@@ -402,14 +404,17 @@ chmod 777 $GKSUDO_PATH
 KIRA_INIT_SCRIPT=/kira/init.sh
 KIRA_START_SCRIPT=/kira/start.sh
 KIRA_DELETE_SCRIPT=/kira/delete.sh
+KIRA_MANAGER_SCRIPT=/kira/delete.sh
 
 echo "gnome-terminal --working-directory=/kira -- bash -c '$KIRA_WORKSTATION/start.sh \"\$0\" ; $SHELL' \"False\"" > $KIRA_START_SCRIPT
 echo "gnome-terminal --working-directory=/kira -- bash -c '$KIRA_WORKSTATION/init.sh ; $SHELL'" > $KIRA_INIT_SCRIPT
 echo "gnome-terminal --working-directory=/kira -- bash -c '$KIRA_WORKSTATION/delete.sh ; $SHELL'" > $KIRA_DELETE_SCRIPT
+echo "gnome-terminal --working-directory=/kira -- bash -c '$KIRA_WORKSTATION/manager.sh ; $SHELL'" > $KIRA_MANAGER_SCRIPT
 
 chmod 777 $KIRA_INIT_SCRIPT
 chmod 777 $KIRA_START_SCRIPT
 chmod 777 $KIRA_DELETE_SCRIPT
+chmod 777 $KIRA_MANAGER_SCRIPT
 
 KIRA_INIT_ENTRY="[Desktop Entry]
 Type=Application
@@ -435,29 +440,44 @@ Icon=${KIRA_IMG}/delete.png
 Exec=gksudo $KIRA_DELETE_SCRIPT
 Categories=Application;"
 
+KIRA_MANAGER_ENTRY="[Desktop Entry]
+Type=Application
+Terminal=false
+Name=KIRA-MANAGER
+Icon=${KIRA_IMG}/interchain.png
+Exec=gksudo $KIRA_MANAGER_SCRIPT
+Categories=Application;"
+
+
 USER_INIT_FAVOURITE=$USER_SHORTCUTS/kira-init.desktop
 USER_START_FAVOURITE=$USER_SHORTCUTS/kira-start.desktop
 USER_DELETE_FAVOURITE=$USER_SHORTCUTS/kira-delete.desktop
+USER_MANAGER_FAVOURITE=$USER_SHORTCUTS/kira-manager.desktop
 
 cat > $USER_INIT_FAVOURITE <<< $KIRA_INIT_ENTRY
 cat > $USER_START_FAVOURITE <<< $KIRA_START_ENTRY
 cat > $USER_DELETE_FAVOURITE <<< $KIRA_DELETE_ENTRY
+cat > $USER_MANAGER_FAVOURITE <<< $KIRA_MANAGER_ENTRY
 
 chmod +x $USER_INIT_FAVOURITE
 chmod +x $USER_START_FAVOURITE
 chmod +x $USER_DELETE_FAVOURITE
+chmod +x $USER_MANAGER_FAVOURITE
 
 USER_INIT_DESKTOP="/home/$KIRA_USER/Desktop/KIRA-INIT.desktop"
 USER_START_DESKTOP="/home/$KIRA_USER/Desktop/KIRA-START.desktop"
 USER_DELETE_DESKTOP="/home/$KIRA_USER/Desktop/KIRA-DELETE.desktop"
+USER_MANAGER_DESKTOP="/home/$KIRA_USER/Desktop/KIRA-MANAGER.desktop"
 
 cat > $USER_INIT_DESKTOP <<< $KIRA_INIT_ENTRY
 cat > $USER_START_DESKTOP <<< $KIRA_START_ENTRY
 cat > $USER_DELETE_DESKTOP <<< $KIRA_DELETE_ENTRY
+cat > $USER_MANAGER_DESKTOP <<< $KIRA_MANAGER_ENTRY
 
 chmod +x $USER_INIT_DESKTOP 
 chmod +x $USER_START_DESKTOP 
 chmod +x $USER_DELETE_DESKTOP 
+chmod +x $USER_MANAGER_DESKTOP 
 
 echo "------------------------------------------------"
 echo "|      FINISHED: KIRA INFRA SETUP v0.0.1       |"
