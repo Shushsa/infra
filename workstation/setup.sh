@@ -110,9 +110,6 @@ if [ ! -f "$KIRA_SETUP_KIRA_ENV" ] ; then
     echo "Setting up kira environment variables"
     touch $CARGO_ENV
 
-    # SMTP_SECRET Should be user defined. Example is provided to simplify the process, to set this up - follow repo instructions
-    [ -z "$SMTP_SECRET" ] && CDHelper text lineswap --insert='SMTP_SECRET={"host":"smtp.gmail.com","port":"587","ssl":true,"login":"noreply.example.email@gmail.com","password":"wpzpjrfsfznyeohs"}' --prefix="SMTP_SECRET=" --path=$ETC_PROFILE --append-if-found-not=True
-    
     CDHelper text lineswap --insert="ETC_PROFILE=$ETC_PROFILE" --prefix="ETC_PROFILE=" --path=$ETC_PROFILE --append-if-found-not=True
     CDHelper text lineswap --insert="KIRA_SETUP=$KIRA_SETUP" --prefix="KIRA_SETUP=" --path=$ETC_PROFILE --append-if-found-not=True
     CDHelper text lineswap --insert="KIRA_INFRA=$KIRA_INFRA" --prefix="KIRA_INFRA=" --path=$ETC_PROFILE --append-if-found-not=True

@@ -13,6 +13,8 @@ source $ETC_PROFILE &> /dev/null
 [ -z "$INFRA_BRANCH" ] && INFRA_BRANCH="master"
 [ -z "$SEKAI_BRANCH" ] && SEKAI_BRANCH="master"
 [ -z "$EMAIL_NOTIFY" ] && EMAIL_NOTIFY="noreply.example.email@gmail.com"
+[ -z "$SMTP_LOGIN" ] && SMTP_LOGIN="noreply.example.email@gmail.com"
+[ -z "$SMTP_PASSWORD" ] && SMTP_PASSWORD="wpzpjrfsfznyeohs"
 [ -z "$INFRA_REPO" ] && INFRA_REPO="https://github.com/KiraCore/infra"
 [ -z "$SEKAI_REPO" ] && SEKAI_REPO="https://github.com/KiraCore/sekai"
 [ ! -z "$SUDO_USER" ] && KIRA_USER=$SUDO_USER
@@ -27,6 +29,12 @@ read -p "Provide SEKAI reposiotry branch (press ENTER if '$SEKAI_BRANCH'): " NEW
 read -p "Provide desired notification email (press ENTER if '$EMAIL_NOTIFY'): " NEW_NOTIFY_EMAIL
 [ ! -z "$NEW_NOTIFY_EMAIL" ] && EMAIL_NOTIFY=$NEW_NOTIFY_EMAIL
 
+read -p "Provide Gmail SMTP login (press ENTER if '$SMTP_LOGIN'): " NEW_SMTP_LOGIN
+[ ! -z "$NEW_SMTP_LOGIN" ] && SMTP_LOGIN=$NEW_SMTP_LOGIN
+
+read -p "Provide Gmail SMTP password (press ENTER if '$SMTP_PASSWORD'): " NEW_SMTP_PASSWORD
+[ ! -z "$NEW_SMTP_PASSWORD" ] && SMTP_PASSWORD=$NEW_SMTP_PASSWORD
+
 echo "------------------------------------------------"
 echo "|       STARTED: KIRA INFRA INIT v0.0.1        |"
 echo "|----------------------------------------------|"
@@ -35,6 +43,8 @@ echo "|       SEKAI BRANCH: $SEKAI_BRANCH"
 echo "|         INFRA REPO: $INFRA_REPO"
 echo "|         SEKAI REPO: $SEKAI_REPO"
 echo "| NOTIFICATION EMAIL: $EMAIL_NOTIFY"
+echo "|         SMTP LOGIN: $SMTP_LOGIN"
+echo "|      SMTP PASSWORD: $SMTP_PASSWORD"
 echo "|          KIRA USER: $KIRA_USER"
 echo "|_______________________________________________"
 
@@ -68,6 +78,10 @@ chmod -R 777 $KIRA_INFRA
 ${KIRA_SCRIPTS}/cdhelper-update.sh "v0.6.11"
 CDHelper version
 
+CDHelper text lineswap --insert="SMTP_LOGIN=$SMTP_LOGIN" --prefix="SMTP_LOGIN=" --path=$ETC_PROFILE --append-if-found-not=True
+CDHelper text lineswap --insert="SMTP_PASSWORD=$SMTP_PASSWORD" --prefix="SMTP_PASSWORD=" --path=$ETC_PROFILE --append-if-found-not=True
+CDHelper text lineswap --insert='SMTP_SECRET={"host":"smtp.gmail.com","port":"587","ssl":true,"login":"$SMTP_LOGIN","password":"$SMTP_PASSWORD"}' --prefix="SMTP_SECRET=" --path=$ETC_PROFILE --append-if-found-not=True
+    
 CDHelper text lineswap --insert="KIRA_USER=$KIRA_USER" --prefix="KIRA_USER=" --path=$ETC_PROFILE --append-if-found-not=True
 CDHelper text lineswap --insert="USER_SHORTCUTS=/home/$KIRA_USER/.local/share/applications" --prefix="USER_SHORTCUTS=" --path=$ETC_PROFILE --append-if-found-not=True
 CDHelper text lineswap --insert="EMAIL_NOTIFY=$EMAIL_NOTIFY" --prefix="EMAIL_NOTIFY=" --path=$ETC_PROFILE --append-if-found-not=True

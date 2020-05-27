@@ -24,7 +24,7 @@ For the purpose of setting up development environment we will
 
    ![picture 1](https://i.imgur.com/7SX2g7y.png)
 
-4. Reboot & Open terminal to execute following command
+4. Reboot & Open terminal to execute following command that will launch a setup script
 
 
     _NOTE: You will be prompted to input branch names you are working with as well as email address where you will receive notifications from_
@@ -35,10 +35,7 @@ sudo -s
 cd /tmp && wget -O - https://raw.githubusercontent.com/KiraCore/infra/master/workstation/init.sh | bash <(cat) </dev/tty
 ```
 
-5. (OPTIONAL) If you want to receive email notifications you can edit `nano /etc/profile` and edit `SMTP_SECRET` environment variable by defining your SMTP auth secrets. If you are using gmail you will have to setup 2FA and [enable less secure apps](https://support.google.com/accounts/answer/6010255?hl=en).
-
-6. Allow launching of newly created desktop shortcuts
-
+5. Allow launching of all newly created desktop shortcuts
 
 ![picture 1](https://i.imgur.com/UAc87UK.png)  
 
