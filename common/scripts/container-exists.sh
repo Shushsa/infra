@@ -14,4 +14,3 @@ if [[ $(docker ps -a --format '{{.Names}}' | grep -Eq "^${name}\$" || echo False
 else
     echo "True"
 fi
-

@@ -38,13 +38,14 @@ echo "|_______________________________________________"
 mkdir -p /kira && cd /kira
 
 KIRA_INFRA=/kira/infra
+KIRA_SEKAI=/kira/sekai
 KIRA_SCRIPTS="$KIRA_INFRA/common/scripts"
 KIRA_WORKSTATION="$KIRA_INFRA/workstation"
 
 if [ "$SKIP_UPDATE" == "False" ] ; then
     echo "INFO: Updating Infra..."
     $KIRA_SCRIPTS/git-pull.sh "$INFRA_REPO" "$INFRA_BRANCH" "$KIRA_INFRA"
-    $KIRA_SCRIPTS/git-pull.sh "$SEKAI_REPO" "$SEKAI_BRANCH" "$KIRA_INFRA/sekai"
+    $KIRA_SCRIPTS/git-pull.sh "$SEKAI_REPO" "$SEKAI_BRANCH" "$KIRA_SEKAI"
     chmod -R 777 $KIRA_INFRA
     $KIRA_WORKSTATION/setup.sh "True"
 elif [ "$SKIP_UPDATE" == "True" ] ; then
@@ -105,13 +106,14 @@ else
     echo "Certs and refs were already installed."
 fi
 
-KIRA_SETUP_KIRA_ENV="$KIRA_SETUP/kira-env-v0.0.20" 
+KIRA_SETUP_KIRA_ENV="$KIRA_SETUP/kira-env-v0.0.21" 
 if [ ! -f "$KIRA_SETUP_KIRA_ENV" ] ; then
     echo "Setting up kira environment variables"
     touch $CARGO_ENV
 
     CDHelper text lineswap --insert="ETC_PROFILE=$ETC_PROFILE" --prefix="ETC_PROFILE=" --path=$ETC_PROFILE --append-if-found-not=True
     CDHelper text lineswap --insert="KIRA_SETUP=$KIRA_SETUP" --prefix="KIRA_SETUP=" --path=$ETC_PROFILE --append-if-found-not=True
+    CDHelper text lineswap --insert="KIRA_SEKAI=$KIRA_SEKAI" --prefix="KIRA_SEKAI=" --path=$ETC_PROFILE --append-if-found-not=True
     CDHelper text lineswap --insert="KIRA_INFRA=$KIRA_INFRA" --prefix="KIRA_INFRA=" --path=$ETC_PROFILE --append-if-found-not=True
     CDHelper text lineswap --insert="KIRA_STATE=$KIRA_STATE" --prefix="KIRA_STATE=" --path=$ETC_PROFILE --append-if-found-not=True
     CDHelper text lineswap --insert="KIRA_SCRIPTS=$KIRA_SCRIPTS" --prefix="KIRA_SCRIPTS=" --path=$ETC_PROFILE --append-if-found-not=True
