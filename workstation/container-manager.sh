@@ -14,45 +14,48 @@ source $ETC_PROFILE &> /dev/null
 CONTAINER_DUPM="/home/$KIRA_USER/Desktop/${NAME^^}-DUMP"
 EXISTS=$($KIRA_SCRIPTS/container-exists.sh "$NAME" || echo "Error")
 STATUS=$(docker inspect $(docker ps --no-trunc -aqf name=$NAME) | jq -r '.[0].State.Status' || echo "Error")
+PAUSED=$(docker inspect $(docker ps --no-trunc -aqf name=$NAME) | jq -r '.[0].State.Paused' || echo "Error")
 HEALTH=$(docker inspect $(docker ps --no-trunc -aqf name=$NAME) | jq -r '.[0].State.Health.Status' || echo "Error")
 RESTARTING=$(docker inspect $(docker ps --no-trunc -aqf name=$NAME) | jq -r '.[0].State.Restarting' || echo "Error")
 STARTED_AT=$(docker inspect $(docker ps --no-trunc -aqf name=$NAME) | jq -r '.[0].State.StartedAt' || echo "Error")
-ID=$(docker inspect --format="{{.Id}}" ${name} 2> /dev/null || echo "                              ")
+ID=$(docker inspect --format="{{.Id}}" ${NAME} 2> /dev/null || echo "                              ")
 
 clear
 
-echo "------------------------------------------------"
+echo -e "\e[36;1m------------------------------------------------"
 echo "|        KIRA CONTAINER MANAGER v0.0.1         |"
-echo "|             $(date '+%d/%m/%Y %H:%M:%S')"
+echo "|             $(date '+%d/%m/%Y %H:%M:%S')              |"
 echo "|----------------------------------------------|"
 echo "| Container Name: $NAME"
 echo "| Container Id: $(echo $ID | head -c 14)...$(echo $ID | tail -c 13) |"
 echo "|----------------------------------------------|"
 echo "| Container Exists: $EXISTS"
 echo "| Container Status: $STATUS"
+echo "| Container Paused: $PAUSED"
 echo "| Container Health: $HEALTH"
 echo "| Container Restarting: $RESTARTING"
 echo "| Container Started At: $STARTED_AT"
-echo "|_______________________________________________"
+echo "|----------------------------------------------|"
 [ "$EXISTS" == "True" ] && 
-echo "| [I] | Try INSPECT container"
+echo "| [I] | Try INSPECT container                  |"
 [ "$EXISTS" == "True" ] && 
-echo "| [L] | View container LOGS"
+echo "| [L] | View container LOGS                    |"
 [ "$EXISTS" == "True" ] && 
-echo "| [R] | RESTART container"
-[ "$EXISTS" == "True" ] && 
-echo "| [A] | START container"
+echo "| [R] | RESTART container                      |"
+[ "$STATUS" == "exited" ] && 
+echo "| [A] | START container                        |"
 [ "$STATUS" == "running" ] && 
-echo "| [S] | STOP container"
+echo "| [S] | STOP container                         |"
+[ "$STATUS" == "running" ] && 
+echo "| [R] | RESTART container                      |"
+[ "$STATUS" == "running" ] && 
+echo "| [P] | PAUSE container                        |"
+[ "$STATUS" == "paused" ] && 
+echo "| [U] | UNPAUSE container                      |"
 [ "$EXISTS" == "True" ] && 
-echo "| [R] | RESTART container"
-[ "$EXISTS" == "True" ] && 
-echo "| [P] | PAUSE container"
-[ "$EXISTS" == "True" ] && 
-echo "| [U] | UNPAUSE container"
-[ "$EXISTS" == "True" ] && echo "|----------------------------------------------|"
+echo "|----------------------------------------------|"
 echo "| [X] | Exit                                   |"
-echo "------------------------------------------------"
+echo -e "------------------------------------------------\e[0m"
 
 read  -d'' -s -n1 -t 3 -p "INFO: Press [KEY] to select option: " OPTION || OPTION=""
 [ ! -z $"$OPTION" ] && echo ""

@@ -14,9 +14,9 @@ VALIDATOR_1_STATUS=$(docker inspect $(docker ps --no-trunc -aqf name=validator-1
 
 clear
 
-echo "------------------------------------------------"
+echo -e "\e[33;1m------------------------------------------------"
 echo "|         KIRA NETWORK MANAGER v0.0.1          |"
-echo "|             $(date '+%d/%m/%Y %H:%M:%S')"
+echo "|             $(date '+%d/%m/%Y %H:%M:%S')              |"
 echo "|----------------------------------------------|"
 echo "| [0] | Inspect registry container             : $REGISTRY_STATUS"
 echo "| [1] | Inspect validator-1 container          : $VALIDATOR_1_STATUS"
@@ -27,7 +27,7 @@ echo "| [D] | DELETE Repos & Environment             |"
 echo "| [S] | View SEKAI Repo ($SEKAI_BRANCH)"
 echo "| [I] | View INFRA Repo ($INFRA_BRANCH)"
 echo "| [X] | EXIT                                   |"
-echo "------------------------------------------------"
+echo -e "------------------------------------------------\e[0m"
 
 read  -d'' -s -n1 -t 3 -p "Press [KEY] to select option: " OPTION || OPTION=""
 [ ! -z $"$OPTION" ] && echo ""
