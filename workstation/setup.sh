@@ -56,7 +56,6 @@ else
     exit 1
 fi
 
-
 CARGO_ENV="/home/$KIRA_USER/.cargo/env"
 
 KIRA_SETUP=/kira/setup
@@ -108,10 +107,14 @@ else
     echo "Certs and refs were already installed."
 fi
 
-KIRA_SETUP_KIRA_ENV="$KIRA_SETUP/kira-env-v0.0.22" 
+KIRA_SETUP_KIRA_ENV="$KIRA_SETUP/kira-env-v0.0.23" 
 if [ ! -f "$KIRA_SETUP_KIRA_ENV" ] ; then
     echo "Setting up kira environment variables"
     touch $CARGO_ENV
+
+    # remove & disable system crash notifications
+    rm -f /var/crash/*
+    CDHelper text lineswap --insert="enabled=0" --prefix="enabled=" --path=/etc/default/apport --append-if-found-not=True
     
     CDHelper text lineswap --insert="KIRA_MANAGER=$KIRA_MANAGER" --prefix="KIRA_MANAGER=" --path=$KIRA_MANAGER --append-if-found-not=True
     CDHelper text lineswap --insert="ETC_PROFILE=$ETC_PROFILE" --prefix="ETC_PROFILE=" --path=$ETC_PROFILE --append-if-found-not=True
