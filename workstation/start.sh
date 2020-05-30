@@ -112,18 +112,6 @@ docker run -d \
 echo "INFO: Witing for validator-1 to start..."
 sleep 5
 
-# docker exec -it $(docker ps -a -q --filter ancestor=validator) bash
-# docker run -it --entrypoint /bin/bash validator-1 -s
-#> Kira Validator container (HEAD): `docker logs --follow $(docker ps -a -q  --filter ancestor=validator)`
-#> Kira Validator container (TAIL): `docker logs --tail 50 --follow --timestamps $(docker ps -a -q  --filter ancestor=validator)`
-# elif [ "$CONTAINER_EXISTS" == "True" ] ; then
-#     echo "INFO: container validator-1 is running"
-#     docker exec -it validator-1 sekaid version
-# else
-#     echo "ERROR: Failed to test if validator-1 container is running"
-#     exit 1
-# fi
-
 echo "INFO: Inspecting if validator-1 is running..."
 docker exec -it validator-1 sekaid version || echo "ERROR: sekai not found"
 

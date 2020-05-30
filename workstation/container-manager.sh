@@ -14,6 +14,9 @@ source $ETC_PROFILE &> /dev/null
 CONTAINER_DUPM="/home/$KIRA_USER/Desktop/${NAME^^}-DUMP"
 EXISTS=$($KIRA_SCRIPTS/container-exists.sh "$NAME" || echo "Error")
 STATUS=$(docker inspect $(docker ps --no-trunc -aqf name=$NAME) | jq -r '.[0].State.Status' || echo "Error")
+HEALTH=$(docker inspect $(docker ps --no-trunc -aqf name=$NAME) | jq -r '.[0].State.Health.Status' || echo "Error")
+RESTARTING=$(docker inspect $(docker ps --no-trunc -aqf name=$NAME) | jq -r '.[0].State.Restarting' || echo "Error")
+STARTED_AT=$(docker inspect $(docker ps --no-trunc -aqf name=$NAME) | jq -r '.[0].State.StartedAt' || echo "Error")
 
 clear
 
@@ -25,22 +28,26 @@ echo "| Container Name: $NAME"
 echo "|----------------------------------------------|"
 echo "| Container Exists: $EXISTS"
 echo "| Container Status: $STATUS"
+echo "| Container Health: $HEALTH"
+echo "| Container Restarting: $RESTARTING"
+echo "| Container Started At: $STARTED_AT"
 echo "|_______________________________________________"
-[ "$EXISTS" == "True" ] && echo "| [1] | Try inspect $NAME container"
-[ "$EXISTS" == "True" ] && echo "| [A] | View $NAME container logs"
+[ "$EXISTS" == "True" ] && echo "| [I] | Try INSPECT container"
+[ "$EXISTS" == "True" ] && echo "| [L] | View container LOGS"
+[ "$EXISTS" == "True" ] && echo "| [R] | RESTART container"
 [ "$EXISTS" == "True" ] && echo "|----------------------------------------------|"
 echo "| [X] | Exit                                   |"
 echo "|_______________________________________________"
 
-read  -d'' -s -n1 -t 5 -p "Press key to select option: " OPTION || OPTION=""
+read  -d'' -s -n1 -t 5 -p "INFO: Press key to select option: " OPTION || OPTION=""
 echo ""
 [ ! -z $"$OPTION" ] && read -d'' -s -n1 -p "Press [ENTER] to confirm [${OPTION^^}] option or any other key to try again" ACCEPT
 [ ! -z $"$ACCEPT" ] && $KIRA_MANAGER/container-manager.sh $NAME
 
-if [ "$OPTION" == "1" ] ; then
+if [ "${OPTION,,}" == "i" ; then
     gnome-terminal -- docker exec -it $(docker ps -aqf "name=^${NAME}$") bash
     sleep 3
-elif [ "${OPTION,,}" == "a" ] ; then
+elif [ "${OPTION,,}" == "l" ] ; then
     rm -rfv $CONTAINER_DUPM
     mkdir -p $CONTAINER_DUPM
     docker cp $NAME:/var/log/journal $CONTAINER_DUPM/journal || echo "WARNING: Failed to dump journal logs"
@@ -48,20 +55,21 @@ elif [ "${OPTION,,}" == "a" ] ; then
     docker cp $NAME:/root/.sekaid $CONTAINER_DUPM/sekaid || echo "WARNING: Failed to dump .sekaid config"
     docker cp $NAME:/root/.sekaicli $CONTAINER_DUPM/sekaicli || echo "WARNING: Failed to dump .sekaicli config"
     docker inspect $(docker ps --no-trunc -aqf name=$NAME) > $CONTAINER_DUPM/container-inspect.json || echo "WARNING: Failed to inspect container"
+    docker inspect $(docker ps --no-trunc -aqf name=$NAME) > $CONTAINER_DUPM/printenv.txt || echo "WARNING: Failed to fetch printenv"
+    docker exec -it $NAME printenv > $CONTAINER_DUPM/printenv.txt || echo "WARNING: Failed to fetch printenv"
     chmod -R 777 $CONTAINER_DUPM
-    echo "Starting code editor..."
+    echo "INFO: Starting code editor..."
     code --user-data-dir /usr/code $CONTAINER_DUPM
     sleep 3
-elif [ "${OPTION,,}" == "u" ] ; then
-    echo "Update and restart infra..."
-    gnome-terminal -- bash -c '$KIRA_MANAGER/start.sh ; $SHELL'
+elif [ "${OPTION,,}" == "r" ] ; then
+    echo "INFO: Restarting container..."
+    $KIRA_SCRIPTS/container-restart.sh $NAME
     sleep 3
 elif [ "${OPTION,,}" == "x" ] ; then
     $KIRA_MANAGER/manager.sh
 fi
 
 $KIRA_MANAGER/container-manager.sh $NAME
-
 
 
 #GIT_SSH_COMMAND='ssh -i ~/.ssh/your_private_key' git submodule update --init
