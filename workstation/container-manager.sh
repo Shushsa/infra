@@ -17,6 +17,7 @@ STATUS=$(docker inspect $(docker ps --no-trunc -aqf name=$NAME) | jq -r '.[0].St
 HEALTH=$(docker inspect $(docker ps --no-trunc -aqf name=$NAME) | jq -r '.[0].State.Health.Status' || echo "Error")
 RESTARTING=$(docker inspect $(docker ps --no-trunc -aqf name=$NAME) | jq -r '.[0].State.Restarting' || echo "Error")
 STARTED_AT=$(docker inspect $(docker ps --no-trunc -aqf name=$NAME) | jq -r '.[0].State.StartedAt' || echo "Error")
+ID=$(docker inspect --format="{{.Id}}" ${name} 2> /dev/null || echo "                              ")
 
 clear
 
@@ -25,6 +26,7 @@ echo "|        KIRA CONTAINER MANAGER v0.0.1         |"
 echo "|             $(date '+%d/%m/%Y %H:%M:%S')"
 echo "|----------------------------------------------|"
 echo "| Container Name: $NAME"
+echo "| Container Id: $(echo $ID | head -c 14)...$(echo $ID | tail -c 13) |"
 echo "|----------------------------------------------|"
 echo "| Container Exists: $EXISTS"
 echo "| Container Status: $STATUS"
@@ -32,9 +34,22 @@ echo "| Container Health: $HEALTH"
 echo "| Container Restarting: $RESTARTING"
 echo "| Container Started At: $STARTED_AT"
 echo "|_______________________________________________"
-[ "$EXISTS" == "True" ] && echo "| [I] | Try INSPECT container"
-[ "$EXISTS" == "True" ] && echo "| [L] | View container LOGS"
-[ "$EXISTS" == "True" ] && echo "| [R] | RESTART container"
+[ "$EXISTS" == "True" ] && 
+echo "| [I] | Try INSPECT container"
+[ "$EXISTS" == "True" ] && 
+echo "| [L] | View container LOGS"
+[ "$EXISTS" == "True" ] && 
+echo "| [R] | RESTART container"
+[ "$EXISTS" == "True" ] && 
+echo "| [A] | START container"
+[ "$STATUS" == "running" ] && 
+echo "| [S] | STOP container"
+[ "$EXISTS" == "True" ] && 
+echo "| [R] | RESTART container"
+[ "$EXISTS" == "True" ] && 
+echo "| [P] | PAUSE container"
+[ "$EXISTS" == "True" ] && 
+echo "| [U] | UNPAUSE container"
 [ "$EXISTS" == "True" ] && echo "|----------------------------------------------|"
 echo "| [X] | Exit                                   |"
 echo "|_______________________________________________"
@@ -64,6 +79,22 @@ elif [ "${OPTION,,}" == "l" ] ; then
 elif [ "${OPTION,,}" == "r" ] ; then
     echo "INFO: Restarting container..."
     $KIRA_SCRIPTS/container-restart.sh $NAME
+    sleep 3
+elif [ "${OPTION,,}" == "a" ] ; then
+    echo "INFO: Staring container..."
+    $KIRA_SCRIPTS/container-start.sh $NAME
+    sleep 3
+elif [ "${OPTION,,}" == "s" ] ; then
+    echo "INFO: Stopping container..."
+    $KIRA_SCRIPTS/container-stop.sh $NAME
+    sleep 3
+elif [ "${OPTION,,}" == "p" ] ; then
+    echo "INFO: Pausing container..."
+    $KIRA_SCRIPTS/container-pause.sh $NAME
+    sleep 3
+elif [ "${OPTION,,}" == "u" ] ; then
+    echo "INFO: UnPausing container..."
+    $KIRA_SCRIPTS/container-unpause.sh $NAME
     sleep 3
 elif [ "${OPTION,,}" == "x" ] ; then
     $KIRA_MANAGER/manager.sh

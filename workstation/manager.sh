@@ -18,8 +18,8 @@ echo "------------------------------------------------"
 echo "|         KIRA NETWORK MANAGER v0.0.1          |"
 echo "|             $(date '+%d/%m/%Y %H:%M:%S')"
 echo "|----------------------------------------------|"
-echo "| [0] | Inspect registry container    | $REGISTRY_STATUS"
-echo "| [1] | Inspect validator-1 container | $VALIDATOR_1_STATUS"
+echo "| [0] | Inspect registry container             : $REGISTRY_STATUS"
+echo "| [1] | Inspect validator-1 container          : $VALIDATOR_1_STATUS"
 echo "|----------------------------------------------|"
 echo "| [W] | WIPE & Re-Initialize Environment       |"
 echo "| [R] | Hard RESET Repos & Infrastructure      |"
@@ -31,14 +31,14 @@ echo "|_______________________________________________"
 
 read  -d'' -s -n1 -t 5 -p "Press key to select option: " OPTION || OPTION=""
 echo ""
-[ ! -z $"$OPTION" ] && read -d'' -s -n1 -p "Press [ENTER] to confirm [${OPTION,,,}] option or any other key to try again" ACCEPT
+[ ! -z $"$OPTION" ] && read -d'' -s -n1 -p "Press [ENTER] to confirm [${OPTION^^}] option or any other key to try again" ACCEPT
 [ ! -z $"$ACCEPT" ] && $KIRA_MANAGER/manager.sh
 
-if [ "$OPTION" == "0" ] ; then
-    $KIRA_MANAGER/container-manager.sh "registry"
+if [ "$OPTION" == "0" ] ; 
+    gnome-terminal -- bash -c "$KIRA_MANAGER/container-manager.sh 'registry' ; read -d'' -s -n1 -p 'Press any key to exit...' && exit"
     sleep 3
 elif [ "$OPTION" == "1" ] ; then
-    $KIRA_MANAGER/container-manager.sh "validator-1"
+    gnome-terminal -- bash -c "$KIRA_MANAGER/container-manager.sh 'validator-1' ; read -d'' -s -n1 -p 'Press any key to exit...' && exit"
     sleep 3
 elif [ "${OPTION,,}" == "i" ] ; then
     echo "INFO: Starting code editor..."
@@ -50,15 +50,15 @@ elif [ "${OPTION,,}" == "s" ] ; then
     sleep 3
 elif [ "${OPTION,,}" == "w" ] ; then
     echo "INFO: Wiping and re-initializing..."
-    gnome-terminal -- bash -c "$KIRA_MANAGER/init.sh False ; \$SHELL"
+    gnome-terminal -- bash -c "$KIRA_MANAGER/init.sh False ; read -d'' -s -n1 -p 'Press any key to exit...' && exit"
     sleep 3
 elif [ "${OPTION,,}" == "r" ] ; then
     echo "INFO: Wiping and Restarting infra..."
-    gnome-terminal -- bash -c "$KIRA_MANAGER/start.sh ; \$SHELL"
+    gnome-terminal -- bash -c "$KIRA_MANAGER/start.sh ; read -d'' -s -n1 -p 'Press any key to exit...' && exit"
     sleep 3
 elif [ "${OPTION,,}" == "d" ] ; then
     echo "INFO: Wiping and removing infra..."
-    gnome-terminal -- bash -c "$KIRA_MANAGER/delete.sh ; \$SHELL"
+    gnome-terminal -- bash -c "$KIRA_MANAGER/delete.sh ; read -d'' -s -n1 -p 'Press any key to exit...' && exit"
     sleep 3
 elif [ "${OPTION,,}" == "x" ] ; then
     exit 0
