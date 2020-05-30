@@ -65,9 +65,35 @@ SSH_KEY_PUB=$(cat $SSH_KEY_PUB_PATH)
 SSH_KEY_PRV=$(cat $SSH_KEY_PRIV_PATH)
 SSH_KEY_PUB_SHORT=$(echo $SSH_KEY_PUB | head -c 24)...$(echo $SSH_KEY_PUB | tail -c 24)
 
+KIRA_INFRA=/kira/infra
+KIRA_WORKSTATION="${KIRA_INFRA}/workstation"
+
+KIRA_SETUP=/kira/setup
+KIRA_SCRIPTS="${KIRA_INFRA}/common/scripts"
+
+mkdir -p $KIRA_INFRA
+
 if [ "$SKIP_UPDATE" == "False" ] ; then
     read -p "Type INFRA reposiotry branch (press [⏎] if '$INFRA_BRANCH'): " NEW_INFRA_BRANCH
     [ ! -z "$NEW_INFRA_BRANCH" ] && INFRA_BRANCH=$NEW_INFRA_BRANCH
+
+    echo "INFO: Updating packages..."
+    apt-get update -y > /dev/null
+    apt-get install -y --allow-unauthenticated --allow-downgrades --allow-remove-essential --allow-change-held-packages \
+        software-properties-common apt-transport-https ca-certificates gnupg curl wget git > /dev/null
+    
+    ln -s /usr/bin/git /bin/git || echo "WARNING: Git symlink already exists"
+    
+    echo "INFO: Updating Infra Repository..."
+    rm -rfv $KIRA_INFRA
+    mkdir -p $KIRA_INFRA
+    git clone --branch $INFRA_BRANCH $INFRA_REPO $KIRA_INFRA
+    cd $KIRA_INFRA
+    git describe --all --always
+    chmod -R 777 $KIRA_INFRA
+
+    cd /kira
+    source $KIRA_WORKSTATION/init.sh "True"
 else
     read -p "Type SEKAI reposiotry branch (press [⏎] if '$SEKAI_BRANCH'): " NEW_SEKAI_BRANCH
     [ ! -z "$NEW_SEKAI_BRANCH" ] && SEKAI_BRANCH=$NEW_SEKAI_BRANCH
@@ -127,34 +153,7 @@ else
     [ ! -z $"$ACCEPT" ] && exit 1
 fi
 
-KIRA_INFRA=/kira/infra
-KIRA_WORKSTATION="${KIRA_INFRA}/workstation"
-
-KIRA_SETUP=/kira/setup
-KIRA_SCRIPTS="${KIRA_INFRA}/common/scripts"
-
-mkdir -p $KIRA_INFRA
-
-echo "INFO: Updating packages..."
-apt-get update -y > /dev/null
-apt-get install -y --allow-unauthenticated --allow-downgrades --allow-remove-essential --allow-change-held-packages \
-    software-properties-common apt-transport-https ca-certificates gnupg curl wget git > /dev/null
-
-ln -s /usr/bin/git /bin/git || echo "WARNING: Git symlink already exists"
-
-echo "INFO: Updating Infra Repository..."
-rm -rfv $KIRA_INFRA
-mkdir -p $KIRA_INFRA
-git clone --branch $INFRA_BRANCH $INFRA_REPO $KIRA_INFRA
-cd $KIRA_INFRA
-git describe --all --always
-chmod -R 777 $KIRA_INFRA
-cd /kira
-
-if [ "$SKIP_UPDATE" == "False" ] ; then
-    source $KIRA_WORKSTATION/init.sh "True"
-fi
-
+echo "INFO: Updating environment..."
 ${KIRA_SCRIPTS}/cdhelper-update.sh "v0.6.12"
 CDHelper version
 
@@ -176,9 +175,10 @@ CDHelper text lineswap --insert="SEKAI_REPO=$SEKAI_REPO" --prefix="SEKAI_REPO=" 
 CDHelper text lineswap --insert="SEKAI_REPO_SSH=$SEKAI_REPO_SSH" --prefix="SEKAI_REPO_SSH=" --path=$ETC_PROFILE --append-if-found-not=True --silent=$SILENT_MODE
 CDHelper text lineswap --insert="INFRA_REPO_SSH=$INFRA_REPO_SSH" --prefix="INFRA_REPO_SSH=" --path=$ETC_PROFILE --append-if-found-not=True --silent=$SILENT_MODE
 
+cd /kira
 source $KIRA_WORKSTATION/setup.sh "True"
 
 echo "------------------------------------------------"
-echo "|       FINISHED: KIRA INFRA INIT v0.0.1       |"
+echo "|       FINISHED: KIRA INFRA INIT v0.0.2       |"
 echo "------------------------------------------------"
 
