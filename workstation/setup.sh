@@ -16,6 +16,7 @@ ETC_PROFILE="/etc/profile"
 source $ETC_PROFILE &> /dev/null
 
 [ "$DEBUG_MODE" == "True" ] && set -x
+[ "$DEBUG_MODE" == "False" ] && set +x
 
 echo "------------------------------------------------"
 echo "|       STARTED: KIRA INFRA SETUP v0.0.2       |"
