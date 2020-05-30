@@ -11,7 +11,7 @@ systemctl2 stop sekaid || systemctl2 status sekaid || true
 systemctl2 stop lcd || systemctl2 status lcd || true
 systemctl2 stop nginx || systemctl2 status nginx || true
 
-CDHelper email send \
+[ "$NOTIFICATIONS" == "True" ] && CDHelper email send \
  --to="$EMAIL_NOTIFY" \
  --subject="[$MONIKER] Failed to Initalize" \
  --body="[$(date)] Attached $(find $SELF_LOGS -type f | wc -l) Log Files" \

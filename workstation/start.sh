@@ -103,6 +103,7 @@ docker run -d \
  -e P2P_PROXY_PORT=10003 \
  -e EMAIL_NOTIFY="$EMAIL_NOTIFY" \
  -e SMTP_SECRET="$SMTP_SECRET" \
+ -e NOTIFICATIONS="$NOTIFICATIONS"
  -e NODE_KEY="node-key-1" \
  -e SIGNING_KEY="signing-1" \
  -e VALIDATOR_KEY="validator-1" \

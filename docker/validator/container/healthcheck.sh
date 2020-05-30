@@ -65,7 +65,7 @@ if [ "${STATUS_SEKAI}" != "active" ] || [ "${STATUS_LCD}" != "active" ] || [ "${
     else
         echo "Sending Healthcheck Notification Email..."
         touch $EMAIL_SENT
-CDHelper email send \
+[ "$NOTIFICATIONS" == "True" ] && CDHelper email send \
  --to="$EMAIL_NOTIFY" \
  --subject="[$MONIKER] Healthcheck Raised" \
  --body="[$(date)] Sekai($STATUS_SEKAI), Faucet($STATUS_FAUCET) LCD($STATUS_LCD) or NGINX($STATUS_NGINX) Failed => Attached $(find $SELF_LOGS -type f | wc -l) Log Files. RPC Status => $RPC_STATUS" \
@@ -81,7 +81,7 @@ else
     if [ -f "$EMAIL_SENT" ]; then
         echo "INFO: Sending confirmation email, that service recovered!"
         rm -f $EMAIL_SENT # if email was sent then remove and send new one
-CDHelper email send \
+[ "$NOTIFICATIONS" == "True" ] && CDHelper email send \
  --to="$EMAIL_NOTIFY" \
  --subject="[$MONIKER] Healthcheck Rerovered" \
  --body="[$(date)] Sekai($STATUS_SEKAI), Faucet($STATUS_FAUCET), LCD($STATUS_LCD) and NGINX($STATUS_NGINX) suceeded. RPC Status => $RPC_STATUS" \
