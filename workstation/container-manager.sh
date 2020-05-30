@@ -52,10 +52,10 @@ echo "| [P] | PAUSE container"
 echo "| [U] | UNPAUSE container"
 [ "$EXISTS" == "True" ] && echo "|----------------------------------------------|"
 echo "| [X] | Exit                                   |"
-echo "|_______________________________________________"
+echo "------------------------------------------------"
 
-read  -d'' -s -n1 -t 5 -p "INFO: Press key to select option: " OPTION || OPTION=""
-echo ""
+read  -d'' -s -n1 -t 3 -p "INFO: Press [KEY] to select option: " OPTION || OPTION=""
+[ ! -z $"$OPTION" ] && echo ""
 [ ! -z $"$OPTION" ] && read -d'' -s -n1 -p "Press [ENTER] to confirm [${OPTION^^}] option or any other key to try again" ACCEPT
 [ ! -z $"$ACCEPT" ] && $KIRA_MANAGER/container-manager.sh $NAME
 

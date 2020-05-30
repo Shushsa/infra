@@ -27,10 +27,10 @@ echo "| [D] | DELETE Repos & Environment             |"
 echo "| [S] | View SEKAI Repo ($SEKAI_BRANCH)"
 echo "| [I] | View INFRA Repo ($INFRA_BRANCH)"
 echo "| [X] | EXIT                                   |"
-echo "|_______________________________________________"
+echo "------------------------------------------------"
 
-read  -d'' -s -n1 -t 5 -p "Press key to select option: " OPTION || OPTION=""
-echo ""
+read  -d'' -s -n1 -t 3 -p "Press [KEY] to select option: " OPTION || OPTION=""
+[ ! -z $"$OPTION" ] && echo ""
 [ ! -z $"$OPTION" ] && read -d'' -s -n1 -p "Press [ENTER] to confirm [${OPTION^^}] option or any other key to try again" ACCEPT
 [ ! -z $"$ACCEPT" ] && $KIRA_MANAGER/manager.sh
 
