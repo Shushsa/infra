@@ -2,7 +2,6 @@
 
 exec 2>&1
 set -e
-set -x
 
 # Local Update Shortcut:
 # (rm -fv $KIRA_WORKSTATION/start.sh) && nano $KIRA_WORKSTATION/start.sh && chmod 777 $KIRA_WORKSTATION/start.sh
@@ -14,6 +13,8 @@ SKIP_UPDATE=$1
 ETC_PROFILE="/etc/profile"
 
 source $ETC_PROFILE &> /dev/null
+
+[ "$DEBUG_MODE" == "True" ] && set -x
 
 echo "------------------------------------------------"
 echo "|       STARTED: KIRA INFRA START v0.0.1       |"
@@ -103,7 +104,9 @@ docker run -d \
  -e P2P_PROXY_PORT=10003 \
  -e EMAIL_NOTIFY="$EMAIL_NOTIFY" \
  -e SMTP_SECRET="$SMTP_SECRET" \
- -e NOTIFICATIONS="$NOTIFICATIONS"
+ -e NOTIFICATIONS="$NOTIFICATIONS" \
+ -e DEBUG_MODE="$DEBUG_MODE" \
+ -e SILENT_MODE="$SILENT_MODE" \
  -e NODE_KEY="node-key-1" \
  -e SIGNING_KEY="signing-1" \
  -e VALIDATOR_KEY="validator-1" \
