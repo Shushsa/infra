@@ -8,10 +8,10 @@ set -x
 # (rm -fv $KIRA_INFRA/docker/base-image/container/deployment.sh) && nano $KIRA_INFRA/docker/base-image/container/deployment.sh
 
 apt-get update -y
-apt-get upgrade -y
 apt-get install -y --allow-unauthenticated --allow-downgrades --allow-remove-essential --allow-change-held-packages \
-    software-properties-common apt-transport-https ca-certificates gnupg curl wget
+    software-properties-common apt-transport-https ca-certificates gnupg curl wget git
 
+apt-get update -y --fix-missing
 curl https://packages.cloud.google.com/apt/doc/apt-key.gpg | apt-key add -
 curl https://dl-ssl.google.com/linux/linux_signing_key.pub | apt-key add -
 curl https://packages.microsoft.com/keys/microsoft.asc | apt-key add -
@@ -22,12 +22,12 @@ add-apt-repository "deb [arch=amd64] https://packages.microsoft.com/repos/vscode
 
 echo "APT Update, Upfrade and Intall..."
 apt-get update -y --fix-missing
-apt-get upgrade -y --allow-unauthenticated --allow-downgrades --allow-remove-essential --allow-change-held-packages
 apt-get install -y --allow-unauthenticated --allow-downgrades --allow-remove-essential --allow-change-held-packages \
     autoconf \
     automake \
     apt-utils \
     awscli \
+    dconf-editor \
     build-essential \
     bind9-host \
     bzip2 \
@@ -44,6 +44,7 @@ apt-get install -y --allow-unauthenticated --allow-downgrades --allow-remove-ess
     gnupg2 \
     groff \
     htop \
+    hashdeep \
     imagemagick \
     iputils-tracepath \
     iputils-ping \
@@ -58,6 +59,7 @@ apt-get install -y --allow-unauthenticated --allow-downgrades --allow-remove-ess
     locales \
     make \
     nano \
+    nautilus-admin \
     nginx \
     netbase \
     netcat-openbsd \
@@ -84,6 +86,7 @@ apt-get install -y --allow-unauthenticated --allow-downgrades --allow-remove-ess
     tzdata \
     unzip \
     wipe \
+    xdotool \
     yarn \
     zip
 

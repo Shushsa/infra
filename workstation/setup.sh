@@ -85,17 +85,16 @@ mkdir -p $SOURCES_LIST
 mkdir -p $KIRA_MANAGER
 chmod 777 $ETC_PROFILE
 
-${KIRA_SCRIPTS}/cdhelper-update.sh "v0.6.11"
+${KIRA_SCRIPTS}/cdhelper-update.sh "v0.6.12"
 CDHelper version
 
-${KIRA_SCRIPTS}/awshelper-update.sh "v0.12.0"
+${KIRA_SCRIPTS}/awshelper-update.sh "v0.12.4"
 AWSHelper version
 
 KIRA_SETUP_CERTS="$KIRA_SETUP/certs-v0.0.4" 
 if [ ! -f "$KIRA_SETUP_CERTS" ] ; then
     echo "Installing certificates and package references..."
     apt-get update -y --fix-missing
-    # apt-get upgrade -y --allow-unauthenticated --allow-downgrades --allow-remove-essential --allow-change-held-packages
     curl https://packages.cloud.google.com/apt/doc/apt-key.gpg | apt-key add -
     curl https://dl-ssl.google.com/linux/linux_signing_key.pub | apt-key add -
     curl https://packages.microsoft.com/keys/microsoft.asc | apt-key add -
@@ -159,7 +158,6 @@ KIRA_SETUP_BASE_TOOLS="$KIRA_SETUP/base-tools-v0.0.4"
 if [ ! -f "$KIRA_SETUP_BASE_TOOLS" ] ; then
     echo "APT Update, Upgrade and Intall basic tools and dependencies..."
     apt-get update -y --fix-missing
-    # apt-get upgrade -y --allow-unauthenticated --allow-downgrades --allow-remove-essential --allow-change-held-packages
     apt-get install -y --allow-unauthenticated --allow-downgrades --allow-remove-essential --allow-change-held-packages \
         autoconf \
         automake \
@@ -300,6 +298,8 @@ if [ ! -f "$KIRA_SETUP_DOTNET" ] ; then
     touch $KIRA_SETUP_DOTNET
 else
     echo ".NET $(dotnet --version) was already installed."
+    dotnet --list-runtimes
+    dotnet --list-sdks
 fi
 
 KIRA_SETUP_SYSCTL="$KIRA_SETUP/systemctl-v0.0.1" 

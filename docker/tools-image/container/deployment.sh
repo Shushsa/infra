@@ -58,7 +58,6 @@ apt-get update
 apt-get install -y dotnet-runtime-deps-3.1
 apt-get install -y dotnet-runtime-3.1
 apt-get install -y aspnetcore-runtime-3.1
-apt-get install -y dotnet-sdk-2.1
 apt-get install -y dotnet-sdk-3.1
 
 echo "Installing latest go version $GO_VERSION https://golang.org/doc/install ..."
@@ -90,10 +89,10 @@ printf "[Service]\nExecStartPost=/bin/sleep 0.1\n" > $NGINX_SERVICED_PATH/overri
 systemctl2 enable nginx.service
 
 echo "Install Asmodat Automation helper tools"
-${SELF_SCRIPTS}/cdhelper-update.sh "v0.6.11"
+${SELF_SCRIPTS}/cdhelper-update.sh "v0.6.12"
 CDHelper version
 
-${SELF_SCRIPTS}/awshelper-update.sh "v0.12.0"
+${SELF_SCRIPTS}/awshelper-update.sh "v0.12.4"
 AWSHelper version
 
 printenv
