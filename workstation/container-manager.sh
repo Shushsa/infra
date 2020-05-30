@@ -44,7 +44,7 @@ echo ""
 [ ! -z $"$OPTION" ] && read -d'' -s -n1 -p "Press [ENTER] to confirm [${OPTION^^}] option or any other key to try again" ACCEPT
 [ ! -z $"$ACCEPT" ] && $KIRA_MANAGER/container-manager.sh $NAME
 
-if [ "${OPTION,,}" == "i" ; then
+if [ "${OPTION,,}" == "i" ] ; then
     gnome-terminal -- docker exec -it $(docker ps -aqf "name=^${NAME}$") bash
     sleep 3
 elif [ "${OPTION,,}" == "l" ] ; then
