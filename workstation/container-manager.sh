@@ -22,7 +22,7 @@ ID=$(docker inspect --format="{{.Id}}" ${NAME} 2> /dev/null || echo "undefined")
 
 clear
 
-echo -e "\e[36;1m------------------------------------------------"
+echo -e "\e[39;1m------------------------------------------------"
 echo "|        KIRA CONTAINER MANAGER v0.0.1         |"
 echo "|             $(date '+%d/%m/%Y %H:%M:%S')              |"
 echo "|----------------------------------------------|"
