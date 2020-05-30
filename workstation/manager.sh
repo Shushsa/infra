@@ -9,14 +9,17 @@ set -e
 ETC_PROFILE="/etc/profile"
 source $ETC_PROFILE &> /dev/null
 
+REGISTRY_STATUS=$(docker inspect $(docker ps --no-trunc -aqf name=registry) | jq -r '.[0].State.Status' || echo "Error")
+VALIDATOR_1_STATUS=$(docker inspect $(docker ps --no-trunc -aqf name=validator-1) | jq -r '.[0].State.Status' || echo "Error")
+
 clear
 
 echo "------------------------------------------------"
 echo "|         KIRA NETWORK MANAGER v0.0.1          |"
 echo "|             $(date '+%d/%m/%Y %H:%M:%S')"
 echo "|----------------------------------------------|"
-echo "| [0] | Inspect registry container             |"
-echo "| [1] | Inspect validator-1 container          |"
+echo "| [0] | Inspect registry container    | $REGISTRY_STATUS"
+echo "| [1] | Inspect validator-1 container | $VALIDATOR_1_STATUS"
 echo "|----------------------------------------------|"
 echo "| [R] | Update & Hard Reset Infrastructure     |"
 echo "| [S] | View SEKAI repo                        |"
@@ -45,7 +48,7 @@ elif [ "${OPTION,,}" == "s" ] ; then
     sleep 3
 elif [ "${OPTION,,}" == "r" ] ; then
     echo "Update and restart infra..."
-    gnome-terminal -- bash -c '/kira/start.sh ; $SHELL'
+    gnome-terminal -- bash -c '$KIRA_MANAGER/start.sh ; $SHELL'
     sleep 3
 elif [ "${OPTION,,}" == "x" ] ; then
     exit 0
