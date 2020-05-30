@@ -41,6 +41,7 @@ KIRA_INFRA=/kira/infra
 KIRA_SEKAI=/kira/sekai
 KIRA_SCRIPTS="$KIRA_INFRA/common/scripts"
 KIRA_WORKSTATION="$KIRA_INFRA/workstation"
+KIRA_MANAGER="/kira/manager"
 
 if [ "$SKIP_UPDATE" == "False" ] ; then
     echo "INFO: Updating Infra..."
@@ -82,6 +83,7 @@ mkdir -p $KIRA_STATE
 mkdir -p "/home/$KIRA_USER/.cargo"
 mkdir -p "/home/$KIRA_USER/Desktop"
 mkdir -p $SOURCES_LIST
+mkdir -p $KIRA_MANAGER
 chmod 777 $ETC_PROFILE
 
 ${KIRA_SCRIPTS}/cdhelper-update.sh "v0.6.11"
@@ -106,11 +108,12 @@ else
     echo "Certs and refs were already installed."
 fi
 
-KIRA_SETUP_KIRA_ENV="$KIRA_SETUP/kira-env-v0.0.21" 
+KIRA_SETUP_KIRA_ENV="$KIRA_SETUP/kira-env-v0.0.22" 
 if [ ! -f "$KIRA_SETUP_KIRA_ENV" ] ; then
     echo "Setting up kira environment variables"
     touch $CARGO_ENV
-
+    
+    CDHelper text lineswap --insert="KIRA_MANAGER=$KIRA_MANAGER" --prefix="KIRA_MANAGER=" --path=$KIRA_MANAGER --append-if-found-not=True
     CDHelper text lineswap --insert="ETC_PROFILE=$ETC_PROFILE" --prefix="ETC_PROFILE=" --path=$ETC_PROFILE --append-if-found-not=True
     CDHelper text lineswap --insert="KIRA_SETUP=$KIRA_SETUP" --prefix="KIRA_SETUP=" --path=$ETC_PROFILE --append-if-found-not=True
     CDHelper text lineswap --insert="KIRA_SEKAI=$KIRA_SEKAI" --prefix="KIRA_SEKAI=" --path=$ETC_PROFILE --append-if-found-not=True
@@ -400,20 +403,21 @@ GKSUDO_PATH=/usr/local/bin/gksudo
 echo "pkexec env DISPLAY=\$DISPLAY XAUTHORITY=\$XAUTHORITY \$@" > $GKSUDO_PATH
 chmod 777 $GKSUDO_PATH
 
-KIRA_INIT_SCRIPT=/kira/init.sh
-KIRA_START_SCRIPT=/kira/start.sh
-KIRA_DELETE_SCRIPT=/kira/delete.sh
-KIRA_MANAGER_SCRIPT=/kira/delete.sh
+# we must ensure that recovery files can't be destroyed in the update process and cause a deadlock
+rm -r -f $KIRA_MANAGER
+cp -r $KIRA_WORKSTATION $KIRA_MANAGER
 
-echo "gnome-terminal --working-directory=/kira -- bash -c '$KIRA_WORKSTATION/start.sh \"\$0\" ; $SHELL' \"False\"" > $KIRA_START_SCRIPT
-echo "gnome-terminal --working-directory=/kira -- bash -c '$KIRA_WORKSTATION/init.sh ; $SHELL'" > $KIRA_INIT_SCRIPT
-echo "gnome-terminal --working-directory=/kira -- bash -c '$KIRA_WORKSTATION/delete.sh ; $SHELL'" > $KIRA_DELETE_SCRIPT
-echo "gnome-terminal --working-directory=/kira -- bash -c '$KIRA_WORKSTATION/manager.sh ; $SHELL'" > $KIRA_MANAGER_SCRIPT
+KIRA_INIT_SCRIPT=$KIRA_MANAGER/init-recovery.sh
+KIRA_START_SCRIPT=$KIRA_MANAGER/start-recovery.sh
+KIRA_DELETE_SCRIPT=$KIRA_MANAGER/delete-recovery.sh
+KIRA_MANAGER_SCRIPT=$KIRA_MANAGER/manager-recovery.sh
 
-chmod 777 $KIRA_INIT_SCRIPT
-chmod 777 $KIRA_START_SCRIPT
-chmod 777 $KIRA_DELETE_SCRIPT
-chmod 777 $KIRA_MANAGER_SCRIPT
+echo "gnome-terminal --working-directory=/kira -- bash -c '$KIRA_MANAGER/start.sh \"\$0\" ; $SHELL' \"False\"" > $KIRA_START_SCRIPT
+echo "gnome-terminal --working-directory=/kira -- bash -c '$KIRA_MANAGER/init.sh ; $SHELL'" > $KIRA_INIT_SCRIPT
+echo "gnome-terminal --working-directory=/kira -- bash -c '$KIRA_MANAGER/delete.sh ; $SHELL'" > $KIRA_DELETE_SCRIPT
+echo "gnome-terminal --working-directory=/kira -- bash -c '$KIRA_MANAGER/manager.sh ; $SHELL'" > $KIRA_MANAGER_SCRIPT
+
+chmod -R 777 $KIRA_MANAGER
 
 KIRA_INIT_ENTRY="[Desktop Entry]
 Type=Application
