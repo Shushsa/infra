@@ -11,9 +11,7 @@ NAME=$1
 ETC_PROFILE="/etc/profile"
 source $ETC_PROFILE &> /dev/null
 
-CONTAINER_DUPM="/home/$KIRA_USER/Desktop/${NAME,,,}-DUMP"
-mkdir -p $CONTAINER_DUPM
-
+CONTAINER_DUPM="/home/$KIRA_USER/Desktop/${NAME^^}-DUMP"
 EXISTS=$($KIRA_SCRIPTS/container-exists.sh "$NAME" || echo "Error")
 STATUS=$(docker inspect $(docker ps --no-trunc -aqf name=$NAME) | jq -r '.[0].State.Status' || echo "Error")
 
@@ -23,22 +21,20 @@ echo "------------------------------------------------"
 echo "|        KIRA CONTAINER MANAGER v0.0.1         |"
 echo "|             $(date '+%d/%m/%Y %H:%M:%S')"
 echo "|----------------------------------------------|"
-echo "| NAME: $NAME"
+echo "| Container Name: $NAME"
 echo "|----------------------------------------------|"
 echo "| Container Exists: $EXISTS"
 echo "| Container Status: $STATUS"
 echo "|_______________________________________________"
-[ "$EXISTS" == "True"] && \
-echo "| [1] | Try inspect $NAME container"
-[ "$EXISTS" == "True"] && \
-echo "| [A] | View $NAME container logs"
-echo "|----------------------------------------------|"
+[ "$EXISTS" == "True" ] && echo "| [1] | Try inspect $NAME container"
+[ "$EXISTS" == "True" ] && echo "| [A] | View $NAME container logs"
+[ "$EXISTS" == "True" ] && echo "|----------------------------------------------|"
 echo "| [X] | Exit                                   |"
 echo "|_______________________________________________"
 
 read  -d'' -s -n1 -t 5 -p "Press key to select option: " OPTION || OPTION=""
 echo ""
-[ ! -z $"$OPTION" ] && read -d'' -s -n1 -p "Press [ENTER] to confirm [${OPTION,,,}] option or any other key to try again" ACCEPT
+[ ! -z $"$OPTION" ] && read -d'' -s -n1 -p "Press [ENTER] to confirm [${OPTION^^}] option or any other key to try again" ACCEPT
 [ ! -z $"$ACCEPT" ] && $KIRA_MANAGER/container-manager.sh $NAME
 
 if [ "$OPTION" == "1" ] ; then
@@ -46,6 +42,7 @@ if [ "$OPTION" == "1" ] ; then
     sleep 3
 elif [ "${OPTION,,}" == "a" ] ; then
     rm -rfv $CONTAINER_DUPM
+    mkdir -p $CONTAINER_DUPM
     docker cp $NAME:/var/log/journal $CONTAINER_DUPM/journal || echo "WARNING: Failed to dump journal logs"
     docker cp $NAME:/self/logs $CONTAINER_DUPM/logs || echo "WARNING: Failed to dump self logs"
     docker cp $NAME:/root/.sekaid $CONTAINER_DUPM/sekaid || echo "WARNING: Failed to dump .sekaid config"
