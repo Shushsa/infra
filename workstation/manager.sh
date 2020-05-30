@@ -50,15 +50,15 @@ elif [ "${OPTION,,}" == "s" ] ; then
     sleep 3
 elif [ "${OPTION,,}" == "w" ] ; then
     echo "INFO: Wiping and re-initializing..."
-    gnome-terminal -- bash -c '$KIRA_MANAGER/init.sh False ; $SHELL'
+    gnome-terminal -- bash -c "$KIRA_MANAGER/init.sh False ; \$SHELL"
     sleep 3
 elif [ "${OPTION,,}" == "r" ] ; then
     echo "INFO: Wiping and Restarting infra..."
-    gnome-terminal -- bash -c '$KIRA_MANAGER/start.sh ; $SHELL'
+    gnome-terminal -- bash -c "$KIRA_MANAGER/start.sh ; \$SHELL"
     sleep 3
 elif [ "${OPTION,,}" == "d" ] ; then
     echo "INFO: Wiping and removing infra..."
-    gnome-terminal -- bash -c '$KIRA_MANAGER/delete.sh ; $SHELL'
+    gnome-terminal -- bash -c "$KIRA_MANAGER/delete.sh ; \$SHELL"
     sleep 3
 elif [ "${OPTION,,}" == "x" ] ; then
     exit 0
