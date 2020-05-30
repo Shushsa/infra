@@ -20,7 +20,7 @@ if [ -z "$DEBUG_MODE" ] ; then
     SILENT_MODE="True"
 fi
 
-read  -d'' -s -n1 -p "Press [Y]es is you want to run in debug mode, press [N]o key if not or [⏎] if '$DEBUG_MODE' (default): " NEW_DEBUG_MODE
+read  -d'' -s -n1 -p "Press [Y]es/[N]o is you want to run in debug mode (press [⏎] if '$DEBUG_MODE'): " NEW_DEBUG_MODE
 if [ $"${NEW_DEBUG_MODE,,}" == "y" ] ; then
     DEBUG_MODE="True"
     SILENT_MODE="False"
@@ -64,13 +64,13 @@ SSH_KEY_PRV=$(cat $SSH_KEY_PRIV_PATH)
 SSH_KEY_PUB_SHORT=$(echo $SSH_KEY_PUB | head -c 24)...$(echo $SSH_KEY_PUB | tail -c 24)
 
 if [ "$SKIP_UPDATE" == "False" ] ; then
-    read -p "Type INFRA reposiotry branch (press ⏎ if '$INFRA_BRANCH'): " NEW_INFRA_BRANCH
+    read -p "Type INFRA reposiotry branch (press [⏎] if '$INFRA_BRANCH'): " NEW_INFRA_BRANCH
     [ ! -z "$NEW_INFRA_BRANCH" ] && INFRA_BRANCH=$NEW_INFRA_BRANCH
 else
-    read -p "Type SEKAI reposiotry branch (press ⏎ if '$SEKAI_BRANCH'): " NEW_SEKAI_BRANCH
+    read -p "Type SEKAI reposiotry branch (press [⏎] if '$SEKAI_BRANCH'): " NEW_SEKAI_BRANCH
     [ ! -z "$NEW_SEKAI_BRANCH" ] && SEKAI_BRANCH=$NEW_SEKAI_BRANCH
     
-    read  -d'' -s -n1 -p "Press [Y]es is you want to receive notifications, press [N]o if not or ⏎ if '$NOTIFICATIONS' (default): " NEW_NOTIFICATIONS
+    read  -d'' -s -n1 -p "Press [Y]es/[N]o to receive notifications (press [⏎] if '$NOTIFICATIONS'): " NEW_NOTIFICATIONS
     if [ $"${NEW_NOTIFICATIONS,,}" == "y" ] ; then
         NOTIFICATIONS="True"
     elif [ $"${NEW_NOTIFICATIONS,,}" == "n" ] ; then
@@ -78,20 +78,20 @@ else
     fi
     
     if [ "$NOTIFICATIONS" == "True" ] ; then
-        read -p "Type desired notification email (press ⏎ if '$EMAIL_NOTIFY'): " NEW_NOTIFY_EMAIL
+        read -p "Type desired notification email (press [⏎] if '$EMAIL_NOTIFY'): " NEW_NOTIFY_EMAIL
         [ ! -z "$NEW_NOTIFY_EMAIL" ] && EMAIL_NOTIFY=$NEW_NOTIFY_EMAIL
         
-        read -p "Type Gmail SMTP login (press ⏎ if '$SMTP_LOGIN'): " NEW_SMTP_LOGIN
+        read -p "Type Gmail SMTP login (press [⏎] if '$SMTP_LOGIN'): " NEW_SMTP_LOGIN
         [ ! -z "$NEW_SMTP_LOGIN" ] && SMTP_LOGIN=$NEW_SMTP_LOGIN
         
-        read -p "Type Gmail SMTP password (press ⏎ if '$SMTP_PASSWORD'): " NEW_SMTP_PASSWORD
+        read -p "Type Gmail SMTP password (press [⏎] if '$SMTP_PASSWORD'): " NEW_SMTP_PASSWORD
         [ ! -z "$NEW_SMTP_PASSWORD" ] && SMTP_PASSWORD=$NEW_SMTP_PASSWORD
     fi
     
     echo "Your current public SSH Key:"
     echo -e "\e[33;1m$SSH_KEY_PUB\e[0m"
     
-    read -p "Input your PRIVATE git SSH key or (press ⏎ if above): " NEW_SSH_KEY
+    read -p "Input your PRIVATE git SSH key or (press [⏎] if above PUB key): " NEW_SSH_KEY
     if [ ! -z "$NEW_SSH_KEY" ] ; then
         echo $NEW_SSH_KEY > $SSH_KEY_PRIV_PATH
         ssh-keygen -y -f $SSH_KEY_PRIV_PATH > $SSH_KEY_PUB_PATH
@@ -133,13 +133,12 @@ KIRA_SCRIPTS="${KIRA_INFRA}/common/scripts"
 
 mkdir -p $KIRA_INFRA
 
-apt-get update -y
+echo "INFO: Updating packages..."
+apt-get update -y > /dev/null
 apt-get install -y --allow-unauthenticated --allow-downgrades --allow-remove-essential --allow-change-held-packages \
-    software-properties-common apt-transport-https ca-certificates gnupg curl wget git
+    software-properties-common apt-transport-https ca-certificates gnupg curl wget git > /dev/null
 
-ln -s /usr/bin/git /bin/git || echo "Git symlink already exists"
-git --version
-git config --global url.https://github.com/.insteadOf git://github.com/
+ln -s /usr/bin/git /bin/git || echo "WARNING: Git symlink already exists"
 
 echo "INFO: Updating Infra Repository..."
 rm -rfv $KIRA_INFRA
@@ -148,6 +147,7 @@ git clone --branch $INFRA_BRANCH $INFRA_REPO $KIRA_INFRA
 cd $KIRA_INFRA
 git describe --all --always
 chmod -R 777 $KIRA_INFRA
+cd /kira
 
 if [ "$SKIP_UPDATE" == "False" ] ; then
     source $KIRA_WORKSTATION/init.sh "True"
@@ -174,7 +174,6 @@ CDHelper text lineswap --insert="SEKAI_REPO=$SEKAI_REPO" --prefix="SEKAI_REPO=" 
 CDHelper text lineswap --insert="SEKAI_REPO_SSH=$SEKAI_REPO_SSH" --prefix="SEKAI_REPO_SSH=" --path=$ETC_PROFILE --append-if-found-not=True --silent=$SILENT_MODE
 CDHelper text lineswap --insert="INFRA_REPO_SSH=$INFRA_REPO_SSH" --prefix="INFRA_REPO_SSH=" --path=$ETC_PROFILE --append-if-found-not=True --silent=$SILENT_MODE
 
-cd /kira
 source $KIRA_WORKSTATION/setup.sh "True"
 
 echo "------------------------------------------------"
