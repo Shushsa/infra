@@ -20,13 +20,15 @@ if [ -z "$DEBUG_MODE" ] ; then
     SILENT_MODE="True"
 fi
 
-read  -d'' -s -n1 -p "Press [Y]es/[N]o is you want to run in debug mode (press [⏎] if '$DEBUG_MODE'): " NEW_DEBUG_MODE
-if [ $"${NEW_DEBUG_MODE,,}" == "y" ] ; then
-    DEBUG_MODE="True"
-    SILENT_MODE="False"
-elif [ $"${NEW_DEBUG_MODE,,}" == "n" ]  ; then
-    DEBUG_MODE="False"
-    SILENT_MODE="True"
+if [ "$SKIP_UPDATE" == "False" ] ; then
+    read  -d'' -s -n1 -p "Press [Y]es/[N]o is you want to run in debug mode (press [⏎] if '$DEBUG_MODE'): " NEW_DEBUG_MODE
+    if [ $"${NEW_DEBUG_MODE,,}" == "y" ] ; then
+        DEBUG_MODE="True"
+        SILENT_MODE="False"
+    elif [ $"${NEW_DEBUG_MODE,,}" == "n" ]  ; then
+        DEBUG_MODE="False"
+        SILENT_MODE="True"
+    fi
 fi
 
 [ "$DEBUG_MODE" == "True" ] && set -x
@@ -104,7 +106,7 @@ else
         echo "Your new public SSH Key:"
         echo -e "\e[32;1m$SSH_KEY_PUB\e[0m"
     fi
-    
+
     echo -e "\e[33;1m------------------------------------------------"
     echo "|       STARTED: KIRA INFRA INIT v0.0.2        |"
     echo "|----------------------------------------------|"
@@ -121,7 +123,7 @@ else
     echo "| PUBLIC GIT SSH KEY: $SSH_KEY_PUB_SHORT"
     echo -e "------------------------------------------------\e[0m"
     
-    read  -d'' -s -n1 -p "Press [ENTER] to confirm or any other key to exit: " ACCEPT
+    read  -d'' -s -n1 -p "Press [⏎] to confirm or any other key to exit: " ACCEPT
     [ ! -z $"$ACCEPT" ] && exit 1
 fi
 
