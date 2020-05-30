@@ -410,41 +410,12 @@ chmod 777 $GKSUDO_PATH
 rm -r -f $KIRA_MANAGER
 cp -r $KIRA_WORKSTATION $KIRA_MANAGER
 
-KIRA_INIT_SCRIPT=$KIRA_MANAGER/init-recovery.sh
-KIRA_START_SCRIPT=$KIRA_MANAGER/start-recovery.sh
-KIRA_DELETE_SCRIPT=$KIRA_MANAGER/delete-recovery.sh
-KIRA_MANAGER_SCRIPT=$KIRA_MANAGER/manager-recovery.sh
 
-echo "gnome-terminal --working-directory=/kira -- bash -c '$KIRA_MANAGER/start.sh \"\$0\" ; $SHELL' \"False\"" > $KIRA_START_SCRIPT
-echo "gnome-terminal --working-directory=/kira -- bash -c '$KIRA_MANAGER/init.sh ; $SHELL'" > $KIRA_INIT_SCRIPT
-echo "gnome-terminal --working-directory=/kira -- bash -c '$KIRA_MANAGER/delete.sh ; $SHELL'" > $KIRA_DELETE_SCRIPT
+KIRA_MANAGER_SCRIPT=$KIRA_MANAGER/start-manager.sh
+
 echo "gnome-terminal --working-directory=/kira -- bash -c '$KIRA_MANAGER/manager.sh ; $SHELL'" > $KIRA_MANAGER_SCRIPT
 
 chmod -R 777 $KIRA_MANAGER
-
-KIRA_INIT_ENTRY="[Desktop Entry]
-Type=Application
-Terminal=false
-Name=KIRA-INIT
-Icon=${KIRA_IMG}/init.png
-Exec=gksudo $KIRA_INIT_SCRIPT
-Categories=Application;"
-
-KIRA_START_ENTRY="[Desktop Entry]
-Type=Application
-Terminal=false
-Name=KIRA-START
-Icon=${KIRA_IMG}/start.png
-Exec=gksudo $KIRA_START_SCRIPT
-Categories=Application;"
-
-KIRA_DELETE_ENTRY="[Desktop Entry]
-Type=Application
-Terminal=false
-Name=KIRA-DELETE
-Icon=${KIRA_IMG}/delete.png
-Exec=gksudo $KIRA_DELETE_SCRIPT
-Categories=Application;"
 
 KIRA_MANAGER_ENTRY="[Desktop Entry]
 Type=Application
@@ -454,35 +425,16 @@ Icon=${KIRA_IMG}/interchain.png
 Exec=gksudo $KIRA_MANAGER_SCRIPT
 Categories=Application;"
 
-
-USER_INIT_FAVOURITE=$USER_SHORTCUTS/kira-init.desktop
-USER_START_FAVOURITE=$USER_SHORTCUTS/kira-start.desktop
-USER_DELETE_FAVOURITE=$USER_SHORTCUTS/kira-delete.desktop
 USER_MANAGER_FAVOURITE=$USER_SHORTCUTS/kira-manager.desktop
 
-cat > $USER_INIT_FAVOURITE <<< $KIRA_INIT_ENTRY
-cat > $USER_START_FAVOURITE <<< $KIRA_START_ENTRY
-cat > $USER_DELETE_FAVOURITE <<< $KIRA_DELETE_ENTRY
 cat > $USER_MANAGER_FAVOURITE <<< $KIRA_MANAGER_ENTRY
 
-chmod +x $USER_INIT_FAVOURITE
-chmod +x $USER_START_FAVOURITE
-chmod +x $USER_DELETE_FAVOURITE
 chmod +x $USER_MANAGER_FAVOURITE
 
-USER_INIT_DESKTOP="/home/$KIRA_USER/Desktop/KIRA-INIT.desktop"
-USER_START_DESKTOP="/home/$KIRA_USER/Desktop/KIRA-START.desktop"
-USER_DELETE_DESKTOP="/home/$KIRA_USER/Desktop/KIRA-DELETE.desktop"
 USER_MANAGER_DESKTOP="/home/$KIRA_USER/Desktop/KIRA-MANAGER.desktop"
 
-cat > $USER_INIT_DESKTOP <<< $KIRA_INIT_ENTRY
-cat > $USER_START_DESKTOP <<< $KIRA_START_ENTRY
-cat > $USER_DELETE_DESKTOP <<< $KIRA_DELETE_ENTRY
 cat > $USER_MANAGER_DESKTOP <<< $KIRA_MANAGER_ENTRY
 
-chmod +x $USER_INIT_DESKTOP 
-chmod +x $USER_START_DESKTOP 
-chmod +x $USER_DELETE_DESKTOP 
 chmod +x $USER_MANAGER_DESKTOP 
 
 echo "------------------------------------------------"
