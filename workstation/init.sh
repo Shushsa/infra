@@ -68,11 +68,13 @@ SSH_KEY_PUB_SHORT=$(echo $SSH_KEY_PUB | head -c 24)...$(echo $SSH_KEY_PUB | tail
 
 KIRA_INFRA=/kira/infra
 KIRA_WORKSTATION="${KIRA_INFRA}/workstation"
+KIRA_MANAGER="/kira/manager"
 
 KIRA_SETUP=/kira/setup
 KIRA_SCRIPTS="${KIRA_INFRA}/common/scripts"
 
 mkdir -p $KIRA_INFRA
+mkdir -p $KIRA_MANAGER
 
 if [ "$SKIP_UPDATE" == "False" ] ; then
     read -p "Type INFRA reposiotry branch (press ⏎ if '$INFRA_BRANCH'): " NEW_INFRA_BRANCH
@@ -92,7 +94,11 @@ if [ "$SKIP_UPDATE" == "False" ] ; then
     cd $KIRA_INFRA
     git describe --all --always
     chmod -R 777 $KIRA_INFRA
+    cp -r $KIRA_WORKSTATION $KIRA_MANAGER
 
+    # update old processes
+    rm -r -f $KIRA_MANAGER
+    chmod -R 777 $KIRA_MANAGER
     cd /kira
     source $KIRA_WORKSTATION/init.sh "True"
 else

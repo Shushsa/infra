@@ -413,7 +413,6 @@ chmod 777 $GKSUDO_PATH
 rm -r -f $KIRA_MANAGER
 cp -r $KIRA_WORKSTATION $KIRA_MANAGER
 
-
 KIRA_MANAGER_SCRIPT=$KIRA_MANAGER/start-manager.sh
 
 echo "gnome-terminal --working-directory=/kira -- bash -c '$KIRA_MANAGER/manager.sh ; $SHELL'" > $KIRA_MANAGER_SCRIPT
