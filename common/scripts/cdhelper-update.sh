@@ -2,7 +2,6 @@
 
 exec 2>&1
 set -e
-set -x
 
 # Local Update Shortcut:
 # (rm -fv /kira/infra/common/scripts/cdhelper-update.sh) && nano /kira/infra/common/scripts/cdhelper-update.sh && chmod 777 /kira/infra/common/scripts/cdhelper-update.sh

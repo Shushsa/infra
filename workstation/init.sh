@@ -3,6 +3,7 @@
 
 exec 2>&1
 set -e
+start_time="$(date -u +%s)"
 
 # Local Update Shortcut:
 # (rm -fv /tmp/init.sh) && nano /tmp/init.sh && chmod 777 /tmp/init.sh
@@ -176,8 +177,11 @@ CDHelper text lineswap --insert="SEKAI_REPO_SSH=$SEKAI_REPO_SSH" --prefix="SEKAI
 CDHelper text lineswap --insert="INFRA_REPO_SSH=$INFRA_REPO_SSH" --prefix="INFRA_REPO_SSH=" --path=$ETC_PROFILE --append-if-found-not=True --silent=$SILENT_MODE
 
 cd /kira
-source $KIRA_WORKSTATION/setup.sh "True"
+source $KIRA_WORKSTATION/start.sh "True"
 
+end_time="$(date -u +%s)"
+elapsed="$(($end_time-$start_time))"
+echo "INFO: Total of $elapsed seconds elapsed for process"
 echo "------------------------------------------------"
 echo "|       FINISHED: KIRA INFRA INIT v0.0.2       |"
 echo "------------------------------------------------"

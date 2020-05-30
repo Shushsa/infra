@@ -2,6 +2,7 @@
 
 exec 2>&1
 set -e
+start_time="$(date -u +%s)"
 
 # Local Update Shortcut:
 # (rm -fv $KIRA_WORKSTATION/setup.sh) && nano $KIRA_WORKSTATION/setup.sh && chmod 777 $KIRA_WORKSTATION/setup.sh
@@ -439,6 +440,9 @@ cat > $USER_MANAGER_DESKTOP <<< $KIRA_MANAGER_ENTRY
 
 chmod +x $USER_MANAGER_DESKTOP 
 
+end_time="$(date -u +%s)"
+elapsed="$(($end_time-$start_time))"
+echo "INFO: Total of $elapsed seconds elapsed for process"
 echo "------------------------------------------------"
 echo "|      FINISHED: KIRA INFRA SETUP v0.0.2       |"
 echo "------------------------------------------------"

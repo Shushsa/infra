@@ -2,6 +2,7 @@
 
 exec 2>&1
 set -e
+start_time="$(date -u +%s)"
 
 # Local Update Shortcut:
 # (rm -fv $KIRA_WORKSTATION/start.sh) && nano $KIRA_WORKSTATION/start.sh && chmod 777 $KIRA_WORKSTATION/start.sh
@@ -119,6 +120,9 @@ sleep 5
 echo "INFO: Inspecting if validator-1 is running..."
 docker exec -it validator-1 sekaid version || echo "ERROR: sekai not found"
 
+end_time="$(date -u +%s)"
+elapsed="$(($end_time-$start_time))"
+echo "INFO: Total of $elapsed seconds elapsed for process"
 echo "------------------------------------------------"
 echo "|      FINISHED: KIRA INFRA START v0.0.1       |"
 echo "------------------------------------------------"
