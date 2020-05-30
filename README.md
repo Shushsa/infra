@@ -22,12 +22,12 @@ For the purpose of setting up development environment we will
      * Disk: 64 GB (SSD or NVMe)
 3. Boot your machine, and ensure latest updates are applied using `Software Updater`
 
-   ![picture 1](https://i.imgur.com/7SX2g7y.png)
+* ![picture 1](https://i.imgur.com/7SX2g7y.png)
 
-4. Reboot & Open terminal to execute following command that will launch a setup script
+4. Restart your VM & Open terminal to execute following command that will launch a setup script
 
 
-    _NOTE: You will be prompted to input branch names you are working with as well as email address where you will receive notifications from_
+    _NOTE: You will be prompted to input branch names you are working with as well as email address where you will receive notifications_
 
 ```
 sudo -s
@@ -35,9 +35,12 @@ sudo -s
 cd /tmp && wget -O - https://raw.githubusercontent.com/KiraCore/infra/master/workstation/init.sh | bash <(cat) </dev/tty
 ```
 
-5. Allow launching of all newly created desktop shortcuts
+5. Allow launching of KIRA-MANAGER and click on the icon to start it
 
-![picture 1](https://i.imgur.com/UAc87UK.png)  
+  * ![picture 1](https://i.imgur.com/4EKLdEh.png)  
+
+
+
 
 
 
