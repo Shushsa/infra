@@ -15,7 +15,7 @@ VALIDATOR_1_STATUS=$(docker inspect $(docker ps --no-trunc -aqf name=validator-1
 clear
 
 echo -e "\e[33;1m------------------------------------------------"
-echo "|         KIRA NETWORK MANAGER v0.0.1          |"
+echo "|         KIRA NETWORK MANAGER v0.0.2          |"
 echo "|             $(date '+%d/%m/%Y %H:%M:%S')              |"
 echo "|----------------------------------------------|"
 echo "| [0] | Inspect registry container             : $REGISTRY_STATUS"

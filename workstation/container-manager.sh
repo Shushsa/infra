@@ -23,7 +23,7 @@ ID=$(docker inspect --format="{{.Id}}" ${NAME} 2> /dev/null || echo "undefined")
 clear
 
 echo -e "\e[39;1m------------------------------------------------"
-echo "|        KIRA CONTAINER MANAGER v0.0.1         |"
+echo "|        KIRA CONTAINER MANAGER v0.0.2         |"
 echo "|             $(date '+%d/%m/%Y %H:%M:%S')              |"
 echo "|----------------------------------------------|"
 echo "| Container Name: $NAME ($(echo $ID | head -c 8))"
@@ -71,6 +71,7 @@ elif [ "${OPTION,,}" == "l" ] ; then
     docker cp $NAME:/self/logs $CONTAINER_DUPM/logs || echo "WARNING: Failed to dump self logs"
     docker cp $NAME:/root/.sekaid $CONTAINER_DUPM/sekaid || echo "WARNING: Failed to dump .sekaid config"
     docker cp $NAME:/root/.sekaicli $CONTAINER_DUPM/sekaicli || echo "WARNING: Failed to dump .sekaicli config"
+    docker cp $NAME:/etc/systemd/system $CONTAINER_DUPM/systemd || echo "WARNING: Failed to dump systemd services"
     docker inspect $(docker ps --no-trunc -aqf name=$NAME) > $CONTAINER_DUPM/container-inspect.json || echo "WARNING: Failed to inspect container"
     docker inspect $(docker ps --no-trunc -aqf name=$NAME) > $CONTAINER_DUPM/printenv.txt || echo "WARNING: Failed to fetch printenv"
     docker exec -it $NAME printenv > $CONTAINER_DUPM/printenv.txt || echo "WARNING: Failed to fetch printenv"
