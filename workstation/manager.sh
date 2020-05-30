@@ -34,7 +34,7 @@ read  -d'' -s -n1 -t 3 -p "Press [KEY] to select option: " OPTION || OPTION=""
 [ ! -z $"$OPTION" ] && read -d'' -s -n1 -p "Press [ENTER] to confirm [${OPTION^^}] option or any other key to try again" ACCEPT
 [ ! -z $"$ACCEPT" ] && $KIRA_MANAGER/manager.sh
 
-if [ "$OPTION" == "0" ] ; 
+if [ "$OPTION" == "0" ] ; then
     gnome-terminal -- bash -c "$KIRA_MANAGER/container-manager.sh 'registry' ; read -d'' -s -n1 -p 'Press any key to exit...' && exit"
     sleep 3
 elif [ "$OPTION" == "1" ] ; then
