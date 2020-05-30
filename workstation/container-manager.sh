@@ -18,7 +18,7 @@ PAUSED=$(docker inspect $(docker ps --no-trunc -aqf name=$NAME) | jq -r '.[0].St
 HEALTH=$(docker inspect $(docker ps --no-trunc -aqf name=$NAME) | jq -r '.[0].State.Health.Status' || echo "Error")
 RESTARTING=$(docker inspect $(docker ps --no-trunc -aqf name=$NAME) | jq -r '.[0].State.Restarting' || echo "Error")
 STARTED_AT=$(docker inspect $(docker ps --no-trunc -aqf name=$NAME) | jq -r '.[0].State.StartedAt' || echo "Error")
-ID=$(docker inspect --format="{{.Id}}" ${NAME} 2> /dev/null || echo "                              ")
+ID=$(docker inspect --format="{{.Id}}" ${NAME} 2> /dev/null || echo "undefined")
 
 clear
 
@@ -26,15 +26,14 @@ echo -e "\e[36;1m------------------------------------------------"
 echo "|        KIRA CONTAINER MANAGER v0.0.1         |"
 echo "|             $(date '+%d/%m/%Y %H:%M:%S')              |"
 echo "|----------------------------------------------|"
-echo "| Container Name: $NAME"
-echo "| Container Id: $(echo $ID | head -c 14)...$(echo $ID | tail -c 13) |"
+echo "| Container Name: $NAME ($(echo $ID | head -c 8))"
 echo "|----------------------------------------------|"
 echo "| Container Exists: $EXISTS"
 echo "| Container Status: $STATUS"
 echo "| Container Paused: $PAUSED"
 echo "| Container Health: $HEALTH"
 echo "| Container Restarting: $RESTARTING"
-echo "| Container Started At: $STARTED_AT"
+echo "| Container Started At: $(echo $STARTED_AT | head -c 19)"
 echo "|----------------------------------------------|"
 [ "$EXISTS" == "True" ] && 
 echo "| [I] | Try INSPECT container                  |"
@@ -100,7 +99,7 @@ elif [ "${OPTION,,}" == "u" ] ; then
     $KIRA_SCRIPTS/container-unpause.sh $NAME
     sleep 3
 elif [ "${OPTION,,}" == "x" ] ; then
-    $KIRA_MANAGER/manager.sh
+    exit
 fi
 
 $KIRA_MANAGER/container-manager.sh $NAME
