@@ -74,7 +74,7 @@ KIRA_SCRIPTS="${KIRA_INFRA}/common/scripts"
 mkdir -p $KIRA_INFRA
 
 if [ "$SKIP_UPDATE" == "False" ] ; then
-    read -p "Type INFRA reposiotry branch (press [⏎] if '$INFRA_BRANCH'): " NEW_INFRA_BRANCH
+    read -p "Type INFRA reposiotry branch (press ⏎ if '$INFRA_BRANCH'): " NEW_INFRA_BRANCH
     [ ! -z "$NEW_INFRA_BRANCH" ] && INFRA_BRANCH=$NEW_INFRA_BRANCH
 
     echo "INFO: Updating packages..."
@@ -95,10 +95,10 @@ if [ "$SKIP_UPDATE" == "False" ] ; then
     cd /kira
     source $KIRA_WORKSTATION/init.sh "True"
 else
-    read -p "Type SEKAI reposiotry branch (press [⏎] if '$SEKAI_BRANCH'): " NEW_SEKAI_BRANCH
+    read -p "Type SEKAI reposiotry branch (press ⏎ if '$SEKAI_BRANCH'): " NEW_SEKAI_BRANCH
     [ ! -z "$NEW_SEKAI_BRANCH" ] && SEKAI_BRANCH=$NEW_SEKAI_BRANCH
     
-    read  -d'' -s -n1 -p "Press [Y]es/[N]o to receive notifications (press [⏎] if '$NOTIFICATIONS'): " NEW_NOTIFICATIONS
+    read  -d'' -s -n1 -p "Press [Y]es/[N]o to receive notifications (press ⏎ if '$NOTIFICATIONS'): " NEW_NOTIFICATIONS
     if [ $"${NEW_NOTIFICATIONS,,}" == "y" ] ; then
         NOTIFICATIONS="True"
     elif [ $"${NEW_NOTIFICATIONS,,}" == "n" ] ; then
@@ -106,20 +106,20 @@ else
     fi
     
     if [ "$NOTIFICATIONS" == "True" ] ; then
-        read -p "Type desired notification email (press [⏎] if '$EMAIL_NOTIFY'): " NEW_NOTIFY_EMAIL
+        read -p "Type desired notification email (press ⏎ if '$EMAIL_NOTIFY'): " NEW_NOTIFY_EMAIL
         [ ! -z "$NEW_NOTIFY_EMAIL" ] && EMAIL_NOTIFY=$NEW_NOTIFY_EMAIL
         
-        read -p "Type Gmail SMTP login (press [⏎] if '$SMTP_LOGIN'): " NEW_SMTP_LOGIN
+        read -p "Type Gmail SMTP login (press ⏎ if '$SMTP_LOGIN'): " NEW_SMTP_LOGIN
         [ ! -z "$NEW_SMTP_LOGIN" ] && SMTP_LOGIN=$NEW_SMTP_LOGIN
         
-        read -p "Type Gmail SMTP password (press [⏎] if '$SMTP_PASSWORD'): " NEW_SMTP_PASSWORD
+        read -p "Type Gmail SMTP password (press ⏎ if '$SMTP_PASSWORD'): " NEW_SMTP_PASSWORD
         [ ! -z "$NEW_SMTP_PASSWORD" ] && SMTP_PASSWORD=$NEW_SMTP_PASSWORD
     fi
     
     echo "Your current public SSH Key:"
     echo -e "\e[33;1m$SSH_KEY_PUB\e[0m"
     
-    read -p "Input your PRIVATE git SSH key or (press [⏎] if above PUB key): " NEW_SSH_KEY
+    read -p "Input your PRIVATE git SSH key or (press ⏎ if above PUB key): " NEW_SSH_KEY
     if [ ! -z "$NEW_SSH_KEY" ] ; then
         echo $NEW_SSH_KEY > $SSH_KEY_PRIV_PATH
         ssh-keygen -y -f $SSH_KEY_PRIV_PATH > $SSH_KEY_PUB_PATH
@@ -149,7 +149,7 @@ else
     echo "| PUBLIC GIT SSH KEY: $SSH_KEY_PUB_SHORT"
     echo -e "------------------------------------------------\e[0m"
     
-    read  -d'' -s -n1 -p "Press [⏎] to confirm or any other key to exit: " ACCEPT
+    read  -d'' -s -n1 -p "Press ⏎ to confirm or any other key to exit: " ACCEPT
     [ ! -z $"$ACCEPT" ] && exit 1
 fi
 
