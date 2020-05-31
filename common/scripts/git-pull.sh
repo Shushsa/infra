@@ -44,19 +44,21 @@ else
     exit 1
 fi
 
-rm -rf $OUTPUT
-mkdir -p $OUTPUT
-cd $OUTPUT
+# make sure not to delete user files if there are no permissions for user to pull
+TMP_OUTPUT="/tmp/$OUTPUT"
+rm -rf $TMP_OUTPUT
+mkdir -p $TMP_OUTPUT
+cd $TMP_OUTPUT
 
 if [[ "${REPO,,}" == *"git@"*   ]] ; then
     echo "INFO: Detected https repo address"
     #git remote set-url origin $REPO
 
     if [ ! -z "$BRANCH" ] ; then
-        ssh-agent sh -c "ssh-add $SSHCRED ; git clone --branch $BRANCH $REPO $OUTPUT"
-        git clone --branch $BRANCH $REPO $OUTPUT
+        ssh-agent sh -c "ssh-add $SSHCRED ; git clone --branch $BRANCH $REPO $TMP_OUTPUT"
+        git clone --branch $BRANCH $REPO $TMP_OUTPUT
     else
-        ssh-agent sh -c "ssh-add $SSHCRED ; git clone $REPO $OUTPUT"
+        ssh-agent sh -c "ssh-add $SSHCRED ; git clone $REPO $TMP_OUTPUT"
     fi
 
     if [ ! -z "$CHECKOUT" ] ; then
@@ -65,9 +67,9 @@ if [[ "${REPO,,}" == *"git@"*   ]] ; then
 elif [[ "${REPO,,}" == *"https://"*   ]] ; then
     echo "INFO: Detected https repo address"
     if [ ! -z "$BRANCH" ] ; then
-        git clone --branch $BRANCH $REPO $OUTPUT
+        git clone --branch $BRANCH $REPO $TMP_OUTPUT
     else
-        git clone $REPO $OUTPUT
+        git clone $REPO $TMP_OUTPUT
     fi
 
     if [ ! -z "$CHECKOUT" ] ; then
@@ -80,6 +82,10 @@ fi
 
 git describe --tags || echo "No tags were found"
 git describe --all --always
+
+rm -rf $OUTPUT
+mkdir -p $OUTPUT
+/bin/cp -rf "$TMP_OUTPUT/*" $OUTPUT
 
 chmod -R $RWXMOD $OUTPUT
 

@@ -7,6 +7,7 @@ REPO_SSH=$1
 REPO_HTTPS=$2
 BRANCH=$3
 DIRECTORY=$4
+BRANCH_ENVAR=$5
 
 [ -z "$REPO" ] && REPO=$REPO_SSH
 [ -z "$REPO" ] && REPO=$REPO_HTTPS
@@ -31,8 +32,9 @@ while : ; do
     echo "| [C] | COMMIT New Changes                     |"
     echo "| [P] | PUSH New Changes                       |"
     echo "| [R] | Delete Repo and RESTORE from Remote    |"
+    echo "| [B] | Change to Diffrent Remote BRANCH       |"
     echo "|----------------------------------------------|"
-    echo "| [X] | Exit                                   |"
+    echo "| [X] | Exit | [W] | Refresh Window            |"
     echo -e "------------------------------------------------\e[0m"
     
     read  -d'' -s -n1 -t 3 -p "INFO: Press [KEY] to select option: " OPTION || OPTION=""
@@ -93,8 +95,29 @@ while : ; do
         fi
         echo "SUCCESS: Pull suceeded"
         break
+    elif [ "${OPTION,,}" == "b" ] ; then
+        echo "INFO: Listing available branches..."
+        git branch -r || echo "ERROR: Failed to list remote branches"
+        echo -e "\e[36;1mProvide name of existing remote branch to checkout: \e[0m\c" && read NEW_BRANCH
+        if [ -z "$NEW_BRANCH" ] ; then
+            echo "ERROR: Branch was not defined"
+            break
+        fi
+        $KIRA_SCRIPTS/git-pull.sh "$REPO_SSH" "$NEW_BRANCH" "$DIRECTORY" || FAILED="True"
+        if [ "$FAILED" == "True" ] ; then
+            echo "ERROR: Changing branch failed"
+            read -d'' -s -n1 -p 'Press any key to continue...'
+            break
+        fi
+
+        BRANCH=$NEW_BRANCH
+        CDHelper text lineswap --insert="$BRANCH_ENVAR=$BRANCH" --prefix="$BRANCH_ENVAR=" --path=$ETC_PROFILE --append-if-found-not=True --silent=$SILENT_MODE
+        
+        echo "SUCCESS: Changing branch suceeded"
+    elif [ "${OPTION,,}" == "w" ] ; then
+        break
     elif [ "${OPTION,,}" == "x" ] ; then
-        exit
+        exit 0
     fi
 done
 

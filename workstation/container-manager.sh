@@ -53,7 +53,7 @@ while : ; do
     echo "| [U] | UNPAUSE container                      |"
     [ "$EXISTS" == "True" ] && 
     echo "|----------------------------------------------|"
-    echo "| [X] | Exit                                   |"
+    echo "| [X] | Exit | [W] | Refresh Window            |"
     echo -e "------------------------------------------------\e[0m"
     
     read  -d'' -s -n1 -t 3 -p "INFO: Press [KEY] to select option: " OPTION || OPTION=""
@@ -97,6 +97,8 @@ while : ; do
     elif [ "${OPTION,,}" == "u" ] ; then
         echo "INFO: UnPausing container..."
         $KIRA_SCRIPTS/container-unpause.sh $NAME
+        break
+    elif [ "${OPTION,,}" == "w" ] ; then
         break
     elif [ "${OPTION,,}" == "x" ] ; then
         exit

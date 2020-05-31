@@ -28,7 +28,7 @@ while : ; do
     echo "| [A] | Mange INFRA Repo ($INFRA_BRANCH)"
     echo "| [B] | Mange SEKAI Repo ($SEKAI_BRANCH)"
     echo "|----------------------------------------------|"
-    echo "| [X] | EXIT                                   |"
+    echo "| [X] | Exit | [W] | Refresh Window            |"
     echo -e "------------------------------------------------\e[0m"
     
     read  -d'' -s -n1 -t 3 -p "Press [KEY] to select option: " OPTION || OPTION=""
@@ -43,11 +43,11 @@ while : ; do
         break
     elif [ "${OPTION,,}" == "a" ] ; then
         echo "INFO: Starting git manager..."
-        gnome-terminal -- bash -c "$KIRA_MANAGER/git-manager.sh \"$INFRA_REPO_SSH\" \"$INFRA_REPO\" \"$INFRA_BRANCH\" \"$KIRA_INFRA\" ; read -d'' -s -n1 -p 'Press any key to exit...' && exit"
+        gnome-terminal -- bash -c "$KIRA_MANAGER/git-manager.sh \"$INFRA_REPO_SSH\" \"$INFRA_REPO\" \"$INFRA_BRANCH\" \"$KIRA_INFRA\" \"KIRA_INFRA\" ; read -d'' -s -n1 -p 'Press any key to exit...' && exit"
         break
     elif [ "${OPTION,,}" == "b" ] ; then
         echo "INFO: Starting git manager..."
-        gnome-terminal -- bash -c "$KIRA_MANAGER/git-manager.sh \"$SEKAI_REPO_SSH\" \"$SEKAI_REPO\" \"$SEKAI_BRANCH\" \"$KIRA_SEKAI\" ; read -d'' -s -n1 -p 'Press any key to exit...' && exit"
+        gnome-terminal -- bash -c "$KIRA_MANAGER/git-manager.sh \"$SEKAI_REPO_SSH\" \"$SEKAI_REPO\" \"$SEKAI_BRANCH\" \"$KIRA_SEKAI\" \"KIRA_SEKAI\" ; read -d'' -s -n1 -p 'Press any key to exit...' && exit"
         break
     elif [ "${OPTION,,}" == "i" ] ; then
         echo "INFO: Wiping and re-initializing..."
@@ -63,6 +63,8 @@ while : ; do
         echo "INFO: Wiping and removing infra..."
         echo -e "\e[33;1mWARNING: You have to wait for new process to finish\e[0m"
         gnome-terminal --disable-factory -- bash -c "$KIRA_MANAGER/delete.sh ; read -d'' -s -n1 -p 'Press any key to exit...' && exit"
+        break
+    elif [ "${OPTION,,}" == "w" ] ; then
         break
     elif [ "${OPTION,,}" == "x" ] ; then
         exit 0
