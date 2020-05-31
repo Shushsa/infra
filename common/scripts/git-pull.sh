@@ -45,7 +45,7 @@ else
 fi
 
 # make sure not to delete user files if there are no permissions for user to pull
-TMP_OUTPUT="/tmp/$OUTPUT"
+TMP_OUTPUT="/tmp$OUTPUT"
 rm -rf $TMP_OUTPUT
 mkdir -p $TMP_OUTPUT
 cd $TMP_OUTPUT
