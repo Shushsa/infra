@@ -33,8 +33,9 @@ echo "|  R/W/X MOD: $RWXMOD"
 echo "|   SSH CRED: $SSHCRED"
 echo "------------------------------------------------"
 
+TMP_OUTPUT="/tmp$OUTPUT"
 if [[ (! -z "$REPO") && ( (! -z "$BRANCH") || (! -z "$CHECKOUT") ) && (! -z "$OUTPUT") ]] ; then
-    echo "INFO: Valid repo details were specified, removing $OUTPUT and starting git pull..."
+    echo "INFO: Valid repo details were specified, removing $TMP_OUTPUT, $OUTPUT and starting git pull..."
 else
     [ -z "$REPO" ] && REPO=undefined
     [ -z "$BRANCH" ] && BRANCH=undefined
@@ -45,10 +46,8 @@ else
 fi
 
 # make sure not to delete user files if there are no permissions for user to pull
-TMP_OUTPUT="/tmp$OUTPUT"
 rm -rf $TMP_OUTPUT
 mkdir -p $TMP_OUTPUT
-cd $TMP_OUTPUT
 
 if [[ "${REPO,,}" == *"git@"*   ]] ; then
     echo "INFO: Detected https repo address"
@@ -60,6 +59,7 @@ if [[ "${REPO,,}" == *"git@"*   ]] ; then
         ssh-agent sh -c "ssh-add $SSHCRED ; git clone $REPO $TMP_OUTPUT"
     fi
 
+    cd $TMP_OUTPUT
     git remote set-url origin $REPO
 
     if [ ! -z "$CHECKOUT" ] ; then
@@ -73,6 +73,7 @@ elif [[ "${REPO,,}" == *"https://"*   ]] ; then
         git clone $REPO $TMP_OUTPUT
     fi
 
+    cd $TMP_OUTPUT
     if [ ! -z "$CHECKOUT" ] ; then
         git checkout $CHECKOUT
     fi
@@ -80,6 +81,8 @@ else
     echo "ERROR: Invalid repo address, should be either https (https://) or ssh (git@)"
     exit 1
 fi
+
+ls -as
 
 git describe --tags || echo "No tags were found"
 git describe --all --always
