@@ -28,7 +28,8 @@ while : ; do
     echo "|   Location: $DIRECTORY"
     echo "|----------------------------------------------|"
     echo "| [V] | VIEW Repo in Code Editor               |"
-    echo "| [C] | COMMIT and Push Changes                |"
+    echo "| [C] | COMMIT New Changes                     |"
+    echo "| [P] | PUSH New Changes                       |"
     echo "| [R] | Delete Repo and RESTORE from Remote    |"
     echo "|----------------------------------------------|"
     echo "| [X] | Exit                                   |"
@@ -65,25 +66,31 @@ while : ; do
     
         if [ "$FAILED" == "True" ] ; then
             echo "ERROR: Commit failed"
-            sleep 3
+            read -d'' -s -n1 -p 'Press any key to continue...'
             break
         fi
-        
+        echo "SUCCESS: Commit suceeded"
+        sleep 3
+    elif [ "${OPTION,,}" == "p" ] ; then
         echo "INFO: Pushing changes..."
         git remote set-url origin $REPO_SSH || FAILED="True"
-        [ "$FAILED" == "False" ] && ssh-agent sh -c "ssh-add $SSH_KEY_PRIV_PATH ; git push origin $BRANCH" ||  FAILED="True"
+        [ "$FAILED" == "False" ] && ssh-agent sh -c "ssh-add $SSH_KEY_PRIV_PATH ; git push origin $BRANCH" || FAILED="True"
 
         if [ "$FAILED" == "True" ] ; then
             echo "ERROR: Push failed"
-            sleep 3
+            read -d'' -s -n1 -p 'Press any key to continue...'
             break
         fi
 
         echo "SUCCESS: Push suceeded"
         sleep 3
     elif [ "${OPTION,,}" == "r" ] ; then
-        $KIRA_SCRIPTS/git-pull.sh "$REPO_SSH" "$BRANCH" "$DIRECTORY"
-        chmod -R 777 $DIRECTORY
+        $KIRA_SCRIPTS/git-pull.sh "$REPO_SSH" "$BRANCH" "$DIRECTORY" || FAILED="True"
+        if [ "$FAILED" == "True" ] ; then
+            echo "ERROR: Pull failed"
+            read -d'' -s -n1 -p 'Press any key to continue...'
+            break
+        fi
         break
     elif [ "${OPTION,,}" == "x" ] ; then
         exit
