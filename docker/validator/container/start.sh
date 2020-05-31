@@ -21,13 +21,13 @@ sleep 5
 
 while [ "${MAINTENANCE_MODE}" == "true"  ] || [ -f "$MAINTENANCE_FILE" ] ; do echo "[$(date '+%d/%m/%Y %H:%M:%S')] WARNING: Maitenance..." ; sleep 60 ; done
 
-if [ -f "$INIT_END_FILE" ]; then
+if [ -f "$INIT_END_FILE" ] ; then
    echo "[$(date '+%d/%m/%Y %H:%M:%S')] SUCCESS: on_success() => START" && touch $SUCCESS_START_FILE
    $ON_SUCCESS_SCRIPT $> $SELF_LOGS/success_script_output.txt
    echo "[$(date '+%d/%m/%Y %H:%M:%S')] SUCCESS: on_success() => END" && touch $SUCCESS_END_FILE
    while :; do echo "[$(date '+%d/%m/%Y %H:%M:%S')] SUCCESS: Running..." ; sleep 3600 ; done
    exit 0
-elif [ -f "$INIT_START_FILE" ]; then
+elif [ -f "$INIT_START_FILE" ] ; then
    echo "[$(date '+%d/%m/%Y %H:%M:%S')] ERROR: on_failure() => START" && touch $FAILURE_START_FILE
    $ON_FAILURE_SCRIPT $> $SELF_LOGS/failure_script_output.txt
    echo "[$(date '+%d/%m/%Y %H:%M:%S')] ERROR: on_failure() => STOP" && touch $FAILURE_END_FILE

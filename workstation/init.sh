@@ -20,7 +20,7 @@ DEBUG_MODE=$3
 [ -z "$DEBUG_MODE" ] && DEBUG_MODE="False"
 if [ "$DEBUG_MODE" == "True" ] ; then set -x ; else set +x ; fi
 
-if [ "$SKIP_UPDATE" == "False" ] ; 
+if [ "$SKIP_UPDATE" == "False" ] ; then
     echo -e "\e[36;1mPress [Y]es/[N]o is you want to run in debug mode, [ENTER] if '$DEBUG_MODE': \e[0m\c" && read  -d'' -s -n1 NEW_DEBUG_MODE
     if [ "${NEW_DEBUG_MODE,,}" == "y" ] ; then
         DEBUG_MODE="True"

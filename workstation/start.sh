@@ -43,14 +43,14 @@ source $ETC_PROFILE &> /dev/null
 cd $KIRA_WORKSTATION
 
 BASE_IMAGE_EXISTS=$(./image-updated.sh "$KIRA_DOCKER/base-image" "base-image" || echo "error")
-if [ "$BASE_IMAGE_EXISTS" == "False" ]; then
+if [ "$BASE_IMAGE_EXISTS" == "False" ] ; then
     $KIRA_SCRIPTS/container-delete.sh "validator-1"
     ./delete-image.sh "$KIRA_DOCKER/tools-image" "tools-image"
     ./delete-image.sh "$KIRA_DOCKER/validator" "validator"
 
     echo "INFO: Updating base image..."
     ./update-image.sh "$KIRA_DOCKER/base-image" "base-image"
-elif [ "$BASE_IMAGE_EXISTS" == "True" ]; then
+elif [ "$BASE_IMAGE_EXISTS" == "True" ] ; then
     echo "INFO: base-image is up to date"
 else
     echo "ERROR: Failed to test if base image exists"
@@ -58,13 +58,13 @@ else
 fi
 
 TOOLS_IMAGE_EXISTS=$(./image-updated.sh "$KIRA_DOCKER/tools-image" "tools-image" || echo "error")
-if [ "$TOOLS_IMAGE_EXISTS" == "False" ]; then
+if [ "$TOOLS_IMAGE_EXISTS" == "False" ] ; then
     $KIRA_SCRIPTS/container-delete.sh "validator-1"
     ./delete-image.sh "$KIRA_DOCKER/validator" "validator"
 
     echo "INFO: Updating tools image..."
     ./update-image.sh "$KIRA_DOCKER/tools-image" "tools-image"
-elif [ "$TOOLS_IMAGE_EXISTS" == "True" ]; then
+elif [ "$TOOLS_IMAGE_EXISTS" == "True" ] ; then
     echo "INFO: tools-image is up to date"
 else
     echo "ERROR: Failed to test if tools image exists"
@@ -72,11 +72,11 @@ else
 fi
 
 VALIDATOR_IMAGE_EXISTS=$(./image-updated.sh "$KIRA_DOCKER/validator" "validator" "latest" "$SEKAI_INTEGRITY" || echo "error")
-if [ "$VALIDATOR_IMAGE_EXISTS" == "False" ]; then
+if [ "$VALIDATOR_IMAGE_EXISTS" == "False" ] ; then
     echo "All imags were updated, starting validator image..."
     $KIRA_SCRIPTS/container-delete.sh "validator-1"
     ./update-image.sh "$KIRA_DOCKER/validator" "validator" "latest" "$SEKAI_INTEGRITY" "REPO=$SEKAI_REPO" "BRANCH=$SEKAI_BRANCH"
-elif [ "$VALIDATOR_IMAGE_EXISTS" == "True" ]; then
+elif [ "$VALIDATOR_IMAGE_EXISTS" == "True" ] ; then
     echo "INFO: validator-image is up to date"
 else
     echo "ERROR: Failed to test if validator image exists"
