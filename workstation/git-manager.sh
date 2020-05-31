@@ -44,78 +44,66 @@ while : ; do
     [ ! -z "$OPTION" ] && echo "" && read -d'' -s -n1 -p "Press [ENTER] to confirm [${OPTION^^}] option or any other key to try again: " ACCEPT
     [ ! -z "$ACCEPT" ] && break
     
-    
     if [ "${OPTION,,}" == "v" ] ; then
         echo "INFO: Starting code editor..."
         code --user-data-dir /usr/code $DIRECTORY
-        sleep 3
         break
     elif [ "${OPTION,,}" == "c" ] ; then
         echo -e "\e[36;1mType desired commit message: \e[0m\c" && read COMMIT
         if [ -z "$COMMIT" ] ; then
             echo "WARINIG: Commit message was not set"
             FORCE="" && while [ "${FORCE,,}" != "y" ] && [ "${FORCE,,}" != "n" ] ; do echo -e "\n\e[36;1mPress [Y]es to commit empty message or [N]o to cancel: \e[0m\c" && read  -d'' -s -n1 FORCE ; done
-            if [ "${FORCE,,}" == "y" ] ; then
-                COMMIT="Forced commit or minor changes"
-            else
-                echo "WARINIG: Commit was cancelled"
-                sleep 3
-                break
-            fi
+            [ "${FORCE,,}" == "y" ] && COMMIT="Forced commit or minor changes"
+            [ "${FORCE,,}" == "n" ] && "WARINIG: Commit was cancelled" && break
         fi
         echo "INFO: Commiting changes..."
         sleep 1
         FAILED="False"
         git commit -am "[$(date '+%d/%m/%Y %H:%M:%S')] $COMMIT" || FAILED="True"
-    
-        if [ "$FAILED" == "True" ] ; then
-            echo "ERROR: Commit failed" && read -d'' -s -n1 -p 'Press any key to continue...'
-            break
-        fi
-        echo "SUCCESS: Commit suceeded"
-        sleep 3
+        [ "$FAILED" == "True" ] && echo "ERROR: Commit failed" && break
+        
+        echo "SUCCESS: Commit suceeded" && break
     elif [ "${OPTION,,}" == "p" ] ; then
         echo "INFO: Pushing changes..."
         git remote set-url origin $REPO_SSH || FAILED="True"
         [ "$FAILED" == "False" ] && ssh-agent sh -c "ssh-add $SSH_KEY_PRIV_PATH ; git push origin $BRANCH" || FAILED="True"
-
-        if [ "$FAILED" == "True" ] ; then
-            echo "ERROR: Push failed" && read -d'' -s -n1 -p 'Press any key to continue...'
-            break
-        fi
-
-        echo "SUCCESS: Push suceeded"
-        sleep 3
+        [ "$FAILED" == "True" ] && echo "ERROR: Push failed" && break
+        
+        echo "SUCCESS: Push suceeded" && break
     elif [ "${OPTION,,}" == "r" ] ; then
         $KIRA_SCRIPTS/git-pull.sh "$REPO_SSH" "$BRANCH" "$DIRECTORY" || FAILED="True"
-        if [ "$FAILED" == "True" ] ; then
-            echo "ERROR: Pull failed" && read -d'' -s -n1 -p 'Press any key to continue...'
-            break
-        fi
-        echo "SUCCESS: Pull suceeded"
-        break
+        [ "$FAILED" == "True" ] && echo "ERROR: Pull failed" && break
+      
+        echo "SUCCESS: Pull suceeded" && break
     elif [ "${OPTION,,}" == "b" ] ; then
         echo "INFO: Listing available branches..."
         git branch -r || echo "ERROR: Failed to list remote branches"
         echo -e "\e[36;1mProvide name of existing remote branch to checkout: \e[0m\c" && read NEW_BRANCH
-        if [ -z "$NEW_BRANCH" ] ; then
-            echo "ERROR: Branch was not defined" && read -d'' -s -n1 -p 'Press any key to continue...'
-            break
-        elif [ "$NEW_BRANCH" == "$BRANCH" ] ; then
-            echo "ERROR: Can't switch to branch with the same name" && read -d'' -s -n1 -p 'Press any key to continue...'
-            break
-        fi
+        [ -z "$NEW_BRANCH" ] && echo "ERROR: Branch was not defined" && break
+        [ "$NEW_BRANCH" == "$BRANCH" ] && echo "ERROR: Can't switch to branch with the same name" && break
+        
         
         $KIRA_SCRIPTS/git-pull.sh "$REPO_SSH" "$NEW_BRANCH" "$DIRECTORY" || FAILED="True"
-        if [ "$FAILED" == "True" ] ; then
-            echo "ERROR: Changing branch failed" && read -d'' -s -n1 -p 'Press any key to continue...'
-            break
-        fi
+        [ "$FAILED" == "True" ] && echo "ERROR: Changing branch failed" && break
 
         BRANCH=$NEW_BRANCH
         CDHelper text lineswap --insert="$BRANCH_ENVAR=$BRANCH" --prefix="$BRANCH_ENVAR=" --path=$ETC_PROFILE --append-if-found-not=True --silent=$SILENT_MODE
         
         echo "SUCCESS: Changing branch suceeded"
+    elif [ "${OPTION,,}" == "n" ] ; then
+        echo "INFO: Listing available branches..."
+        git branch -r || echo "ERROR: Failed to list remote branches"
+        echo -e "\e[36;1mProvide name of new branch to create: \e[0m\c" && read NEW_BRANCH
+        git remote set-url origin $REPO_SSH || FAILED="True"
+        [ -z "$NEW_BRANCH" ] && echo "ERROR: Branch was not defined" && break
+        [ "$NEW_BRANCH" == "$BRANCH" ] && echo "ERROR: Can't create a new branch with the same name as current branch" && break
+
+        git remote set-url origin $REPO_SSH || FAILED="True"
+        [ "$FAILED" == "False" ] && ssh-agent sh -c "ssh-add $SSH_KEY_PRIV_PATH ; git checkout -b $NEW_BRANCH $BRANCH" || FAILED="True"
+        [ "$FAILED" == "True" ] && echo "ERROR: Failed to create new branch" && break
+      
+        
+        echo "SUCCESS: New branch was created" && break
     elif [ "${OPTION,,}" == "w" ] ; then
         break
     elif [ "${OPTION,,}" == "x" ] ; then
@@ -123,6 +111,7 @@ while : ; do
     fi
 done
 
+read -d'' -s -n1 -p 'Press any key to continue...'
 sleep 1
 source $KIRA_MANAGER/git-manager.sh "$REPO_SSH" "$REPO_HTTPS" "$BRANCH" "$DIRECTORY"
 
