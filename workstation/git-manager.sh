@@ -70,7 +70,7 @@ while : ; do
         fi
         
         echo "INFO: Pushing changes..."
-        git remote set-url origin $REPO_SSH ||  FAILED="True"
+        git remote set-url origin $REPO_SSH || FAILED="True"
         [ "$FAILED" == "False" ] && ssh-agent sh -c "ssh-add $SSH_KEY_PRIV_PATH ; git push origin $BRANCH" ||  FAILED="True"
 
         if [ "$FAILED" == "True" ] ; then
@@ -82,14 +82,12 @@ while : ; do
         echo "SUCCESS: Push suceeded"
         sleep 3
     elif [ "${OPTION,,}" == "r" ] ; then
-        $KIRA_SCRIPTS/git-pull.sh "$REPO_HTTPS" "$BRANCH" "$DIRECTORY"
+        $KIRA_SCRIPTS/git-pull.sh "$REPO_SSH" "$BRANCH" "$DIRECTORY"
         chmod -R 777 $DIRECTORY
         break
     elif [ "${OPTION,,}" == "x" ] ; then
         exit
     fi
-
-
 done
 
 sleep 1
