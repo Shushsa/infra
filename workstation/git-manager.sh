@@ -9,8 +9,6 @@ BRANCH=$3
 DIRECTORY=$4
 BRANCH_ENVAR=$5
 
-[ -z "$REPO" ] && REPO=$REPO_SSH
-[ -z "$REPO" ] && REPO=$REPO_HTTPS
 [ -z "$BRANCH_ENVAR" ] && echo "Git manager failure, BRANCH_ENVAR property was not defined" && exit 1
 
 ETC_PROFILE="/etc/profile"
@@ -27,9 +25,10 @@ while : ; do
     echo "|           KIRA GIT MANAGER v0.0.1            |"
     echo "|             $(date '+%d/%m/%Y %H:%M:%S')              |"
     echo "|----------------------------------------------|"
-    echo "| Repository: $REPO"
-    echo "|     Branch: $BRANCH"
-    echo "|   Location: $DIRECTORY"
+    echo "|   SSH Address: $REPO_SSH"
+    echo "| HTTPS Address: $REPO_HTTPS"
+    echo "|        Branch: $BRANCH"
+    echo "|      Location: $DIRECTORY"
     echo "|----------------------------------------------|"
     echo "| [V] | VIEW Repo in Code Editor               |"
     echo "| [C] | COMMIT New Changes                     |"
@@ -44,10 +43,14 @@ while : ; do
     read  -d'' -s -n1 -t 5 -p "INFO: Press [KEY] to select option: " OPTION || OPTION=""
     [ ! -z "$OPTION" ] && echo "" && read -d'' -s -n1 -p "Press [ENTER] to confirm [${OPTION^^}] option or any other key to try again: " ACCEPT
     [ ! -z "$ACCEPT" ] && break
+    FAILED="False"
     
     if [ "${OPTION,,}" == "v" ] ; then
         echo "INFO: Starting code editor..."
-        code --user-data-dir /usr/code $DIRECTORY
+        USER_DATA_DIR="/usr/code$DIRECTORY"
+        rm -rf $USER_DATA_DIR
+        mkdir -p $USER_DATA_DIR
+        code --user-data-dir $USER_DATA_DIR $DIRECTORY
         break
     elif [ "${OPTION,,}" == "c" ] ; then
         echo -e "\e[36;1mType desired commit message: \e[0m\c" && read COMMIT
@@ -58,11 +61,8 @@ while : ; do
             [ "${FORCE,,}" == "n" ] && "WARINIG: Commit was cancelled" && break
         fi
         echo "INFO: Commiting changes..."
-        sleep 1
-        FAILED="False"
         git commit -am "[$(date '+%d/%m/%Y %H:%M:%S')] $COMMIT" || FAILED="True"
         [ "$FAILED" == "True" ] && echo "ERROR: Commit failed" && break
-        
         echo "SUCCESS: Commit suceeded" && break
     elif [ "${OPTION,,}" == "p" ] ; then
         echo "INFO: Pushing changes..."
@@ -93,15 +93,23 @@ while : ; do
     elif [ "${OPTION,,}" == "n" ] ; then
         echo "INFO: Listing available branches..."
         git branch -r || echo "ERROR: Failed to list remote branches"
-        echo -e "\e[36;1mProvide name of new branch to create: \e[0m\c" && read NEW_BRANCH
         git remote set-url origin $REPO_SSH || FAILED="True"
+        [ -z "$FAILED" ] && echo "ERROR: Failed to set remote url for origin" && break
+
+        echo -e "\e[36;1mProvide name of new branch to create: \e[0m\c" && read NEW_BRANCH
         [ -z "$NEW_BRANCH" ] && echo "ERROR: Branch was not defined" && break
         [ "$NEW_BRANCH" == "$BRANCH" ] && echo "ERROR: Can't create a new branch with the same name as current branch" && break
 
         git remote set-url origin $REPO_SSH || FAILED="True"
         [ "$FAILED" == "False" ] && ssh-agent sh -c "ssh-add $SSH_KEY_PRIV_PATH ; git checkout -b $NEW_BRANCH $BRANCH" || FAILED="True"
-        [ "$FAILED" == "True" ] && echo "ERROR: Failed to create new branch" && break
+        [ "$FAILED" == "True" ] && echo "ERROR: Failed to create new branch '$NEW_BRANCH' from '$BRANCH'" && break
+        
+        ssh-agent sh -c "ssh-add $SSH_KEY_PRIV_PATH ; git push origin $NEW_BRANCH" || FAILED="True"
+        [ "$FAILED" == "True" ] && echo "ERROR: Failed to push-create new branch" && break
 
+        BRANCH=$NEW_BRANCH
+        CDHelper text lineswap --insert="$BRANCH_ENVAR=$BRANCH" --prefix="$BRANCH_ENVAR=" --path=$ETC_PROFILE --silent=$SILENT_MODE
+        
         echo "SUCCESS: New branch was created" && break
     elif [ "${OPTION,,}" == "w" ] ; then
         break

@@ -17,7 +17,7 @@ For the purpose of setting up development environment we will
    
 2. Download and Install [Ubuntu 20.04 LTS](https://releases.ubuntu.com/20.04/) with VMWare
    * Recommended VM Setup
-     * CPU: 2 virtualized cores
+     * CPU: 4 virtualized cores
      * RAM: 8 GB
      * Disk: 64 GB (SSD or NVMe)
 3. Boot your machine, and ensure latest updates are applied using `Software Updater`
@@ -51,6 +51,16 @@ cd /tmp && rm -f ./init.sh && wget https://raw.githubusercontent.com/KiraCore/in
    
    > _NOTE: If you want to stay 100% safe, you should create a new github account, and request access to `sekai` and all other repositories you want to interact with_
 
+# Issues
 
+Problems or issues that might occur during testing
+
+
+> Problem: Visual Studio code might not be oppening folder due to memory corruption
+```
+# Solution: (remove working directory)
+
+rm -rfv /usr/code && mkdir -p /usr/code
+```
 
  
