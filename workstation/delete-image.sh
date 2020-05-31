@@ -2,7 +2,6 @@
 
 exec 2>&1
 set -e
-set -x
 
 # Local Update Shortcut:
 # (rm -fv $KIRA_WORKSTATION/delete-image.sh) && nano $KIRA_WORKSTATION/delete-image.sh && chmod 777 $KIRA_WORKSTATION/delete-image.sh
@@ -15,6 +14,8 @@ IMAGE_DIR=$1
 IMAGE_NAME=$2
 IMAGE_TAG=$3
 
+[ "$DEBUG_MODE" == "True" ] && set -x
+[ "$DEBUG_MODE" == "False" ] && set +x
 [ -z "$IMAGE_TAG" ] && IMAGE_TAG="latest"
 
 KIRA_SETUP_FILE="$KIRA_SETUP/$IMAGE_NAME-$IMAGE_TAG"
