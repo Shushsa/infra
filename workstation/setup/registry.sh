@@ -5,11 +5,8 @@ exec 2>&1
 set -e
 
 ETC_PROFILE="/etc/profile"
-
 source $ETC_PROFILE &> /dev/null
-
-[ "$DEBUG_MODE" == "True" ] && set -x
-[ "$DEBUG_MODE" == "False" ] && set +x
+if [ "$DEBUG_MODE" == "True" ] ; then set -x ; else set +x ; fi
 
 # ensure docker registry exists
 if [[ $(${KIRA_SCRIPTS}/container-exists.sh "registry") != "True" ]] ; then

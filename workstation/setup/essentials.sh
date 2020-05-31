@@ -4,20 +4,17 @@
 exec 2>&1
 set -e
 
+ETC_PROFILE="/etc/profile"
+source $ETC_PROFILE &> /dev/null
+if [ "$DEBUG_MODE" == "True" ] ; then set -x ; else set +x ; fi
+
 DEBUG_MODE=$1
 
-if [ -z "$DEBUG_MODE" ] && DEBUG_MODE="False"
-
-ETC_PROFILE="/etc/profile"
-
-source $ETC_PROFILE &> /dev/null
-
-[ "$DEBUG_MODE" == "True" ] && set -x
-[ "$DEBUG_MODE" == "False" ] && set +
-
-if [ $"DEBUG_MODE" == "True" ] ; then
+if [ "$DEBUG_MODE" == "True" ] ; then
+    set -x 
     SILENT_MODE="False"
 else
+    set +x
     DEBUG_MODE="False"
     SILENT_MODE="True"
 fi

@@ -9,6 +9,7 @@ ETC_PROFILE="/etc/profile"
 
 while : ; do
     source $ETC_PROFILE &> /dev/null
+    if [ "$DEBUG_MODE" == "True" ] ; then set -x ; else set +x ; fi
 
     CONTAINER_DUPM="/home/$KIRA_USER/Desktop/${NAME^^}-DUMP"
     EXISTS=$($KIRA_SCRIPTS/container-exists.sh "$NAME" || echo "Error")
@@ -56,9 +57,8 @@ while : ; do
     echo -e "------------------------------------------------\e[0m"
     
     read  -d'' -s -n1 -t 3 -p "INFO: Press [KEY] to select option: " OPTION || OPTION=""
-    [ ! -z $"$OPTION" ] && echo ""
-    [ ! -z $"$OPTION" ] && read -d'' -s -n1 -p "Press [ENTER] to confirm [${OPTION^^}] option or any other key to try again" ACCEPT
-    [ ! -z $"$ACCEPT" ] && break
+    [ ! -z "$OPTION" ] && echo "" && read -d'' -s -n1 -p "Press [ENTER] to confirm [${OPTION^^}] option or any other key to try again: " ACCEPT
+    [ ! -z "$ACCEPT" ] && break
     
     if [ "${OPTION,,}" == "i" ] ; then
         gnome-terminal -- docker exec -it $(docker ps -aqf "name=^${NAME}$") bash

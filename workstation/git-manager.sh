@@ -16,6 +16,7 @@ ETC_PROFILE="/etc/profile"
 
 while : ; do
     source $ETC_PROFILE &> /dev/null
+    if [ "$DEBUG_MODE" == "True" ] ; then set -x ; else set +x ; fi
     
     clear
     
@@ -35,9 +36,8 @@ while : ; do
     echo -e "------------------------------------------------\e[0m"
     
     read  -d'' -s -n1 -t 3 -p "INFO: Press [KEY] to select option: " OPTION || OPTION=""
-    [ ! -z $"$OPTION" ] && echo ""
-    [ ! -z $"$OPTION" ] && read -d'' -s -n1 -p "Press [ENTER] to confirm [${OPTION^^}] option or any other key to try again" ACCEPT
-    [ ! -z $"$ACCEPT" ] && break
+    [ ! -z "$OPTION" ] && echo "" && read -d'' -s -n1 -p "Press [ENTER] to confirm [${OPTION^^}] option or any other key to try again: " ACCEPT
+    [ ! -z "$ACCEPT" ] && break
     
     if [ "${OPTION,,}" == "v" ] ; then
         echo "INFO: Starting code editor..."
@@ -45,10 +45,10 @@ while : ; do
         sleep 1
     elif [ "${OPTION,,}" == "c" ] ; then
         echo -e "\e[36;1mType desired commit message: \e[0m\c" && read COMMIT
-        if [ -z $"$COMMIT" ] ; then
+        if [ -z "$COMMIT" ] ; then
             echo "WARINIG: Commit message was not set"
             FORCE="" && while [ "${FORCE,,}" != "y" ] && [ "${FORCE,,}" != "n" ] ; do echo -e "\n\e[36;1mPress [Y]es to commit empty message or [N]o to cancel: \e[0m\c" && read  -d'' -s -n1 FORCE ; done
-            if [ $"${FORCE,,}" == "y" ] ; then
+            if [ "${FORCE,,}" == "y" ] ; then
                 COMMIT="Forced commit or minor changes"
             else
                 echo "WARINIG: Commit was cancelled"
@@ -62,7 +62,7 @@ while : ; do
         FAILED="False"
         git commit -am "[$(date '+%d/%m/%Y %H:%M:%S')] $COMMIT" || FAILED="True"
     
-        if [ $"FAILED" == "True" ] ; then
+        if [ "$FAILED" == "True" ] ; then
             echo "ERROR: Commit failed"
             sleep 3
             continue
@@ -72,7 +72,7 @@ while : ; do
         git remote set-url origin $REPO_SSH ||  FAILED="True"
         [ "$FAILED" == "False" ] && ssh-agent sh -c "ssh-add $SSH_KEY_PRIV_PATH ; git push origin $BRANCH" ||  FAILED="True"
 
-        if [ $"FAILED" == "True" ] ; then
+        if [ "$FAILED" == "True" ] ; then
             echo "ERROR: Push failed"
             sleep 3
             continue

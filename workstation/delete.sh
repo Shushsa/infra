@@ -3,15 +3,12 @@
 exec 2>&1
 set -e
 
-SKIP_UPDATE=$1
-
-[ -z "$SKIP_UPDATE" ] && SKIP_UPDATE="False"
-
 ETC_PROFILE="/etc/profile"
-
 source $ETC_PROFILE &> /dev/null
-[ "$DEBUG_MODE" == "True" ] && set -x
-[ "$DEBUG_MODE" == "False" ] && set +x
+if [ "$DEBUG_MODE" == "True" ] ; then set -x ; else set +x ; fi
+
+SKIP_UPDATE=$1
+[ -z "$SKIP_UPDATE" ] && SKIP_UPDATE="False"
 
 echo "------------------------------------------------"
 echo "|      STARTED: KIRA INFRA DELETE v0.0.1       |"

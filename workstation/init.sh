@@ -7,32 +7,29 @@ set -e
 # Local Update Shortcut:
 # (rm -fv /tmp/init.sh) && nano /tmp/init.sh && chmod 777 /tmp/init.sh
 
+ETC_PROFILE="/etc/profile"
+source $ETC_PROFILE &> /dev/null
+if [ "$DEBUG_MODE" == "True" ] ; then set -x ; else set +x ; fi
+
 SKIP_UPDATE=$1
 START_TIME=$2
+DEBUG_MODE=$3
 
 [ -z "$START_TIME" ] && START_TIME="$(date -u +%s)"
 [ -z "$SKIP_UPDATE" ] && SKIP_UPDATE="False"
-
-ETC_PROFILE="/etc/profile"
-
-source $ETC_PROFILE &> /dev/null
-
 [ -z "$DEBUG_MODE" ] && DEBUG_MODE="False"
+if [ "$DEBUG_MODE" == "True" ] ; then set -x ; else set +x ; fi
 
-[ "$DEBUG_MODE" == "True" ] && set -x
-[ "$DEBUG_MODE" == "False" ] && set +x
-
-if [ "$SKIP_UPDATE" == "False" ] ; then
-    read  -d'' -s -n1 -p "Press [Y]es/[N]o is you want to run in debug mode, [ENTER] if '$DEBUG_MODE': " NEW_DEBUG_MODE
-    if [ $"${NEW_DEBUG_MODE,,}" == "y" ] ; then
+if [ "$SKIP_UPDATE" == "False" ] ; 
+    echo -e "\e[36;1mPress [Y]es/[N]o is you want to run in debug mode, [ENTER] if '$DEBUG_MODE': \e[0m\c" && read  -d'' -s -n1 NEW_DEBUG_MODE
+    if [ "${NEW_DEBUG_MODE,,}" == "y" ] ; then
         DEBUG_MODE="True"
-    elif [ $"${NEW_DEBUG_MODE,,}" == "n" ]  ; then
+    elif [ "${NEW_DEBUG_MODE,,}" == "n" ]  ; then
         DEBUG_MODE="False"
     fi
 fi
 
-[ "$DEBUG_MODE" == "True" ] && set -x
-[ "$DEBUG_MODE" == "False" ] && set +x
+if [ "$DEBUG_MODE" == "True" ] ; then set -x ; else set +x ; fi
 
 [ -z "$INFRA_BRANCH" ] && INFRA_BRANCH="master"
 [ -z "$SEKAI_BRANCH" ] && SEKAI_BRANCH="master"
@@ -85,9 +82,9 @@ else
     [ ! -z "$NEW_SEKAI_BRANCH" ] && SEKAI_BRANCH=$NEW_SEKAI_BRANCH
     
     echo -e "\e[36;1mPress [Y]es/[N]o to receive notifications, [ENTER] if '$NOTIFICATIONS': \e[0m\c" && read  -d'' -s -n1 NEW_NOTIFICATIONS
-    if [ $"${NEW_NOTIFICATIONS,,}" == "y" ] ; then
+    if [ "${NEW_NOTIFICATIONS,,}" == "y" ] ; then
         NOTIFICATIONS="True"
-    elif [ $"${NEW_NOTIFICATIONS,,}" == "n" ] ; then
+    elif [ "${NEW_NOTIFICATIONS,,}" == "n" ] ; then
         NOTIFICATIONS="False"
     fi
     
@@ -122,7 +119,7 @@ else
     fi
 
     echo -e "\e[36;1mPress [Y]es/[N]o to display your private key: \e[0m\c" && read  -d'' -s -n1 SHOW_PRIV_KEY
-    if [ $"${NEW_NOTIFICATIONS,,}" == "y" ] ; then
+    if [ "${NEW_NOTIFICATIONS,,}" == "y" ] ; then
         echo "INFO: Your private SSH Key: (select, copy and save it for future recovery)"
         echo -e "\e[32;1m$(cat $SSH_KEY_PRIV_PATH)\e[0m"
     fi
@@ -144,7 +141,7 @@ else
     echo -e "------------------------------------------------\e[0m"
     
     echo -e "\e[36;1mPress [ENTER] to confirm or any other key to exit: \e[0m\c" && read  -d'' -s -n1 ACCEPT
-    [ ! -z $"$ACCEPT" ] && exit 1
+    [ ! -z "$ACCEPT" ] && exit 1
 fi
 
 CDHelper text lineswap --insert="NOTIFICATIONS=$NOTIFICATIONS" --prefix="NOTIFICATIONS=" --path=$ETC_PROFILE --append-if-found-not=True --silent=$SILENT_MODE

@@ -6,12 +6,8 @@ set -e
 
 BASHRC=~/.bashrc
 ETC_PROFILE="/etc/profile"
-
 source $ETC_PROFILE &> /dev/null
-
-
-[ "$DEBUG_MODE" == "True" ] && set -x
-[ "$DEBUG_MODE" == "False" ] && set +x
+if [ "$DEBUG_MODE" == "True" ] ; then set -x ; else set +x ; fi
 
 
 CARGO_ENV="/home/$KIRA_USER/.cargo/env"

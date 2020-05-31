@@ -1,0 +1,1 @@
+# Test commands playground  > cd /tmp && wget -O - https://raw.githubusercontent.com/KiraCore/infra/develop/workstation/init.sh | bash <(cat) </dev/tty

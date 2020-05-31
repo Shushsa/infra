@@ -8,6 +8,7 @@ ETC_PROFILE="/etc/profile"
 
 while : ; do
     source $ETC_PROFILE &> /dev/null
+    if [ "$DEBUG_MODE" == "True" ] ; then set -x ; else set +x ; fi
     REGISTRY_STATUS=$(docker inspect $(docker ps --no-trunc -aqf name=registry) | jq -r '.[0].State.Status' || echo "Error")
     VALIDATOR_1_STATUS=$(docker inspect $(docker ps --no-trunc -aqf name=validator-1) | jq -r '.[0].State.Status' || echo "Error")
     
@@ -31,9 +32,8 @@ while : ; do
     echo -e "------------------------------------------------\e[0m"
     
     read  -d'' -s -n1 -t 3 -p "Press [KEY] to select option: " OPTION || OPTION=""
-    [ ! -z $"$OPTION" ] && echo ""
-    [ ! -z $"$OPTION" ] && read -d'' -s -n1 -p "Press [ENTER] to confirm [${OPTION^^}] option or any other key to try again" ACCEPT
-    [ ! -z $"$ACCEPT" ] && break
+    [ ! -z "$OPTION" ] && echo "" && read -d'' -s -n1 -p "Press [ENTER] to confirm [${OPTION^^}] option or any other key to try again" ACCEPT
+    [ ! -z "$ACCEPT" ] && break
     
     if [ "$OPTION" == "0" ] ; then
         gnome-terminal -- bash -c "$KIRA_MANAGER/container-manager.sh 'registry' ; read -d'' -s -n1 -p 'Press any key to exit...' && exit"
