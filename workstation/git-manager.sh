@@ -40,7 +40,7 @@ while : ; do
     echo "| [X] | Exit | [W] | Refresh Window            |"
     echo -e "------------------------------------------------\e[0m"
     
-    read  -d'' -s -n1 -t 3 -p "INFO: Press [KEY] to select option: " OPTION || OPTION=""
+    read  -d'' -s -n1 -t 5 -p "INFO: Press [KEY] to select option: " OPTION || OPTION=""
     [ ! -z "$OPTION" ] && echo "" && read -d'' -s -n1 -p "Press [ENTER] to confirm [${OPTION^^}] option or any other key to try again: " ACCEPT
     [ ! -z "$ACCEPT" ] && break
     
