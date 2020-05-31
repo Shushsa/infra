@@ -81,8 +81,7 @@ while : ; do
         echo -e "\e[36;1mProvide name of existing remote branch to checkout: \e[0m\c" && read NEW_BRANCH
         [ -z "$NEW_BRANCH" ] && echo "ERROR: Branch was not defined" && break
         [ "$NEW_BRANCH" == "$BRANCH" ] && echo "ERROR: Can't switch to branch with the same name" && break
-        
-        
+
         $KIRA_SCRIPTS/git-pull.sh "$REPO_SSH" "$NEW_BRANCH" "$DIRECTORY" || FAILED="True"
         [ "$FAILED" == "True" ] && echo "ERROR: Changing branch failed" && break
 
@@ -101,8 +100,7 @@ while : ; do
         git remote set-url origin $REPO_SSH || FAILED="True"
         [ "$FAILED" == "False" ] && ssh-agent sh -c "ssh-add $SSH_KEY_PRIV_PATH ; git checkout -b $NEW_BRANCH $BRANCH" || FAILED="True"
         [ "$FAILED" == "True" ] && echo "ERROR: Failed to create new branch" && break
-      
-        
+
         echo "SUCCESS: New branch was created" && break
     elif [ "${OPTION,,}" == "w" ] ; then
         break
