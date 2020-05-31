@@ -25,8 +25,8 @@ while : ; do
     echo "| [R] | Hard RESET Repos & Infrastructure      |"
     echo "| [D] | DELETE Repos & Infrastructure          |"
     echo "|----------------------------------------------|"
-    echo "| [A] | View INFRA Repo ($INFRA_BRANCH)"
-    echo "| [B] | View SEKAI Repo ($SEKAI_BRANCH)"
+    echo "| [A] | Mange INFRA Repo ($INFRA_BRANCH)"
+    echo "| [B] | Mange SEKAI Repo ($SEKAI_BRANCH)"
     echo "|----------------------------------------------|"
     echo "| [X] | EXIT                                   |"
     echo -e "------------------------------------------------\e[0m"
@@ -37,18 +37,18 @@ while : ; do
     
     if [ "$OPTION" == "0" ] ; then
         gnome-terminal -- bash -c "$KIRA_MANAGER/container-manager.sh 'registry' ; read -d'' -s -n1 -p 'Press any key to exit...' && exit"
-        sleep 1
+        break
     elif [ "$OPTION" == "1" ] ; then
         gnome-terminal -- bash -c "$KIRA_MANAGER/container-manager.sh 'validator-1' ; read -d'' -s -n1 -p 'Press any key to exit...' && exit"
-        sleep 1
+        break
     elif [ "${OPTION,,}" == "a" ] ; then
-        echo "INFO: Starting code editor..."
-        code --user-data-dir /usr/code $KIRA_INFRA
-        sleep 1
+        echo "INFO: Starting git manager..."
+        gnome-terminal -- bash -c "$KIRA_MANAGER/git-manager.sh 'registry' ; read -d'' -s -n1 -p 'Press any key to exit...' && exit"
+        break
     elif [ "${OPTION,,}" == "b" ] ; then
-        echo "INFO: Starting code editor..."
-        code --user-data-dir /usr/code $KIRA_SEKAI
-        sleep 1
+        echo "INFO: Starting git manager..."
+        gnome-terminal -- bash -c "$KIRA_MANAGER/git-manager.sh 'registry' ; read -d'' -s -n1 -p 'Press any key to exit...' && exit"
+        break
     elif [ "${OPTION,,}" == "i" ] ; then
         echo "INFO: Wiping and re-initializing..."
         echo -e "\e[33;1mWARNING: You have to wait for new process to finish\e[0m"

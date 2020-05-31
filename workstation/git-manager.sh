@@ -38,11 +38,12 @@ while : ; do
     read  -d'' -s -n1 -t 3 -p "INFO: Press [KEY] to select option: " OPTION || OPTION=""
     [ ! -z "$OPTION" ] && echo "" && read -d'' -s -n1 -p "Press [ENTER] to confirm [${OPTION^^}] option or any other key to try again: " ACCEPT
     [ ! -z "$ACCEPT" ] && break
+    cd /kira
     
     if [ "${OPTION,,}" == "v" ] ; then
         echo "INFO: Starting code editor..."
         code --user-data-dir /usr/code $DIRECTORY
-        sleep 1
+        break
     elif [ "${OPTION,,}" == "c" ] ; then
         echo -e "\e[36;1mType desired commit message: \e[0m\c" && read COMMIT
         if [ -z "$COMMIT" ] ; then
@@ -53,7 +54,7 @@ while : ; do
             else
                 echo "WARINIG: Commit was cancelled"
                 sleep 3
-                continue
+                break
             fi
         fi
         cd $DIRECTORY
@@ -65,7 +66,7 @@ while : ; do
         if [ "$FAILED" == "True" ] ; then
             echo "ERROR: Commit failed"
             sleep 3
-            continue
+            break
         fi
         
         echo "INFO: Pushing changes..."
@@ -75,7 +76,7 @@ while : ; do
         if [ "$FAILED" == "True" ] ; then
             echo "ERROR: Push failed"
             sleep 3
-            continue
+            break
         fi
 
         echo "SUCCESS: Push suceeded"
@@ -83,13 +84,15 @@ while : ; do
     elif [ "${OPTION,,}" == "r" ] ; then
         $KIRA_SCRIPTS/git-pull.sh "$REPO_HTTPS" "$BRANCH" "$DIRECTORY"
         chmod -R 777 $DIRECTORY
+        break
     elif [ "${OPTION,,}" == "x" ] ; then
         exit
     fi
 
-cd /kira
+
 done
 
+sleep 1
 source $KIRA_MANAGER/git-manager.sh "$REPO_SSH" "$REPO_HTTPS" "$BRANCH" "$DIRECTORY"
 
 # TODO: Check if below commands can be fully ommited 

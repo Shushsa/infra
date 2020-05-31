@@ -62,7 +62,7 @@ while : ; do
     
     if [ "${OPTION,,}" == "i" ] ; then
         gnome-terminal -- docker exec -it $(docker ps -aqf "name=^${NAME}$") bash
-        sleep 3
+        break
     elif [ "${OPTION,,}" == "l" ] ; then
         rm -rfv $CONTAINER_DUPM
         mkdir -p $CONTAINER_DUPM
@@ -77,30 +77,31 @@ while : ; do
         chmod -R 777 $CONTAINER_DUPM
         echo "INFO: Starting code editor..."
         code --user-data-dir /usr/code $CONTAINER_DUPM
-        sleep 3
+        break
     elif [ "${OPTION,,}" == "r" ] ; then
         echo "INFO: Restarting container..."
         $KIRA_SCRIPTS/container-restart.sh $NAME
-        sleep 3
+        break
     elif [ "${OPTION,,}" == "a" ] ; then
         echo "INFO: Staring container..."
         $KIRA_SCRIPTS/container-start.sh $NAME
-        sleep 3
+        break
     elif [ "${OPTION,,}" == "s" ] ; then
         echo "INFO: Stopping container..."
         $KIRA_SCRIPTS/container-stop.sh $NAME
-        sleep 3
+        break
     elif [ "${OPTION,,}" == "p" ] ; then
         echo "INFO: Pausing container..."
         $KIRA_SCRIPTS/container-pause.sh $NAME
-        sleep 3
+        break
     elif [ "${OPTION,,}" == "u" ] ; then
         echo "INFO: UnPausing container..."
         $KIRA_SCRIPTS/container-unpause.sh $NAME
-        sleep 3
+        break
     elif [ "${OPTION,,}" == "x" ] ; then
         exit
     fi
 done
 
+sleep 1
 source $KIRA_MANAGER/container-manager.sh $NAME
