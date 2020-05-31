@@ -11,7 +11,7 @@ while : ; do
     source $ETC_PROFILE &> /dev/null
     if [ "$DEBUG_MODE" == "True" ] ; then set -x ; else set +x ; fi
 
-    CONTAINER_DUPM="/home/$KIRA_USER/Desktop/${NAME^^}-DUMP"
+    CONTAINER_DUPM="/home/$KIRA_USER/Desktop/DUMP/${NAME^^}"
     EXISTS=$($KIRA_SCRIPTS/container-exists.sh "$NAME" || echo "Error")
     STATUS=$(docker inspect $(docker ps --no-trunc -aqf name=$NAME) | jq -r '.[0].State.Status' || echo "Error")
     PAUSED=$(docker inspect $(docker ps --no-trunc -aqf name=$NAME) | jq -r '.[0].State.Paused' || echo "Error")

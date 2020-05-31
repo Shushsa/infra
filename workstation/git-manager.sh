@@ -7,10 +7,9 @@ REPO_SSH=$1
 REPO_HTTPS=$2
 BRANCH=$3
 DIRECTORY=$4
-START_TIME="$(date -u +%s)"
 
-[-z "$REPO" ] && REPO=$REPO_SSH
-[-z "$REPO" ] && REPO=$REPO_HTTPS
+[ -z "$REPO" ] && REPO=$REPO_SSH
+[ -z "$REPO" ] && REPO=$REPO_HTTPS
 
 ETC_PROFILE="/etc/profile"
 
@@ -43,6 +42,7 @@ while : ; do
     if [ "${OPTION,,}" == "v" ] ; then
         echo "INFO: Starting code editor..."
         code --user-data-dir /usr/code $DIRECTORY
+        sleep 3
         break
     elif [ "${OPTION,,}" == "c" ] ; then
         echo -e "\e[36;1mType desired commit message: \e[0m\c" && read COMMIT
