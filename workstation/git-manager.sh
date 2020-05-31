@@ -11,6 +11,7 @@ BRANCH_ENVAR=$5
 
 [ -z "$REPO" ] && REPO=$REPO_SSH
 [ -z "$REPO" ] && REPO=$REPO_HTTPS
+[ -z "$BRANCH_ENVAR" ] && echo "Git manager failure, BRANCH_ENVAR property was not defined" && exit 1
 
 ETC_PROFILE="/etc/profile"
 
@@ -86,7 +87,7 @@ while : ; do
         [ "$FAILED" == "True" ] && echo "ERROR: Changing branch failed" && break
 
         BRANCH=$NEW_BRANCH
-        CDHelper text lineswap --insert="$BRANCH_ENVAR=$BRANCH" --prefix="$BRANCH_ENVAR=" --path=$ETC_PROFILE --append-if-found-not=True --silent=$SILENT_MODE
+        CDHelper text lineswap --insert="$BRANCH_ENVAR=$BRANCH" --prefix="$BRANCH_ENVAR=" --path=$ETC_PROFILE --silent=$SILENT_MODE
         
         echo "SUCCESS: Changing branch suceeded"
     elif [ "${OPTION,,}" == "n" ] ; then
@@ -111,7 +112,7 @@ done
 
 read -d'' -s -n1 -p 'Press any key to continue...'
 sleep 1
-source $KIRA_MANAGER/git-manager.sh "$REPO_SSH" "$REPO_HTTPS" "$BRANCH" "$DIRECTORY"
+source $KIRA_MANAGER/git-manager.sh "$REPO_SSH" "$REPO_HTTPS" "$BRANCH" "$DIRECTORY" "$BRANCH_ENVAR"
 
 # TODO: Check if below commands can be fully ommited 
 # git config --global user.name github-username
