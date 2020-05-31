@@ -17,6 +17,8 @@ ETC_PROFILE="/etc/profile"
 while : ; do
     source $ETC_PROFILE &> /dev/null
     if [ "$DEBUG_MODE" == "True" ] ; then set -x ; else set +x ; fi
+    mkdir -p $DIRECTORY
+    cd $DIRECTORY
     
     clear
     
@@ -40,7 +42,7 @@ while : ; do
     read  -d'' -s -n1 -t 3 -p "INFO: Press [KEY] to select option: " OPTION || OPTION=""
     [ ! -z "$OPTION" ] && echo "" && read -d'' -s -n1 -p "Press [ENTER] to confirm [${OPTION^^}] option or any other key to try again: " ACCEPT
     [ ! -z "$ACCEPT" ] && break
-    cd /kira
+    
     
     if [ "${OPTION,,}" == "v" ] ; then
         echo "INFO: Starting code editor..."
@@ -60,7 +62,6 @@ while : ; do
                 break
             fi
         fi
-        cd $DIRECTORY
         echo "INFO: Commiting changes..."
         sleep 1
         FAILED="False"
