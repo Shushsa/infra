@@ -56,10 +56,11 @@ if [[ "${REPO,,}" == *"git@"*   ]] ; then
 
     if [ ! -z "$BRANCH" ] ; then
         ssh-agent sh -c "ssh-add $SSHCRED ; git clone --branch $BRANCH $REPO $TMP_OUTPUT"
-        git clone --branch $BRANCH $REPO $TMP_OUTPUT
     else
         ssh-agent sh -c "ssh-add $SSHCRED ; git clone $REPO $TMP_OUTPUT"
     fi
+
+    git remote set-url origin $REPO
 
     if [ ! -z "$CHECKOUT" ] ; then
         ssh-agent sh -c "ssh-add $SSHCRED ; git checkout $CHECKOUT"
