@@ -44,7 +44,7 @@ else
     exit 1
 fi
 
-rm -rf $OUTPUT
+find -type d "$OUTPUT" -exec rm -f {} \;
 mkdir -p $OUTPUT
 cd $OUTPUT
 
