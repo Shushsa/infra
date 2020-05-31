@@ -43,11 +43,11 @@ while : ; do
         break
     elif [ "${OPTION,,}" == "a" ] ; then
         echo "INFO: Starting git manager..."
-        gnome-terminal -- bash -c "$KIRA_MANAGER/git-manager.sh 'registry' ; read -d'' -s -n1 -p 'Press any key to exit...' && exit"
+        gnome-terminal -- bash -c "$KIRA_MANAGER/git-manager.sh \"$INFRA_REPO_SSH\" \"$INFRA_REPO\" \"$INFRA_BRANCH\" \"$KIRA_INFRA\" ; read -d'' -s -n1 -p 'Press any key to exit...' && exit"
         break
     elif [ "${OPTION,,}" == "b" ] ; then
         echo "INFO: Starting git manager..."
-        gnome-terminal -- bash -c "$KIRA_MANAGER/git-manager.sh 'registry' ; read -d'' -s -n1 -p 'Press any key to exit...' && exit"
+        gnome-terminal -- bash -c "$KIRA_MANAGER/git-manager.sh \"$SEKAI_REPO_SSH\" \"$SEKAI_REPO\" \"$SEKAI_BRANCH\" \"$KIRA_SEKAI\" ; read -d'' -s -n1 -p 'Press any key to exit...' && exit"
         break
     elif [ "${OPTION,,}" == "i" ] ; then
         echo "INFO: Wiping and re-initializing..."
