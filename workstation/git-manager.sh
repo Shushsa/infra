@@ -91,6 +91,7 @@ while : ; do
             read -d'' -s -n1 -p 'Press any key to continue...'
             break
         fi
+        echo "SUCCESS: Pull suceeded"
         break
     elif [ "${OPTION,,}" == "x" ] ; then
         exit
