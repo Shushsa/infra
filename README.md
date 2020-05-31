@@ -32,7 +32,7 @@ For the purpose of setting up development environment we will
 ```
 sudo -s
 
-cd /tmp && wget -O - https://raw.githubusercontent.com/KiraCore/infra/master/workstation/init.sh | bash <(cat) </dev/tty
+cd /tmp && rm -f ./init.sh && wget https://raw.githubusercontent.com/KiraCore/infra/master/workstation/init.sh -O ./init.sh && chmod 777 ./init.sh && ./init.sh
 ```
 
 5. Allow launching of KIRA-MANAGER and setup your working environment
