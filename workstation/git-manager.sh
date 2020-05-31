@@ -101,7 +101,7 @@ while : ; do
         if [ -z "$NEW_BRANCH" ] ; then
             echo "ERROR: Branch was not defined" && read -d'' -s -n1 -p 'Press any key to continue...'
             break
-        elif [ "$NEW_BRANCH" == "$BRANCH" ] ; 
+        elif [ "$NEW_BRANCH" == "$BRANCH" ] ; then
             echo "ERROR: Can't switch to branch with the same name" && read -d'' -s -n1 -p 'Press any key to continue...'
             break
         fi
