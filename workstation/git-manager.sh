@@ -35,6 +35,7 @@ while : ; do
     echo "| [P] | PUSH New Changes                       |"
     echo "| [R] | Delete Repo and RESTORE from Remote    |"
     echo "| [B] | Change to Diffrent Remote BRANCH       |"
+    echo "| [N] | Create NEW Branch from Current Remote  |"
     echo "|----------------------------------------------|"
     echo "| [X] | Exit | [W] | Refresh Window            |"
     echo -e "------------------------------------------------\e[0m"
