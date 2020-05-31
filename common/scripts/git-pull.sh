@@ -89,7 +89,7 @@ git describe --all --always
 
 rm -rf $OUTPUT
 mkdir -p $OUTPUT
-/bin/cp -rf "$TMP_OUTPUT/*" $OUTPUT
+/bin/cp -rf "$TMP_OUTPUT/"* $OUTPUT
 
 chmod -R $RWXMOD $OUTPUT
 

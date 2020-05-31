@@ -69,8 +69,7 @@ while : ; do
         git commit -am "[$(date '+%d/%m/%Y %H:%M:%S')] $COMMIT" || FAILED="True"
     
         if [ "$FAILED" == "True" ] ; then
-            echo "ERROR: Commit failed"
-            read -d'' -s -n1 -p 'Press any key to continue...'
+            echo "ERROR: Commit failed" && read -d'' -s -n1 -p 'Press any key to continue...'
             break
         fi
         echo "SUCCESS: Commit suceeded"
@@ -81,8 +80,7 @@ while : ; do
         [ "$FAILED" == "False" ] && ssh-agent sh -c "ssh-add $SSH_KEY_PRIV_PATH ; git push origin $BRANCH" || FAILED="True"
 
         if [ "$FAILED" == "True" ] ; then
-            echo "ERROR: Push failed"
-            read -d'' -s -n1 -p 'Press any key to continue...'
+            echo "ERROR: Push failed" && read -d'' -s -n1 -p 'Press any key to continue...'
             break
         fi
 
@@ -91,8 +89,7 @@ while : ; do
     elif [ "${OPTION,,}" == "r" ] ; then
         $KIRA_SCRIPTS/git-pull.sh "$REPO_SSH" "$BRANCH" "$DIRECTORY" || FAILED="True"
         if [ "$FAILED" == "True" ] ; then
-            echo "ERROR: Pull failed"
-            read -d'' -s -n1 -p 'Press any key to continue...'
+            echo "ERROR: Pull failed" && read -d'' -s -n1 -p 'Press any key to continue...'
             break
         fi
         echo "SUCCESS: Pull suceeded"
@@ -102,13 +99,16 @@ while : ; do
         git branch -r || echo "ERROR: Failed to list remote branches"
         echo -e "\e[36;1mProvide name of existing remote branch to checkout: \e[0m\c" && read NEW_BRANCH
         if [ -z "$NEW_BRANCH" ] ; then
-            echo "ERROR: Branch was not defined"
+            echo "ERROR: Branch was not defined" && read -d'' -s -n1 -p 'Press any key to continue...'
+            break
+        elif [ "$NEW_BRANCH" == "$BRANCH" ] ; 
+            echo "ERROR: Can't switch to branch with the same name" && read -d'' -s -n1 -p 'Press any key to continue...'
             break
         fi
+        
         $KIRA_SCRIPTS/git-pull.sh "$REPO_SSH" "$NEW_BRANCH" "$DIRECTORY" || FAILED="True"
         if [ "$FAILED" == "True" ] ; then
-            echo "ERROR: Changing branch failed"
-            read -d'' -s -n1 -p 'Press any key to continue...'
+            echo "ERROR: Changing branch failed" && read -d'' -s -n1 -p 'Press any key to continue...'
             break
         fi
 
