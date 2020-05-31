@@ -61,10 +61,7 @@ else
 fi
 
 ${KIRA_SCRIPTS}/cdhelper-update.sh "v0.6.12"
-CDHelper version
-
 ${KIRA_SCRIPTS}/awshelper-update.sh "v0.12.4"
-AWSHelper 
 
 source $KIRA_WORKSTATION/setup/certs.sh
 source $KIRA_WORKSTATION/setup/envs.sh

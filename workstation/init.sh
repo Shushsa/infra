@@ -70,20 +70,18 @@ if [ "$SKIP_UPDATE" == "False" ] ; then
             software-properties-common apt-transport-https ca-certificates gnupg curl wget git > /dev/null
         
         ln -s /usr/bin/git /bin/git || echo "WARNING: Git symlink already exists"
+        git config --global user.email dev@local
+        git config --global core.autocrlf input
     
         echo "INFO: Base Tools Setup..."
         ${KIRA_SCRIPTS}/cdhelper-update.sh "v0.6.12"
-        CDHelper version
-    
+
         echo "INFO: Setting up Essential Variables and Configs..."
         SSHD_CONFIG="/etc/ssh/sshd_config"
         CDHelper text lineswap --insert="PermitRootLogin yes " --prefix="PermitRootLogin" --path=$SSHD_CONFIG --append-if-found-not=True --silent=$SILENT_MODE
         CDHelper text lineswap --insert="PasswordAuthentication yes " --prefix="PasswordAuthentication" --path=$SSHD_CONFIG --append-if-found-not=True --silent=$SILENT_MODE
         service ssh restart || echo "WARNING: Failed to restart ssh service"
-    
-        git config --global user.email dev@local
-        git config --global core.autocrlf input
-    
+
         CDHelper text lineswap --insert="KIRA_MANAGER=$KIRA_MANAGER" --prefix="KIRA_MANAGER=" --path=$ETC_PROFILE --append-if-found-not=True --silent=$SILENT_MODE
         CDHelper text lineswap --insert="KIRA_SETUP=$KIRA_SETUP" --prefix="KIRA_SETUP=" --path=$ETC_PROFILE --append-if-found-not=True --silent=$SILENT_MODE
         CDHelper text lineswap --insert="KIRA_INFRA=$KIRA_INFRA" --prefix="KIRA_INFRA=" --path=$ETC_PROFILE --append-if-found-not=True --silent=$SILENT_MODE
@@ -162,7 +160,7 @@ else
     echo "INFO: Your current public SSH Key:"
     echo -e "\e[33;1m$SSH_KEY_PUB\e[0m"
     
-    echo -e "\e[36;1mInput your PRIVATE git SSH key, [ENTER] if above PUB key: \e[0m\c" && read NEW_SSH_KEY
+    echo -e "\e[36;1mInput your PRIVATE git SSH key or press [ENTER] to skip: \e[0m\c" && read NEW_SSH_KEY
     if [ ! -z "$NEW_SSH_KEY" ] ; then
         echo $NEW_SSH_KEY > $SSH_KEY_PRIV_PATH
         ssh-keygen -y -f $SSH_KEY_PRIV_PATH > $SSH_KEY_PUB_PATH
@@ -175,7 +173,7 @@ else
     fi
 
     echo -e "\e[36;1mPress [Y]es/[N]o to display your private key: \e[0m\c" && read  -d'' -s -n1 SHOW_PRIV_KEY
-    if [ "${NEW_NOTIFICATIONS,,}" == "y" ] ; then
+    if [ "${SHOW_PRIV_KEY,,}" == "y" ] ; then
         echo "INFO: Your private SSH Key: (select, copy and save it for future recovery)"
         echo -e "\e[32;1m$(cat $SSH_KEY_PRIV_PATH)\e[0m"
     fi
