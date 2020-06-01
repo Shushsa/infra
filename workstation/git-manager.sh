@@ -59,7 +59,7 @@ while : ; do
     echo "| [P] | PUSH New Changes                       |" # only push if not pushed commits found
     [ -z "$CHANGES" ] && [ ! -z "$BEHIND" ] && [ -z "${BEHIND##[0-9]*}" ] && [ $BEHIND -ge 1 ] && \
     echo "| [L] | Pull LATEST Changes                    |" # only pull if not up to date
-    echo "| [R] | Clear and RESTORE Repo from Remote     |"
+    echo "| [R] | Wipe and RESTORE Repo from Remote      |"
     echo "| [B] | Change to Diffrent Remote BRANCH       |"
     echo "| [N] | Create NEW Branch from Current Remote  |"
     [ ! -z "$BEHIND" ] && [ -z "${BEHIND##[0-9]*}" ] && [ $BEHIND -eq 0 ] && [ -z "$NOT_PUSHED" ] && [ -z "$CHANGES" ] && \
@@ -107,7 +107,7 @@ while : ; do
     elif [ "${OPTION,,}" == "b" ] ; then
         echo "INFO: Listing available branches..."
         git branch -r || echo "ERROR: Failed to list remote branches"
-        echo -e "\e[36;1mProvide name of existing remote branch to checkout: \e[0m\c" && read NEW_BRANCH
+        echo -e "\e[36;1mProvide name of EXISTING remote branch to checkout: \e[0m\c" && read NEW_BRANCH
         [ -z "$NEW_BRANCH" ] && echo "ERROR: Branch was not defined" && break
         [ "$NEW_BRANCH" == "$BRANCH" ] && echo "ERROR: Can't switch to branch with the same name" && break
 
@@ -124,13 +124,13 @@ while : ; do
         git remote set-url origin $REPO_SSH || FAILED="True"
         [ -z "$FAILED" ] && echo "ERROR: Failed to set remote url for origin" && break
 
-        echo -e "\e[36;1mProvide name of new branch to create: \e[0m\c" && read NEW_BRANCH
+        echo -e "\e[36;1mProvide name of a NEW branch to create: \e[0m\c" && read NEW_BRANCH
         [ -z "$NEW_BRANCH" ] && echo "ERROR: Branch was not defined" && break
-        [ "$NEW_BRANCH" == "$BRANCH" ] && echo "ERROR: Can't create a new branch with the same name as current branch" && break
+        [ "$NEW_BRANCH" == "$BRANCH_REF" ] && echo "ERROR: Can't create a new branch with the same name as current branch" && break
 
         git remote set-url origin $REPO_SSH || FAILED="True"
-        [ "$FAILED" == "False" ] && ssh-agent sh -c "ssh-add $SSH_KEY_PRIV_PATH ; git checkout -b $NEW_BRANCH $BRANCH" || FAILED="True"
-        [ "$FAILED" == "True" ] && echo "ERROR: Failed to create new branch '$NEW_BRANCH' from '$BRANCH'" && break
+        [ "$FAILED" == "False" ] && ssh-agent sh -c "ssh-add $SSH_KEY_PRIV_PATH ; git checkout -b $NEW_BRANCH $BRANCH_REF" || FAILED="True"
+        [ "$FAILED" == "True" ] && echo "ERROR: Failed to create new branch '$NEW_BRANCH' from '$BRANCH_REF'" && break
         
         ssh-agent sh -c "ssh-add $SSH_KEY_PRIV_PATH ; git push origin $NEW_BRANCH" || FAILED="True"
         [ "$FAILED" == "True" ] && echo "ERROR: Failed to push-create new branch" && break
@@ -144,6 +144,26 @@ while : ; do
         [ "$FAILED" == "True" ] && echo "ERROR: Failed to pull chnages from origin to branch '$BRANCH_REF'" && break
         git merge origin $BRANCH_REF || FAILED="True"
         [ "$FAILED" == "True" ] && echo "ERROR: Failed to merge chnages from origin to local branch '$BRANCH_REF'" && break
+        break
+    elif [ "${OPTION,,}" == "a" ] ; then
+        echo "INFO: Listing available branches..."
+        git branch -r || echo "ERROR: Failed to list remote branches"
+        echo -e "\e[36;1mProvide name of EXISTING branch to get changes from: \e[0m\c" && read NEW_BRANCH
+        [ -z "$NEW_BRANCH" ] && echo "ERROR: Branch was not defined" && break
+        [ "$NEW_BRANCH" == "$BRANCH_REF" ] && echo "ERROR: Can't get changes from the same branch as local branch, use 'Pull LATEST Changes' option instead" && break
+
+        git checkout $NEW_BRANCH || FAILED="True"
+        [ "$FAILED" == "True" ] && echo "ERROR: Failed to checkout '$NEW_BRANCH'" && break
+        
+        git pull --no-edit origin $BRANCH_REF || FAILED="True"
+        [ "$FAILED" == "True" ] && echo "ERROR: Failed to pull chnages from origin to branch '$BRANCH_REF'" && break
+
+        git checkout $BRANCH_REF || FAILED="True"
+        [ "$FAILED" == "True" ] && echo "ERROR: Failed to checkout '$BRANCH_REF'" && break
+
+        git merge $NEW_BRANCH || FAILED="True"
+        [ "$FAILED" == "True" ] && echo "ERROR: Failed to merge changes from '$NEW_BRANCH'" && break
+        echo "SUCCESS: Changes from '$NEW_BRANCH' were merged into '$BRANCH_REF', you can now push them to remote"
         break
     elif [ "${OPTION,,}" == "w" ] ; then
         break
