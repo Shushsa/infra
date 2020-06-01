@@ -74,7 +74,6 @@ if [ ! -f "$KIRA_SETUP_BASE_TOOLS" ] ; then
         tar \
         telnet \
         tzdata \
-        unzip \
         wipe \
         xdotool \
         yarn \
