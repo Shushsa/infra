@@ -101,6 +101,12 @@ while : ; do
         echo "SUCCESS: Commit suceeded" && break
     elif [ "${OPTION,,}" == "p" ] ; then
         echo "INFO: Pushing changes..."
+        git checkout $BRANCH || FAILED="True"
+        [ "$FAILED" == "True" ] && echo "ERROR: Failed to checkout '$BRANCH'" && break
+
+        git merge $BRANCH_REF || FAILED="True"
+        [ "$FAILED" == "True" ] && echo "ERROR: Failed to merge changes from '$NEW_BRANCH'" && break
+
         git remote set-url origin $REPO_SSH || FAILED="True"
         [ "$FAILED" == "False" ] && ssh-agent sh -c "ssh-add $SSH_KEY_PRIV_PATH ; git push origin $BRANCH" || FAILED="True"
         [ "$FAILED" == "True" ] && echo "ERROR: Push failed" && break
