@@ -67,15 +67,25 @@ if [ "$SKIP_UPDATE" == "False" ] ; then
         echo "INFO: Installing Essential Packages and Variables..."
         apt-get update -y > /dev/null
         apt-get install -y --allow-unauthenticated --allow-downgrades --allow-remove-essential --allow-change-held-packages \
-            software-properties-common apt-transport-https ca-certificates gnupg curl wget git > /dev/null
-        
+            software-properties-common apt-transport-https ca-certificates gnupg curl wget git unzip openssh-client openssh-server sshfs > /dev/null
+
         ln -s /usr/bin/git /bin/git || echo "WARNING: Git symlink already exists"
         git config --global user.email dev@local
         git config --global core.autocrlf input
         git config --global core.fileMode false
     
         echo "INFO: Base Tools Setup..."
-        ${KIRA_SCRIPTS}/cdhelper-update.sh "v0.6.12"
+        cd /tmp
+        INSTALL_DIR="/usr/local/bin"
+        rm -f -v ./CDHelper-linux-x64.zip
+        wget https://github.com/asmodat/CDHelper/releases/download/v0.6.12/CDHelper-linux-x64.zip
+        rm -rfv $INSTALL_DIR
+        unzip CDHelper-linux-x64.zip -d $INSTALL_DIR
+        chmod -R -v 777 $INSTALL_DIR
+        
+        ln -s $INSTALL_DIR/CDHelper /bin/CDHelper || echo "CDHelper symlink already exists"
+        
+        CDHelper version
 
         echo "INFO: Setting up Essential Variables and Configs..."
         SSHD_CONFIG="/etc/ssh/sshd_config"
