@@ -26,7 +26,7 @@ For the purpose of setting up development environment we will
 
 4. Restart your VM & Open terminal to execute following command that will launch a setup script
 
-    > _NOTE: You will be prompted to input branch names you are working with as well as email address where you will receive notifications_
+    > _NOTE: You will be prompted to input branch names you are working with as well as email address where you will receive notifications, to simplify the setup you can press [ENTER] key every time you are prompted to used the default (recommended) settings_
 
 ```
 sudo -s
@@ -44,7 +44,7 @@ cd /tmp && rm -f ./init.sh && wget https://raw.githubusercontent.com/KiraCore/in
 
    ii. (OPTIONAL) [Enable SMTP](https://www.youtube.com/watch?v=D-NYmDWiFjU) and [less secure apps](https://web.archive.org/save/https://hotter.io/docs/email-accounts/secure-app-gmail/) in your gmail account, then provide your login and password as SMTP credentials
 
-   iii. (OPTIONAL) In your github go to [Account Settings](https://github.com/settings/profile) -> [SSH and PGP keys](https://github.com/settings/keys) -> [New SSH Key](`https://github.com/settings/ssh/new`) and add new ssh key using provided to you by the `KIRA-MANAGER` PUBLIC ssh key (or create new one and provide PRIVATE ssh key to the `KIRA-MANAGER`)
+   iii. (OPTIONAL) In your github go to [Account Settings](https://github.com/settings/profile) -> [SSH and PGP keys](https://github.com/settings/keys) -> [New SSH Key](`https://github.com/settings/ssh/new`) and add new ssh key using provided to you by the `KIRA-MANAGER` PUBLIC ssh key (or create new one and provide PRIVATE ssh key to the `KIRA-MANAGER`). If you do not provide SSH key or do not add new public ssh key to your github account you will not be able to access many useful features offered by the  **KIRA GIT MANAGER**
    
    > _NOTE: If you want to stay 100% safe, you should create a new github account, and request access to `sekai` and all other repositories you want to interact with though `KIRA GIT MANAGER`_
 
