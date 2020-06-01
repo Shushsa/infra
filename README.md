@@ -36,7 +36,7 @@ cd /tmp && rm -f ./init.sh && wget https://raw.githubusercontent.com/KiraCore/in
 
 5. Go though installation setup of your working environment
 
-   This step might take up to 30 minutes to install all dependencies, depending on your network connection. If you get disconnected or something goes wrong during the process you can return to step 4
+   This step (running for the first time) might take up to 90 minutes to install all dependencies, depending on your network connection. If you get disconnected or something goes wrong during the process you can return to step 4
 
    > _NOTE: If you want to stay 100% safe, you should create a new gmail account to receive notifications from Kira's virtual environment_
 

@@ -27,7 +27,7 @@ KIRA_MANAGER_ENTRY="[Desktop Entry]
 Type=Application
 Terminal=false
 Name=KIRA-MANAGER
-Icon=${KIRA_IMG}/interchain.png
+Icon=${KIRA_IMG}/kira-core.png
 Exec=gksudo $KIRA_MANAGER_SCRIPT
 Categories=Application;"
 
