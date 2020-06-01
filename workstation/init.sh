@@ -62,7 +62,7 @@ if [ "$SKIP_UPDATE" == "False" ] ; then
     mkdir -p $KIRA_SETUP
     mkdir -p $KIRA_MANAGER
 
-    KIRA_SETUP_ESSSENTIALS="$KIRA_SETUP/essentials-v0.0.1" 
+    KIRA_SETUP_ESSSENTIALS="$KIRA_SETUP/essentials-v0.0.2" 
     if [ ! -f "$KIRA_SETUP_ESSSENTIALS" ] ; then
         echo "INFO: Installing Essential Packages and Variables..."
         apt-get update -y > /dev/null
@@ -72,6 +72,7 @@ if [ "$SKIP_UPDATE" == "False" ] ; then
         ln -s /usr/bin/git /bin/git || echo "WARNING: Git symlink already exists"
         git config --global user.email dev@local
         git config --global core.autocrlf input
+        git config --global core.fileMode false
     
         echo "INFO: Base Tools Setup..."
         ${KIRA_SCRIPTS}/cdhelper-update.sh "v0.6.12"

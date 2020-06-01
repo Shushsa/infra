@@ -13,34 +13,52 @@ BRANCH_ENVAR=$5
 
 ETC_PROFILE="/etc/profile"
 
+
 while : ; do
     source $ETC_PROFILE &> /dev/null
     if [ "$DEBUG_MODE" == "True" ] ; then set -x ; else set +x ; fi
     mkdir -p $DIRECTORY
     cd $DIRECTORY
-    
+     
+    git remote set-url origin $REPO_HTTPS || echo "WARNING: Failed to set origin of the remote branch"
+    BRANCH_REF=$(git rev-parse --abbrev-ref HEAD || echo "$BRANCH")
+    BEHIND=$(git rev-list $BRANCH_REF..origin/$BRANCH_REF --count || echo "unknown")
+    [ "$BEHIND" == "0" ] && BEHIND="Local branch is up to date"
+    [ -z "${BEHIND##[0-9]*}"  ] && [ $BEHIND -eq 1  ] && BEHIND="$BEHIND commit behind remote"
+    [ -z "${BEHIND##[0-9]*}"  ] && [ $BEHIND -ge 2  ] && BEHIND="$BEHIND commits behind remote"
+    CHANGES=$(git diff --cached --shortstat || echo "unknown")
+
     clear
     
     echo -e "\e[32;1m------------------------------------------------"
     echo "|           KIRA GIT MANAGER v0.0.1            |"
     echo "|             $(date '+%d/%m/%Y %H:%M:%S')              |"
     echo "|----------------------------------------------|"
-    echo "|   SSH Address: $REPO_SSH"
-    echo "| HTTPS Address: $REPO_HTTPS"
-    echo "|        Branch: $BRANCH"
-    echo "|      Location: $DIRECTORY"
+    echo "|       SSH: $REPO_SSH"
+    echo "|     HTTPS: $REPO_HTTPS"
+    echo "|  Checkout: $BRANCH"
+    echo "| HEAD Name: $BRANCH_REF"
+    echo "|  Location: $DIRECTORY"
+    echo "|    Status: $BEHIND"
+    echo "|   Changes: $CHANGES"
     echo "|----------------------------------------------|"
     echo "| [V] | VIEW Repo in Code Editor               |"
-    echo "| [C] | COMMIT New Changes                     |"
-    echo "| [P] | PUSH New Changes                       |"
-    echo "| [R] | Delete Repo and RESTORE from Remote    |"
+    [ ! -z "$CHANGES" ] && \
+    echo "| [C] | COMMIT New Changes                     |" # only if there are changes
+    [ -z "${BEHIND##[0-9]*}"  ] && [ $BEHIND -eq 0  ] && \
+    echo "| [P] | PUSH New Changes                       |" # only push if up to date
+    [ -z "${BEHIND##[0-9]*}"  ] && [ $BEHIND -ge 1  ] && \
+    echo "| [L] | Pull LATEST Changes                    |" # only pull if not up to date
+    echo "| [R] | Clear and RESTORE Repo from Remote     |"
     echo "| [B] | Change to Diffrent Remote BRANCH       |"
     echo "| [N] | Create NEW Branch from Current Remote  |"
+    [ -z "${BEHIND##[0-9]*}"  ] && [ $BEHIND -eq 0  ] && \
+    echo "| [A] | Pull Changes from ANOTHER Branch       |"
     echo "|----------------------------------------------|"
     echo "| [X] | Exit | [W] | Refresh Window            |"
     echo -e "------------------------------------------------\e[0m"
     
-    read  -d'' -s -n1 -t 5 -p "INFO: Press [KEY] to select option: " OPTION || OPTION=""
+    read  -d'' -s -n1 -t 3 -p "INFO: Press [KEY] to select option: " OPTION || OPTION=""
     [ ! -z "$OPTION" ] && echo "" && read -d'' -s -n1 -p "Press [ENTER] to confirm [${OPTION^^}] option or any other key to try again: " ACCEPT
     [ ! -z "$ACCEPT" ] && break
     FAILED="False"
@@ -111,6 +129,10 @@ while : ; do
         CDHelper text lineswap --insert="$BRANCH_ENVAR=$BRANCH" --prefix="$BRANCH_ENVAR=" --path=$ETC_PROFILE --silent=$SILENT_MODE
         
         echo "SUCCESS: New branch was created" && break
+    elif [ "${OPTION,,}" == "l" ] ; then
+        git pull origin/$BRANCH_REF $BRANCH_REF || FAILED="True"
+        [ "$FAILED" == "True" ] && echo "ERROR: Failed to pull chnages from origin/$BRANCH_REF to $BRANCH_REF" && break
+        break
     elif [ "${OPTION,,}" == "w" ] ; then
         break
     elif [ "${OPTION,,}" == "x" ] ; then
@@ -128,3 +150,10 @@ source $KIRA_MANAGER/git-manager.sh "$REPO_SSH" "$REPO_HTTPS" "$BRANCH" "$DIRECT
 # ssh-agent -s 
 # eval `ssh-agent -s`
 # ssh-add $SSH_KEY_PRIV_PATH
+
+# BRANCH_REF=$(git rev-parse --abbrev-ref HEAD)
+# git for-each-ref --format='%(refname:short) %(upstream:short)' refs/heads
+# git rev-list develop..origin/develop --count
+
+# last_commit=$(git rev-parse HEAD)
+# git branch -r --contains $(git rev-parse HEAD)
