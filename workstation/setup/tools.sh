@@ -56,8 +56,6 @@ if [ ! -f "$KIRA_SETUP_BASE_TOOLS" ] ; then
         net-tools \
         nodejs \
         node-gyp \
-        openssh-client \
-        openssh-server \
         pkg-config \
         python \
         patch \
@@ -67,7 +65,6 @@ if [ ! -f "$KIRA_SETUP_BASE_TOOLS" ] ; then
         rename \
         rsync \
         socat \
-        sshfs \
         stunnel \
         subversion \
         syslinux \

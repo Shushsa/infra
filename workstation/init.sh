@@ -67,8 +67,8 @@ if [ "$SKIP_UPDATE" == "False" ] ; then
         echo "INFO: Installing Essential Packages and Variables..."
         apt-get update -y > /dev/null
         apt-get install -y --allow-unauthenticated --allow-downgrades --allow-remove-essential --allow-change-held-packages \
-            software-properties-common apt-transport-https ca-certificates gnupg curl wget git unzip > /dev/null
-        
+            software-properties-common apt-transport-https ca-certificates gnupg curl wget git unzip openssh-client openssh-server sshfs > /dev/null
+
         ln -s /usr/bin/git /bin/git || echo "WARNING: Git symlink already exists"
         git config --global user.email dev@local
         git config --global core.autocrlf input
