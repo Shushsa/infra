@@ -26,7 +26,6 @@ For the purpose of setting up development environment we will
 
 4. Restart your VM & Open terminal to execute following command that will launch a setup script
 
-
     > _NOTE: You will be prompted to input branch names you are working with as well as email address where you will receive notifications_
 
 ```
@@ -47,20 +46,8 @@ cd /tmp && rm -f ./init.sh && wget https://raw.githubusercontent.com/KiraCore/in
 
    iii. (OPTIONAL) [Enable SMTP](https://www.youtube.com/watch?v=D-NYmDWiFjU) and [less secure apps](https://web.archive.org/save/https://hotter.io/docs/email-accounts/secure-app-gmail/) in your gmail account, then provide your login and password as SMTP credentials
 
-   iv.  In your github go to [Account Settings](https://github.com/settings/profile) -> [SSH and PGP keys](https://github.com/settings/keys) -> [New SSH Key](`https://github.com/settings/ssh/new`) and add new ssh key using provided to you by the `KIRA-MANAGER` PUBLIC ssh key (or create new one and provide PRIVATE ssh key to the `KIRA-MANAGER`)
+   iv. (OPTIONAL) In your github go to [Account Settings](https://github.com/settings/profile) -> [SSH and PGP keys](https://github.com/settings/keys) -> [New SSH Key](`https://github.com/settings/ssh/new`) and add new ssh key using provided to you by the `KIRA-MANAGER` PUBLIC ssh key (or create new one and provide PRIVATE ssh key to the `KIRA-MANAGER`)
    
-   > _NOTE: If you want to stay 100% safe, you should create a new github account, and request access to `sekai` and all other repositories you want to interact with_
-
-# Issues
-
-Problems or issues that might occur during testing
-
-
-> Problem: Visual Studio code might not be oppening folder due to memory corruption
-```
-# Solution: (remove working directory)
-
-rm -rfv /usr/code && mkdir -p /usr/code
-```
+   > _NOTE: If you want to stay 100% safe, you should create a new github account, and request access to `sekai` and all other repositories you want to interact with though `KIRA GIT MANAGER`_
 
  
