@@ -22,7 +22,7 @@ For the purpose of setting up development environment we will
      * Disk: 64 GB (SSD or NVMe)
 3. Boot your machine, and ensure latest updates are applied using `Software Updater`
 
-* ![picture 1](https://i.imgur.com/7SX2g7y.png)
+   ![picture 1](https://i.imgur.com/7SX2g7yl.png)
 
 4. Restart your VM & Open terminal to execute following command that will launch a setup script
 
@@ -34,20 +34,41 @@ sudo -s
 cd /tmp && rm -f ./init.sh && wget https://raw.githubusercontent.com/KiraCore/infra/v0.0.1/workstation/init.sh -O ./init.sh && chmod 777 ./init.sh && ./init.sh
 ```
 
-5. Allow launching of KIRA-MANAGER and setup your working environment
+5. Go though installation setup of your working environment
 
-  * ![picture 1](https://i.imgur.com/4EKLdEh.png)
+   This step might take up to 30 minutes to install all dependencies, depending on your network connection. If you get disconnected or something goes wrong during the process you can return to step 4
 
-   > _NOTE: If you want to stay 100% safe, you should create a new gmail account if you want to work with and receive notifications from Kira's virtual environment_
+   > _NOTE: If you want to stay 100% safe, you should create a new gmail account to receive notifications from Kira's virtual environment_
 
-   i. Click on the `KIRA-MANAGER` icon to start it & setup desired branches that you want to work with
+   i. (OPTIONAL) Define email where you want to receive build notifications
 
-   ii. (OPTIONAL) Define email where you want to receive build notifications
+   ii. (OPTIONAL) [Enable SMTP](https://www.youtube.com/watch?v=D-NYmDWiFjU) and [less secure apps](https://web.archive.org/save/https://hotter.io/docs/email-accounts/secure-app-gmail/) in your gmail account, then provide your login and password as SMTP credentials
 
-   iii. (OPTIONAL) [Enable SMTP](https://www.youtube.com/watch?v=D-NYmDWiFjU) and [less secure apps](https://web.archive.org/save/https://hotter.io/docs/email-accounts/secure-app-gmail/) in your gmail account, then provide your login and password as SMTP credentials
-
-   iv. (OPTIONAL) In your github go to [Account Settings](https://github.com/settings/profile) -> [SSH and PGP keys](https://github.com/settings/keys) -> [New SSH Key](`https://github.com/settings/ssh/new`) and add new ssh key using provided to you by the `KIRA-MANAGER` PUBLIC ssh key (or create new one and provide PRIVATE ssh key to the `KIRA-MANAGER`)
+   iii. (OPTIONAL) In your github go to [Account Settings](https://github.com/settings/profile) -> [SSH and PGP keys](https://github.com/settings/keys) -> [New SSH Key](`https://github.com/settings/ssh/new`) and add new ssh key using provided to you by the `KIRA-MANAGER` PUBLIC ssh key (or create new one and provide PRIVATE ssh key to the `KIRA-MANAGER`)
    
    > _NOTE: If you want to stay 100% safe, you should create a new github account, and request access to `sekai` and all other repositories you want to interact with though `KIRA GIT MANAGER`_
+
+6. Allow launching of KIRA-MANAGER
+
+   Right-click on the `KIRA-MANAGER` desktop icon and select `Allow Launching` option from the menu as demonstrated by the picture below
+
+    ![picture 1](https://i.imgur.com/4EKLdEhl.png)
+
+   By double clicking on the icon you will be prompted to enter password and will be presented with a management console.
+
+7. See what is going on with your new network !
+   
+   **KIRA NETWORK MANAGER** enables you to restart your environment and pull latest changes from github, every time you make change to repositories you are working with you should select option `[R]` to re-build everything (If you only work with `sekai` that should take less then 3 minutes to complete!). If you ever need to update your default settings such as SSH key or notifications email address you can select option `[I]` and go through setup once again.
+
+   ![picture 1](https://i.imgur.com/iyuqqsz.png)
+
+   **KIRA CONTAINER MANAGER** allows you to inspect any running container, such as validator based of your `sekai` repository. You can also manage the container by stopping, starting, pausing or unpausing it. If something goes wrong and your validator fails all you have to do to find out what happened is click `[L]` and inspect logs in the pre-installed visual studio code editor. Longs will contain all information's necessary do debug. To refresh logs you have to run `[L]` option again, you can do it bot with container in running or failed state.
+
+   ![picture 3](https://i.imgur.com/LFKtIAm.png) 
+
+   **KIRA GIT MANAGER** allows you to edit, push, pull, resolve conflicts, change branches and even merge all your code changes with other branches without having to leave your virtual machine. Clicking `[V]` option will open a visual studio code editor and allow you deep dive into the code in minutes.
+
+   ![picture 4](https://i.imgur.com/OKGDSMH.png)  
+
 
  
