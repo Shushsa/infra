@@ -49,7 +49,7 @@ fi
 rm -rf $TMP_OUTPUT
 mkdir -p $TMP_OUTPUT
 
-if [[ "${REPO,,}" == *"git@"*   ]] ; then
+if [[ "${REPO,,}" == *"git@"* ]] ; then
     echo "INFO: Detected https repo address"
     #git remote set-url origin $REPO
 
