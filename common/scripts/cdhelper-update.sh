@@ -2,7 +2,6 @@
 
 exec 2>&1
 set -e
-set -x
 
 # Local Update Shortcut:
 # (rm -fv /kira/infra/common/scripts/cdhelper-update.sh) && nano /kira/infra/common/scripts/cdhelper-update.sh && chmod 777 /kira/infra/common/scripts/cdhelper-update.sh
@@ -32,7 +31,7 @@ echo "|   SERVICE FILE: $SERVICE_FILE"
 echo "|    INSTALL DIR: $INSTALL_DIR"
 echo "|_______________________________________________"
 
-if [ "$VEREQ" == "1" ] || [ "$VEREQ" == "0" ]; then
+if [ "$VEREQ" == "1" ] || [ "$VEREQ" == "0" ] ; then
     echo "CDHelper will not be updated, old version is older or equal to new."
     exit 0
 else

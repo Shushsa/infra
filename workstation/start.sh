@@ -2,7 +2,7 @@
 
 exec 2>&1
 set -e
-set -x
+START_TIME="$(date -u +%s)"
 
 # Local Update Shortcut:
 # (rm -fv $KIRA_WORKSTATION/start.sh) && nano $KIRA_WORKSTATION/start.sh && chmod 777 $KIRA_WORKSTATION/start.sh
@@ -14,6 +14,8 @@ SKIP_UPDATE=$1
 ETC_PROFILE="/etc/profile"
 
 source $ETC_PROFILE &> /dev/null
+
+[ "$DEBUG_MODE" == "True" ] && set -x
 
 echo "------------------------------------------------"
 echo "|       STARTED: KIRA INFRA START v0.0.1       |"
@@ -41,14 +43,14 @@ source $ETC_PROFILE &> /dev/null
 cd $KIRA_WORKSTATION
 
 BASE_IMAGE_EXISTS=$(./image-updated.sh "$KIRA_DOCKER/base-image" "base-image" || echo "error")
-if [ "$BASE_IMAGE_EXISTS" == "False" ]; then
+if [ "$BASE_IMAGE_EXISTS" == "False" ] ; then
     $KIRA_SCRIPTS/container-delete.sh "validator-1"
     ./delete-image.sh "$KIRA_DOCKER/tools-image" "tools-image"
     ./delete-image.sh "$KIRA_DOCKER/validator" "validator"
 
     echo "INFO: Updating base image..."
     ./update-image.sh "$KIRA_DOCKER/base-image" "base-image"
-elif [ "$BASE_IMAGE_EXISTS" == "True" ]; then
+elif [ "$BASE_IMAGE_EXISTS" == "True" ] ; then
     echo "INFO: base-image is up to date"
 else
     echo "ERROR: Failed to test if base image exists"
@@ -56,13 +58,13 @@ else
 fi
 
 TOOLS_IMAGE_EXISTS=$(./image-updated.sh "$KIRA_DOCKER/tools-image" "tools-image" || echo "error")
-if [ "$TOOLS_IMAGE_EXISTS" == "False" ]; then
+if [ "$TOOLS_IMAGE_EXISTS" == "False" ] ; then
     $KIRA_SCRIPTS/container-delete.sh "validator-1"
     ./delete-image.sh "$KIRA_DOCKER/validator" "validator"
 
     echo "INFO: Updating tools image..."
     ./update-image.sh "$KIRA_DOCKER/tools-image" "tools-image"
-elif [ "$TOOLS_IMAGE_EXISTS" == "True" ]; then
+elif [ "$TOOLS_IMAGE_EXISTS" == "True" ] ; then
     echo "INFO: tools-image is up to date"
 else
     echo "ERROR: Failed to test if tools image exists"
@@ -70,11 +72,11 @@ else
 fi
 
 VALIDATOR_IMAGE_EXISTS=$(./image-updated.sh "$KIRA_DOCKER/validator" "validator" "latest" "$SEKAI_INTEGRITY" || echo "error")
-if [ "$VALIDATOR_IMAGE_EXISTS" == "False" ]; then
+if [ "$VALIDATOR_IMAGE_EXISTS" == "False" ] ; then
     echo "All imags were updated, starting validator image..."
     $KIRA_SCRIPTS/container-delete.sh "validator-1"
     ./update-image.sh "$KIRA_DOCKER/validator" "validator" "latest" "$SEKAI_INTEGRITY" "REPO=$SEKAI_REPO" "BRANCH=$SEKAI_BRANCH"
-elif [ "$VALIDATOR_IMAGE_EXISTS" == "True" ]; then
+elif [ "$VALIDATOR_IMAGE_EXISTS" == "True" ] ; then
     echo "INFO: validator-image is up to date"
 else
     echo "ERROR: Failed to test if validator image exists"
@@ -103,6 +105,9 @@ docker run -d \
  -e P2P_PROXY_PORT=10003 \
  -e EMAIL_NOTIFY="$EMAIL_NOTIFY" \
  -e SMTP_SECRET="$SMTP_SECRET" \
+ -e NOTIFICATIONS="$NOTIFICATIONS" \
+ -e DEBUG_MODE="$DEBUG_MODE" \
+ -e SILENT_MODE="$SILENT_MODE" \
  -e NODE_KEY="node-key-1" \
  -e SIGNING_KEY="signing-1" \
  -e VALIDATOR_KEY="validator-1" \
@@ -116,5 +121,6 @@ echo "INFO: Inspecting if validator-1 is running..."
 docker exec -it validator-1 sekaid version || echo "ERROR: sekai not found"
 
 echo "------------------------------------------------"
-echo "|      FINISHED: KIRA INFRA START v0.0.1       |"
+echo "| FINISHED: KIRA INFRA START v0.0.1            |"
+echo "|  ELAPSED: $(($(date -u +%s)-$START_TIME)) seconds"
 echo "------------------------------------------------"

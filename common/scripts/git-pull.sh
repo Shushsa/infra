@@ -10,6 +10,7 @@ REPO=$1
 BRANCH=$2
 OUTPUT=$3
 RWXMOD=$4
+SSHCRED=$5
 
 if [[ $BRANCH =~ ^[0-9A-Fa-f]{1,}$ ]] ; then
     CHECKOUT=$BRANCH
@@ -19,6 +20,7 @@ else
 fi
 
 [ -z "$RWXMOD" ] && RWXMOD=777
+[ -z "$SSHCRED" ] && SSHCRED="/home/root/.ssh/id_rsa"
 
 echo "------------------------------------------------"
 echo "|         STARTED: GIT PULL v0.0.1             |"
@@ -28,10 +30,12 @@ echo "|     BRANCH: $BRANCH"
 echo "|   CHECKOUT: $CHECKOUT"
 echo "|     OUTPUT: $OUTPUT"
 echo "|  R/W/X MOD: $RWXMOD"
+echo "|   SSH CRED: $SSHCRED"
 echo "------------------------------------------------"
 
+TMP_OUTPUT="/tmp$OUTPUT"
 if [[ (! -z "$REPO") && ( (! -z "$BRANCH") || (! -z "$CHECKOUT") ) && (! -z "$OUTPUT") ]] ; then
-    echo "INFO: Valid repo details were specified, removing $OUTPUT and starting git pull..."
+    echo "INFO: Valid repo details were specified, removing $TMP_OUTPUT, $OUTPUT and starting git pull..."
 else
     [ -z "$REPO" ] && REPO=undefined
     [ -z "$BRANCH" ] && BRANCH=undefined
@@ -41,26 +45,53 @@ else
     exit 1
 fi
 
-rm -rf $OUTPUT
-mkdir -p $OUTPUT
+# make sure not to delete user files if there are no permissions for user to pull
+rm -rf $TMP_OUTPUT
+mkdir -p $TMP_OUTPUT
 
-if [ ! -z "$BRANCH" ]
-then
-    git clone --branch $BRANCH $REPO $OUTPUT
+if [[ "${REPO,,}" == *"git@"* ]] ; then
+    echo "INFO: Detected https repo address"
+    #git remote set-url origin $REPO
+
+    if [ ! -z "$BRANCH" ] ; then
+        ssh-agent sh -c "ssh-add $SSHCRED ; git clone --branch $BRANCH $REPO $TMP_OUTPUT"
+    else
+        ssh-agent sh -c "ssh-add $SSHCRED ; git clone $REPO $TMP_OUTPUT"
+    fi
+
+    cd $TMP_OUTPUT
+    git remote set-url origin $REPO
+
+    if [ ! -z "$CHECKOUT" ] ; then
+        ssh-agent sh -c "ssh-add $SSHCRED ; git checkout $CHECKOUT"
+    fi
+elif [[ "${REPO,,}" == *"https://"*   ]] ; then
+    echo "INFO: Detected https repo address"
+    if [ ! -z "$BRANCH" ] ; then
+        git clone --branch $BRANCH $REPO $TMP_OUTPUT
+    else
+        git clone $REPO $TMP_OUTPUT
+    fi
+
+    cd $TMP_OUTPUT
+    if [ ! -z "$CHECKOUT" ] ; then
+        git checkout $CHECKOUT
+    fi
 else
-    git clone $REPO $OUTPUT
+    echo "ERROR: Invalid repo address, should be either https (https://) or ssh (git@)"
+    exit 1
 fi
 
-cd $OUTPUT
-
-if [ ! -z "$CHECKOUT" ]
-then
-    git checkout $CHECKOUT
-fi   
+ls -as
 
 git describe --tags || echo "No tags were found"
 git describe --all --always
 
+rm -rf $OUTPUT
+mkdir -p $OUTPUT
+cp -rTfv "$TMP_OUTPUT" "$OUTPUT"
+
+ls -as
 chmod -R $RWXMOD $OUTPUT
 
 echo "------------------------------------------------"

@@ -23,7 +23,7 @@ echo "| VERSIONS EQUAL: $VEREQ"
 echo "|    INSTALL DIR: $INSTALL_DIR"
 echo "|_______________________________________________"
 
-if [ "$VEREQ" == "1" ] || [ "$VEREQ" == "0" ]; then
+if [ "$VEREQ" == "1" ] || [ "$VEREQ" == "0" ] ; then
     echo "AWSHelper will not be updated, old version is older or equal to new."
     exit 0
 else
