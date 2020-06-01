@@ -34,7 +34,7 @@ while : ; do
     CHANGES=$(git diff --shortstat || echo "unknown")
     CHANGES_INFO=$(echo $CHANGES | xargs) # remove whitespaces
     NOT_PUSHED=$(git cherry || echo "unknown") # not pushed changes
-    [ ! -z "$NOT_PUSHED" ] && [ -z "$CHANGES_INFO" ] && CHANGES_INFO = "Detected NOT pushed changes!"
+    [ ! -z "$NOT_PUSHED" ] && [ -z "$CHANGES_INFO" ] && CHANGES_INFO="Detected NOT pushed changes!"
     [ -z "$CHANGES_INFO" ] && CHANGES_INFO="NO changes detected"
     CHANGES_INFO=$(echo $CHANGES_INFO | sed s/" insertions"// | sed s/" deletions"//)
 
