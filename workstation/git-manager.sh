@@ -3,6 +3,8 @@
 exec 2>&1
 set -e
 
+# rm -r -f $KIRA_MANAGER && cp -r $KIRA_WORKSTATION $KIRA_MANAGER && chmod -R 777 $KIRA_MANAGER
+
 REPO_SSH=$1
 REPO_HTTPS=$2
 BRANCH=$3
@@ -13,20 +15,28 @@ BRANCH_ENVAR=$5
 
 ETC_PROFILE="/etc/profile"
 
-
 while : ; do
     source $ETC_PROFILE &> /dev/null
     if [ "$DEBUG_MODE" == "True" ] ; then set -x ; else set +x ; fi
     mkdir -p $DIRECTORY
-    cd $DIRECTORY
+    cd /tmp && cd $DIRECTORY
      
-    git remote set-url origin $REPO_HTTPS || echo "WARNING: Failed to set origin of the remote branch"
     BRANCH_REF=$(git rev-parse --abbrev-ref HEAD || echo "$BRANCH")
+    git remote set-url origin $REPO_HTTPS || echo "WARNING: Failed to set origin of the remote branch"
+    git fetch origin $BRANCH_REF || echo "WARNING: Failed to fetch remote changes"
+    
     BEHIND=$(git rev-list $BRANCH_REF..origin/$BRANCH_REF --count || echo "unknown")
-    [ "$BEHIND" == "0" ] && BEHIND="Local branch is up to date"
-    [ -z "${BEHIND##[0-9]*}"  ] && [ $BEHIND -eq 1  ] && BEHIND="$BEHIND commit behind remote"
-    [ -z "${BEHIND##[0-9]*}"  ] && [ $BEHIND -ge 2  ] && BEHIND="$BEHIND commits behind remote"
-    CHANGES=$(git diff --cached --shortstat || echo "unknown")
+    BEHIND_INFO=$BEHIND
+    [ "$BEHIND" == "0" ] && BEHIND_INFO="Local branch is up to date"
+    [ -z "${BEHIND##[0-9]*}"  ] && [ $BEHIND -eq 1  ] && BEHIND_INFO="$BEHIND commit behind remote"
+    [ -z "${BEHIND##[0-9]*}"  ] && [ $BEHIND -ge 2  ] && BEHIND_INFO="$BEHIND commits behind remote"
+
+    CHANGES=$(git diff --shortstat || echo "unknown")
+    CHANGES_INFO=$(echo $CHANGES | xargs) # remove whitespaces
+    NOT_PUSHED=$(git cherry || echo "unknown") # not pushed changes
+    [ ! -z "$NOT_PUSHED" ] && [ -z "$CHANGES_INFO" ] && CHANGES_INFO = "Detected NOT pushed changes!"
+    [ -z "$CHANGES_INFO" ] && CHANGES_INFO="NO changes detected"
+    CHANGES_INFO=$(echo $CHANGES_INFO | sed s/" insertions"// | sed s/" deletions"//)
 
     clear
     
@@ -39,20 +49,20 @@ while : ; do
     echo "|  Checkout: $BRANCH"
     echo "| HEAD Name: $BRANCH_REF"
     echo "|  Location: $DIRECTORY"
-    echo "|    Status: $BEHIND"
-    echo "|   Changes: $CHANGES"
+    echo "|  Position: $BEHIND_INFO"
+    echo "|   Changes: $CHANGES_INFO"
     echo "|----------------------------------------------|"
     echo "| [V] | VIEW Repo in Code Editor               |"
     [ ! -z "$CHANGES" ] && \
     echo "| [C] | COMMIT New Changes                     |" # only if there are changes
-    [ -z "${BEHIND##[0-9]*}"  ] && [ $BEHIND -eq 0  ] && \
-    echo "| [P] | PUSH New Changes                       |" # only push if up to date
-    [ -z "${BEHIND##[0-9]*}"  ] && [ $BEHIND -ge 1  ] && \
+    [ ! -z "$NOT_PUSHED" ] && \
+    echo "| [P] | PUSH New Changes                       |" # only push if not pushed commits found
+    [ -z "$CHANGES" ] && [ ! -z "$BEHIND" ] && [ -z "${BEHIND##[0-9]*}" ] && [ $BEHIND -ge 1 ] && \
     echo "| [L] | Pull LATEST Changes                    |" # only pull if not up to date
     echo "| [R] | Clear and RESTORE Repo from Remote     |"
     echo "| [B] | Change to Diffrent Remote BRANCH       |"
     echo "| [N] | Create NEW Branch from Current Remote  |"
-    [ -z "${BEHIND##[0-9]*}"  ] && [ $BEHIND -eq 0  ] && \
+    [ ! -z "$BEHIND" ] && [ -z "${BEHIND##[0-9]*}" ] && [ $BEHIND -eq 0 ] && [ -z "$NOT_PUSHED" ] && [ -z "$CHANGES" ] && \
     echo "| [A] | Pull Changes from ANOTHER Branch       |"
     echo "|----------------------------------------------|"
     echo "| [X] | Exit | [W] | Refresh Window            |"
@@ -130,8 +140,8 @@ while : ; do
         
         echo "SUCCESS: New branch was created" && break
     elif [ "${OPTION,,}" == "l" ] ; then
-        git pull origin/$BRANCH_REF $BRANCH_REF || FAILED="True"
-        [ "$FAILED" == "True" ] && echo "ERROR: Failed to pull chnages from origin/$BRANCH_REF to $BRANCH_REF" && break
+        git merge origin $BRANCH_REF || FAILED="True"
+        [ "$FAILED" == "True" ] && echo "ERROR: Failed to merge chnages from origin to local $BRANCH_REF" && break
         break
     elif [ "${OPTION,,}" == "w" ] ; then
         break
