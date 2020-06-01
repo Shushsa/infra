@@ -56,8 +56,8 @@ while : ; do
     echo "| [X] | Exit | [W] | Refresh Window            |"
     echo -e "------------------------------------------------\e[0m"
     
-    read  -d'' -s -n1 -t 5 -p "INFO: Press [KEY] to select option: " OPTION || OPTION=""
-    [ ! -z "$OPTION" ] && echo "" && read -d'' -s -n1 -p "Press [ENTER] to confirm [${OPTION^^}] option or any other key to try again: " ACCEPT
+    read  -d'' -s -n1 -t 5 -p "INFO: Press [KEY] to select option" OPTION || OPTION=""
+    [ ! -z "$OPTION" ] && echo "" && read -d'' -s -n1 -p "Press [ENTER] to confirm [${OPTION^^}] option or any other key to try again" ACCEPT
     [ ! -z "$ACCEPT" ] && break
     
     if [ "${OPTION,,}" == "i" ] ; then
@@ -76,7 +76,10 @@ while : ; do
         docker exec -it $NAME printenv > $CONTAINER_DUPM/printenv.txt || echo "WARNING: Failed to fetch printenv"
         chmod -R 777 $CONTAINER_DUPM
         echo "INFO: Starting code editor..."
-        code --user-data-dir /usr/code $CONTAINER_DUPM
+        USER_DATA_DIR="/usr/code$CONTAINER_DUPM"
+        rm -rf $USER_DATA_DIR
+        mkdir -p $USER_DATA_DIR
+        code --user-data-dir $USER_DATA_DIR $CONTAINER_DUPM
         break
     elif [ "${OPTION,,}" == "r" ] ; then
         echo "INFO: Restarting container..."
