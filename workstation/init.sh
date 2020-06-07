@@ -70,9 +70,11 @@ if [ "$SKIP_UPDATE" == "False" ] ; then
             software-properties-common apt-transport-https ca-certificates gnupg curl wget git unzip openssh-client openssh-server sshfs > /dev/null
 
         ln -s /usr/bin/git /bin/git || echo "WARNING: Git symlink already exists"
-        git config --global user.email dev@local
-        git config --global core.autocrlf input
-        git config --global core.fileMode false
+        git config --add --global user.name dev || echo "WARNING: Failed to set global user name"
+        git config --add --global user.email dev@local || echo "WARNING: Failed to set global user email"
+        git config --add --global core.autocrlf input || echo "WARNING: Failed to set global autocrlf"
+        git config --unset --global core.filemode || echo "WARNING: Failed to unset global filemode"
+        git config --add --global core.filemode false || echo "WARNING: Failed to set global filemode"
     
         echo "INFO: Base Tools Setup..."
         cd /tmp
