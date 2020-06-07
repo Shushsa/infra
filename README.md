@@ -45,6 +45,9 @@ cd /tmp && rm -f ./init.sh && wget https://raw.githubusercontent.com/KiraCore/in
    ii. (OPTIONAL) [Enable SMTP](https://www.youtube.com/watch?v=D-NYmDWiFjU) and [less secure apps](https://web.archive.org/save/https://hotter.io/docs/email-accounts/secure-app-gmail/) in your gmail account, then provide your login and password as SMTP credentials
 
    iii. (OPTIONAL) In your github go to [Account Settings](https://github.com/settings/profile) -> [SSH and PGP keys](https://github.com/settings/keys) -> [New SSH Key](`https://github.com/settings/ssh/new`) and add new ssh key using provided to you by the `KIRA-MANAGER` PUBLIC ssh key (or create new one and provide PRIVATE ssh key to the `KIRA-MANAGER`). If you do not provide SSH key or do not add new public ssh key to your github account you will not be able to access many useful features offered by the  **KIRA GIT MANAGER**
+
+   ![picture 5](https://i.imgur.com/5MUhRWK.png)  
+
    
    > _NOTE: If you want to stay 100% safe, you should create a new github account, and request access to `sekai` and all other repositories you want to interact with though `KIRA GIT MANAGER`_
 
