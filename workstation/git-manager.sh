@@ -96,7 +96,8 @@ while : ; do
             [ "${FORCE,,}" == "n" ] && "WARINIG: Commit was cancelled" && break
         fi
         echo "INFO: Commiting changes..."
-        git commit -am "[$(date '+%d/%m/%Y %H:%M:%S')] $COMMIT" || FAILED="True"
+        git add -A || FAILED="True"
+        [ "$FAILED" == "False" ] && git commit -a -m "[$(date '+%d/%m/%Y %H:%M:%S')] $COMMIT" || FAILED="True"
         [ "$FAILED" == "True" ] && echo "ERROR: Commit failed" && break
         echo "SUCCESS: Commit suceeded" && break
     elif [ "${OPTION,,}" == "p" ] ; then
