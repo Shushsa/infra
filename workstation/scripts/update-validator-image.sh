@@ -19,6 +19,9 @@ VALIDATOR_IMAGE_EXISTS=$(./image-updated.sh "$KIRA_DOCKER/validator" "validator"
 if [ "$VALIDATOR_IMAGE_EXISTS" == "False" ] ; then
     echo "All imags were updated, starting validator image..."
     $KIRA_SCRIPTS/container-delete.sh "validator-1"
+    $KIRA_SCRIPTS/container-delete.sh "validator-2"
+    $KIRA_SCRIPTS/container-delete.sh "validator-3"
+    $KIRA_SCRIPTS/container-delete.sh "validator-4"
     ./update-image.sh "$KIRA_DOCKER/validator" "validator" "latest" "$SEKAI_INTEGRITY" "REPO=$SEKAI_REPO" "BRANCH=$SEKAI_BRANCH"
 elif [ "$VALIDATOR_IMAGE_EXISTS" == "True" ] ; then
     echo "INFO: validator-image is up to date"

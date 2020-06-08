@@ -21,12 +21,14 @@ SIGNING_KEY_PATH="$SEKAID_CONFIG/priv_validator_key.json"
 # key's can be passed from json in the config directory 
 [ ! -z "$NODE_KEY" ] && NODE_KEY="$SELF_CONFIGS/${NODE_KEY}.json"
 [ ! -z "$SIGNING_KEY" ] && SIGNING_KEY="$SELF_CONFIGS/${SIGNING_KEY}.key"
+[ ! -z "$VALIDATOR_INDEX" ] && VALIDATOR_INDEX=1
 
 # external variables: P2P_PROXY_PORT, RPC_PROXY_PORT, LCD_PROXY_PORT, RLY_PROXY_PORT
 P2P_LOCAL_PORT=26656
 RPC_LOCAL_PORT=26657
 LCD_LOCAL_PORT=1317
 RLY_LOCAL_PORT=8000
+
 
 [ -z "$NODE_ADDESS" ] && NODE_ADDESS="tcp://localhost:$RPC_LOCAL_PORT"
 [ -z "$CHAIN_JSON_FULL_PATH" ] && CHAIN_JSON_FULL_PATH="$SELF_CONFIGS/$CHAIN_ID.json"
@@ -87,22 +89,32 @@ sed -i 's#tcp://127.0.0.1:26657#tcp://0.0.0.0:26657#g' $CONFIG_TOML_PATH
 sed -i "s/stake/$DENOM/g" $GENESIS_JSON_PATH
 sed -i 's/pruning = "syncable"/pruning = "nothing"/g' $APP_TOML_PATH
 
-$SELF_SCRIPTS/add-account.sh validator "$VALIDATOR_KEY" $KEYRINGPASS $PASSPHRASE
+$SELF_SCRIPTS/add-account.sh "validator-$VALIDATOR_INDEX" "$VALIDATOR_KEY" $KEYRINGPASS $PASSPHRASE
 $SELF_SCRIPTS/add-account.sh test "$TEST_KEY" $KEYRINGPASS $PASSPHRASE
 
 echo ${KEYRINGPASS} | sekaicli keys list
+if [ $VALIDATOR_INDEX -eq 1 ] ; then
+    echo "Creating genesis file..."
+    echo ${KEYRINGPASS} | sekaid add-genesis-account $(sekaicli keys show test -a) 100000000000000$DENOM,10000000samoleans
 
-echo "Creating genesis file..."
-echo ${KEYRINGPASS} | sekaid add-genesis-account $(sekaicli keys show validator -a) 100000000000000$DENOM,10000000samoleans
-echo ${KEYRINGPASS} | sekaid add-genesis-account $(sekaicli keys show test -a) 100000000000000$DENOM,10000000samoleans
-
-sekaid gentx --name validator --amount 90000000000000$DENOM << EOF
+    for ((i=1;i<=$VALIDATORS_COUNT;i++)); do
+        echo "INFO: Creating validator-$i account..."
+        echo ${KEYRINGPASS} | sekaid add-genesis-account $(sekaicli keys show "validator-$VALIDATOR_INDEX" -a) 100000000000000$DENOM,10000000samoleans
+        sekaid gentx --name "validator-$VALIDATOR_INDEX" --amount 90000000000000$DENOM << EOF
 $KEYRINGPASS
 $KEYRINGPASS
 $KEYRINGPASS
 EOF
+    done
 
-sekaid collect-gentxs
+    sekaid collect-gentxs
+elif [ -f "$COMMON_DIR/genesis.json" ] ; then
+    echo "Loading existing genesis file..."
+    cat "$COMMON_DIR/genesis.json" > $GENESIS_JSON_PATH
+else
+    echo "ERROR: Failed to find existing genesis file"
+    exit 1
+fi
 
 cat > /etc/systemd/system/sekaid.service << EOL
 [Unit]

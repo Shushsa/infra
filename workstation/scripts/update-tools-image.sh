@@ -16,6 +16,9 @@ cd $KIRA_WORKSTATION
 TOOLS_IMAGE_EXISTS=$(./image-updated.sh "$KIRA_DOCKER/tools-image" "tools-image" || echo "error")
 if [ "$TOOLS_IMAGE_EXISTS" == "False" ] ; then
     $KIRA_SCRIPTS/container-delete.sh "validator-1"
+    $KIRA_SCRIPTS/container-delete.sh "validator-2"
+    $KIRA_SCRIPTS/container-delete.sh "validator-3"
+    $KIRA_SCRIPTS/container-delete.sh "validator-4"
     ./delete-image.sh "$KIRA_DOCKER/validator" "validator"
 
     echo "INFO: Updating tools image..."

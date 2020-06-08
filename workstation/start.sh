@@ -44,12 +44,20 @@ source $KIRA_WORKSTATION/scripts/update-validator-image.sh
 cd $KIRA_WORKSTATION
 
 $KIRA_SCRIPTS/container-delete.sh "validator-1"
+$KIRA_SCRIPTS/container-delete.sh "validator-2"
+$KIRA_SCRIPTS/container-delete.sh "validator-3"
+$KIRA_SCRIPTS/container-delete.sh "validator-4"
 VALIDATOR_1_EXISTS=$($KIRA_SCRIPTS/container-exists.sh "validator-1" || echo "error")
+VALIDATOR_2_EXISTS=$($KIRA_SCRIPTS/container-exists.sh "validator-2" || echo "error")
+VALIDATOR_3_EXISTS=$($KIRA_SCRIPTS/container-exists.sh "validator-3" || echo "error")
+VALIDATOR_4_EXISTS=$($KIRA_SCRIPTS/container-exists.sh "validator-4" || echo "error")
 
-if [ "$VALIDATOR_1_EXISTS" != "False" ] ; then
-    echo "ERROR: Failed to delete validator-1 container, status: ${VALIDATOR_1_EXISTS}"
+if [ "$VALIDATOR_1_EXISTS" != "False" ] || [ "$VALIDATOR_2_EXISTS" != "False" ] || [ "$VALIDATOR_3_EXISTS" != "False" ]  || [ "$VALIDATOR_4_EXISTS" != "False" ] ; then
+    echo "ERROR: Failed to delete validator-1 container, status-v1: ${VALIDATOR_1_EXISTS}, status-v2: ${VALIDATOR_2_EXISTS}, status-v3: ${VALIDATOR_3_EXISTS}, status-v4: ${VALIDATOR_4_EXISTS}"
     exit 1
 fi
+
+VALIDATORS_COUNT=2
 
 echo "INFO: Creating 'validator-1' container..."
 rm -fr "${KIRA_STATE}/validator-1"
@@ -58,11 +66,13 @@ docker run -d \
  --network="host" \
  --restart=always \
  --name validator-1 \
+ -e VALIDATOR_INDEX=1 \
+ -e VALIDATORS_COUNT=$VALIDATORS_COUNT \
  -e MONIKER="Local Kira Hub Validator 1" \
- -e P2P_PROXY_PORT=10000 \
- -e P2P_PROXY_PORT=10001 \
- -e P2P_PROXY_PORT=10002 \
- -e P2P_PROXY_PORT=10003 \
+ -e P2P_PROXY_PORT=1100 \
+ -e RPC_PROXY_PORT=1101 \
+ -e LCD_PROXY_PORT=1102 \
+ -e RLY_PROXY_PORT=1103 \
  -e EMAIL_NOTIFY="$EMAIL_NOTIFY" \
  -e SMTP_SECRET="$SMTP_SECRET" \
  -e NOTIFICATIONS="$NOTIFICATIONS" \
@@ -77,14 +87,57 @@ docker run -d \
 echo "INFO: Witing for validator-1 to start..."
 source $KIRA_WORKSTATION/scripts/await-container-init.sh "validator-1" 300
 
+echo "INFO: Inspecting if validator-1 is running..."
+docker exec -it validator-1 sekaid version || echo "ERROR: sekai not found"
+
 echo "INFO: Saving genesis file..."
 GENESIS_SOUCE="/root/.sekai/config/genesis.json"
-GENESIS_DESTINATION="/tmp/genesis.json"
+DOCKER_COMMON="/docker/shared/common"
+GENESIS_DESTINATION="$DOCKER_COMMON/genesis.json"
+mkdir -p $DOCKER_COMMON
 rm -f $GENESIS_DESTINATION
 docker cp $NAME:$GENESIS_SOUCE $GENESIS_DESTINATION
 
-echo "INFO: Inspecting if validator-1 is running..."
-docker exec -it validator-1 sekaid version || echo "ERROR: sekai not found"
+if [ ! -f "$GENESIS_DESTINATION" ] ; then
+    echo "ERROR: Failed to copy genesis file from validator-1"
+    exit 1
+fi
+
+for ((i=2;i<=$VALIDATORS_COUNT;i++)); do
+    echo "INFO: Creating validator-$i container..."
+    rm -fr "${KIRA_STATE}/validator-$i"
+    mkdir -p "${KIRA_STATE}/validator-$i"
+    docker run -d \
+     --network="host" \
+     --restart=always \
+     --name "validator-$i" \
+     -e VALIDATOR_INDEX=$i \
+     -e VALIDATORS_COUNT=$VALIDATORS_COUNT \
+     -e MONIKER="Local Kira Hub Validator $i" \
+     -e P2P_PROXY_PORT="${i}100" \
+     -e RPC_PROXY_PORT="${i}101" \
+     -e LCD_PROXY_PORT="${i}102" \
+     -e RLY_PROXY_PORT="${i}103" \
+     -e EMAIL_NOTIFY="$EMAIL_NOTIFY" \
+     -e SMTP_SECRET="$SMTP_SECRET" \
+     -e NOTIFICATIONS="$NOTIFICATIONS" \
+     -e DEBUG_MODE="$DEBUG_MODE" \
+     -e SILENT_MODE="$SILENT_MODE" \
+     -e NODE_KEY="node-key-$i" \
+     -e SIGNING_KEY="signing-$i" \
+     -e VALIDATOR_KEY="validator-$i" \
+     -e TEST_KEY="test-$i" \
+     -v $DOCKER_COMMON:"/common"
+     validator:latest
+
+    echo "INFO: Inspecting if validator-$i is running..."
+    docker exec -it "validator-$i" sekaid version || echo "ERROR: sekai not found"
+done
+
+
+
+
+
 
 # success_end file is created when docker startup suceeds
 

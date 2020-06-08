@@ -17,6 +17,9 @@ echo "------------------------------------------------"
 cd $KIRA_WORKSTATION
 
 $KIRA_SCRIPTS/container-delete.sh "validator-1"
+$KIRA_SCRIPTS/container-delete.sh "validator-2"
+$KIRA_SCRIPTS/container-delete.sh "validator-3"
+$KIRA_SCRIPTS/container-delete.sh "validator-4"
 ./delete-image.sh "$KIRA_DOCKER/base-image" "base-image"
 ./delete-image.sh "$KIRA_DOCKER/tools-image" "tools-image"
 ./delete-image.sh "$KIRA_DOCKER/validator" "validator"
