@@ -108,7 +108,7 @@ EOF
     done
 
     sekaid collect-gentxs
-elif [ -f "$COMMON_DIR/genesis.json" ] ; 
+elif [ -f "$COMMON_DIR/genesis.json" ] ; then
     echo "INFO: Adding validator-$VALIDATOR_INDEX account..."
     $SELF_SCRIPTS/add-account.sh "validator-$VALIDATOR_INDEX" "$VALIDATOR_KEY" $KEYRINGPASS $PASSPHRASE
     echo "INFO: Loading existing genesis file..."
