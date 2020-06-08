@@ -100,7 +100,7 @@ if [ $VALIDATOR_INDEX -eq 1 ] ; then
         cat "$SELF_CONFIGS/signing-keys/signing-$i.key" > $SIGNING_KEY_PATH
         echo "INFO: Creating validator-$i account..."
         $SELF_SCRIPTS/add-account.sh "validator-$i" "validator-keys/validator-$i" $KEYRINGPASS $PASSPHRASE
-        echo ${KEYRINGPASS} | sekaid add-genesis-account $(sekaicli keys show "validator-$i" -a) 100000000000000$DENOM,
+        echo ${KEYRINGPASS} | sekaid add-genesis-account $(sekaicli keys show "validator-$i" -a) 100000000000000$DENOM
         echo "INFO: Creating genesis transaction for validator-$i account..."
         sekaid gentx --trace --name "validator-$i" --amount 90000000000000$DENOM << EOF
 $KEYRINGPASS
