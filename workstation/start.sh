@@ -80,7 +80,6 @@ docker run -d \
  -e SILENT_MODE="$SILENT_MODE" \
  -e NODE_KEY="node-key-1" \
  -e SIGNING_KEY="signing-1" \
- -e TEST_KEY="test-1" \
  validator:latest
 
 echo "INFO: Witing for validator-1 to start..."
@@ -124,7 +123,6 @@ for ((i=2;i<=$VALIDATORS_COUNT;i++)); do
      -e SILENT_MODE="$SILENT_MODE" \
      -e NODE_KEY="node-key-$i" \
      -e SIGNING_KEY="signing-$i" \
-     -e TEST_KEY="test-$i" \
      -v $DOCKER_COMMON:"/common"
      validator:latest
 

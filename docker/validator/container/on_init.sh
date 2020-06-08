@@ -19,8 +19,8 @@ SEKAICLI_HOME=$HOME/.sekaicli
 SIGNING_KEY_PATH="$SEKAID_CONFIG/priv_validator_key.json"
 
 # key's can be passed from json in the config directory 
-[ ! -z "$NODE_KEY" ] && NODE_KEY="$SELF_CONFIGS/${NODE_KEY}.json"
-[ ! -z "$SIGNING_KEY" ] && SIGNING_KEY="$SELF_CONFIGS/${SIGNING_KEY}.key"
+[ ! -z "$NODE_KEY" ] && NODE_KEY="$SELF_CONFIGS/node-keys/${NODE_KEY}.json"
+[ ! -z "$SIGNING_KEY" ] && SIGNING_KEY="$SELF_CONFIGS/signing-keys/${SIGNING_KEY}.key"
 [ ! -z "$VALIDATOR_INDEX" ] && VALIDATOR_INDEX=1
 
 # external variables: P2P_PROXY_PORT, RPC_PROXY_PORT, LCD_PROXY_PORT, RLY_PROXY_PORT
@@ -89,18 +89,20 @@ sed -i 's#tcp://127.0.0.1:26657#tcp://0.0.0.0:26657#g' $CONFIG_TOML_PATH
 sed -i "s/stake/$DENOM/g" $GENESIS_JSON_PATH
 sed -i 's/pruning = "syncable"/pruning = "nothing"/g' $APP_TOML_PATH
 
-$SELF_SCRIPTS/add-account.sh test "$TEST_KEY" $KEYRINGPASS $PASSPHRASE
-
 echo ${KEYRINGPASS} | sekaicli keys list
 if [ $VALIDATOR_INDEX -eq 1 ] ; then
     echo "INFO: Creating genesis file..."
-    echo ${KEYRINGPASS} | sekaid add-genesis-account $(sekaicli keys show test -a) 100000000000000$DENOM,10000000samoleans
-
     for ((i=1;i<=$VALIDATORS_COUNT;i++)); do
+        echo "INFO: Adding test-$i account..."
+        $SELF_SCRIPTS/add-account.sh test-$i "test-keys/test-$i" $KEYRINGPASS $PASSPHRASE
+        echo ${KEYRINGPASS} | sekaid add-genesis-account $(sekaicli keys show "test-$i" -a) 100000000000000$DENOM,10000000samoleans
+        #signing key has to be rotated as it is used by default by the gentx
+        cat "$SELF_CONFIGS/signing-keys/signing-$i.key" > $SIGNING_KEY_PATH
         echo "INFO: Creating validator-$i account..."
         $SELF_SCRIPTS/add-account.sh "validator-$i" "validator-keys/validator-$i" $KEYRINGPASS $PASSPHRASE
-        echo ${KEYRINGPASS} | sekaid add-genesis-account $(sekaicli keys show "validator-$i" -a) 100000000000000$DENOM,10000000samoleans
-        sekaid gentx --name "validator-$i" --amount 90000000000000$DENOM << EOF
+        echo ${KEYRINGPASS} | sekaid add-genesis-account $(sekaicli keys show "validator-$i" -a) 100000000000000$DENOM,
+        echo "INFO: Creating genesis transaction for validator-$i account..."
+        sekaid gentx --trace --name "validator-$i" --amount 90000000000000$DENOM << EOF
 $KEYRINGPASS
 $KEYRINGPASS
 $KEYRINGPASS
@@ -109,6 +111,8 @@ EOF
 
     sekaid collect-gentxs
 elif [ -f "$COMMON_DIR/genesis.json" ] ; then
+    echo "INFO: Adding test-$VALIDATOR_INDEX account..."
+    $SELF_SCRIPTS/add-account.sh test-$VALIDATOR_INDEX "test-keys/test-1" $KEYRINGPASS $PASSPHRASE
     echo "INFO: Adding validator-$VALIDATOR_INDEX account..."
     $SELF_SCRIPTS/add-account.sh "validator-$VALIDATOR_INDEX" "validator-keys/validator-$VALIDATOR_INDEX" $KEYRINGPASS $PASSPHRASE
     echo "INFO: Loading existing genesis file..."
@@ -117,6 +121,9 @@ else
     echo "ERROR: Failed to find existing genesis file"
     exit 1
 fi
+
+# original signing key has to recovered
+cat $SIGNING_KEY > $SIGNING_KEY_PATH
 
 cat > /etc/systemd/system/sekaid.service << EOL
 [Unit]
