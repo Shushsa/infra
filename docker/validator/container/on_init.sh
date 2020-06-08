@@ -98,7 +98,7 @@ if [ $VALIDATOR_INDEX -eq 1 ] ; then
 
     for ((i=1;i<=$VALIDATORS_COUNT;i++)); do
         echo "INFO: Creating validator-$i account..."
-        $SELF_SCRIPTS/add-account.sh "validator-$i" "$VALIDATOR_KEY" $KEYRINGPASS $PASSPHRASE
+        $SELF_SCRIPTS/add-account.sh "validator-$i" "validator-keys/validator-$i" $KEYRINGPASS $PASSPHRASE
         echo ${KEYRINGPASS} | sekaid add-genesis-account $(sekaicli keys show "validator-$i" -a) 100000000000000$DENOM,10000000samoleans
         sekaid gentx --name "validator-$i" --amount 90000000000000$DENOM << EOF
 $KEYRINGPASS
@@ -110,7 +110,7 @@ EOF
     sekaid collect-gentxs
 elif [ -f "$COMMON_DIR/genesis.json" ] ; then
     echo "INFO: Adding validator-$VALIDATOR_INDEX account..."
-    $SELF_SCRIPTS/add-account.sh "validator-$VALIDATOR_INDEX" "$VALIDATOR_KEY" $KEYRINGPASS $PASSPHRASE
+    $SELF_SCRIPTS/add-account.sh "validator-$VALIDATOR_INDEX" "validator-keys/validator-$VALIDATOR_INDEX" $KEYRINGPASS $PASSPHRASE
     echo "INFO: Loading existing genesis file..."
     cat "$COMMON_DIR/genesis.json" > $GENESIS_JSON_PATH
 else
