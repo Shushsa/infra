@@ -25,15 +25,27 @@ ELAPSED=0
 mkdir -p $DESTINATION
 
 while [ $ELAPSED -le $TIMEOUT ] && [ "$SUCCESS" == "False" ] ; do
-    SUCCESS="True"
     ELAPSED=$(($(date -u +%s)-$START_TIME_CONTAINER_AWAIT))
+    CONTAINER_EXISTS=$($KIRA_SCRIPTS/container-exists.sh $NAME || echo "error")
+    if [ "$CONTAINER_EXISTS" != "True"  ] ; then
+        continue
+    fi
+
+    SUCCESS="True"
+    ERROR="True"
     docker cp $NAME:$TARGET_PASS_FILE "$DESTINATION/tmp-pass.file" || SUCCESS="False"
-    docker cp $NAME:$TARGET_FAIL_FILE "$DESTINATION/tmp-fail.file" || echo "ERROR: Fail report file was found wihtin container $NAME after $ELAPSED seconds" && exit 1
+    docker cp $NAME:$TARGET_FAIL_FILE "$DESTINATION/tmp-fail.file" || ERROR="False"
+
+    if [ "$ERROR" == "True" ] ; then
+        echo "ERROR: Fail report file was found wihtin container $NAME after $ELAPSED seconds"
+        exit 1
+    fi
+
     sleep 1
 done
 
 if [ "$SUCCESS" == "False" ] ; then
-    echo "ERROR: Awaitng for container $NAME to init timeouted after $ELAPSED seconds"
+    echo "ERROR: Awaitng for container $NAME to init, timeouted after $ELAPSED seconds"
     exit 1
 fi
 
