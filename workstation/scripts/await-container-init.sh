@@ -9,12 +9,14 @@ source $ETC_PROFILE &> /dev/null
 
 NAME=$1
 TIMEOUT=$2
+DELAY=$3
 
 echo "------------------------------------------------"
 echo "| STARTED: AWAITING CONTAINER INIT v0.0.1      |"
 echo "|-----------------------------------------------"
 echo "|    NAME: $1"
 echo "| TIMEOUT: $2 seconds"
+echo "|   DELAY: $3 seconds"
 echo "------------------------------------------------"
 
 TARGET_PASS_FILE="/self/home/success_end"
@@ -41,7 +43,7 @@ while [ $ELAPSED -le $TIMEOUT ] && [ "$SUCCESS" == "False" ] ; do
         exit 1
     fi
 
-    sleep 1
+    sleep $DELAY
 done
 
 if [ "$SUCCESS" == "False" ] ; then

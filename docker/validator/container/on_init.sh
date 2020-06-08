@@ -99,8 +99,8 @@ if [ $VALIDATOR_INDEX -eq 1 ] ; then
 
     for ((i=1;i<=$VALIDATORS_COUNT;i++)); do
         echo "INFO: Creating validator-$i account..."
-        echo ${KEYRINGPASS} | sekaid add-genesis-account $(sekaicli keys show "validator-$VALIDATOR_INDEX" -a) 100000000000000$DENOM,10000000samoleans
-        sekaid gentx --name "validator-$VALIDATOR_INDEX" --amount 90000000000000$DENOM << EOF
+        echo ${KEYRINGPASS} | sekaid add-genesis-account $(sekaicli keys show "validator-$i" -a) 100000000000000$DENOM,10000000samoleans
+        sekaid gentx --name "validator-$i" --amount 90000000000000$DENOM << EOF
 $KEYRINGPASS
 $KEYRINGPASS
 $KEYRINGPASS
