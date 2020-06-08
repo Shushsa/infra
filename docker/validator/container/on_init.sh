@@ -89,16 +89,16 @@ sed -i 's#tcp://127.0.0.1:26657#tcp://0.0.0.0:26657#g' $CONFIG_TOML_PATH
 sed -i "s/stake/$DENOM/g" $GENESIS_JSON_PATH
 sed -i 's/pruning = "syncable"/pruning = "nothing"/g' $APP_TOML_PATH
 
-$SELF_SCRIPTS/add-account.sh "validator-$VALIDATOR_INDEX" "$VALIDATOR_KEY" $KEYRINGPASS $PASSPHRASE
 $SELF_SCRIPTS/add-account.sh test "$TEST_KEY" $KEYRINGPASS $PASSPHRASE
 
 echo ${KEYRINGPASS} | sekaicli keys list
 if [ $VALIDATOR_INDEX -eq 1 ] ; then
-    echo "Creating genesis file..."
+    echo "INFO: Creating genesis file..."
     echo ${KEYRINGPASS} | sekaid add-genesis-account $(sekaicli keys show test -a) 100000000000000$DENOM,10000000samoleans
 
     for ((i=1;i<=$VALIDATORS_COUNT;i++)); do
         echo "INFO: Creating validator-$i account..."
+        $SELF_SCRIPTS/add-account.sh "validator-$i" "$VALIDATOR_KEY" $KEYRINGPASS $PASSPHRASE
         echo ${KEYRINGPASS} | sekaid add-genesis-account $(sekaicli keys show "validator-$i" -a) 100000000000000$DENOM,10000000samoleans
         sekaid gentx --name "validator-$i" --amount 90000000000000$DENOM << EOF
 $KEYRINGPASS
@@ -108,8 +108,10 @@ EOF
     done
 
     sekaid collect-gentxs
-elif [ -f "$COMMON_DIR/genesis.json" ] ; then
-    echo "Loading existing genesis file..."
+elif [ -f "$COMMON_DIR/genesis.json" ] ; 
+    echo "INFO: Adding validator-$VALIDATOR_INDEX account..."
+    $SELF_SCRIPTS/add-account.sh "validator-$VALIDATOR_INDEX" "$VALIDATOR_KEY" $KEYRINGPASS $PASSPHRASE
+    echo "INFO: Loading existing genesis file..."
     cat "$COMMON_DIR/genesis.json" > $GENESIS_JSON_PATH
 else
     echo "ERROR: Failed to find existing genesis file"

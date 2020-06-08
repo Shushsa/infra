@@ -85,7 +85,7 @@ docker run -d \
  validator:latest
 
 echo "INFO: Witing for validator-1 to start..."
-source $KIRA_WORKSTATION/scripts/await-container-init.sh "validator-1" 300 10
+source $KIRA_WORKSTATION/scripts/await-container-init.sh "validator-1" "300" "10"
 
 echo "INFO: Inspecting if validator-1 is running..."
 docker exec -it validator-1 sekaid version || echo "ERROR: sekai not found"
