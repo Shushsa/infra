@@ -21,6 +21,7 @@ TARGET_PASS_FILE="/self/home/success_end"
 TARGET_FAIL_FILE="/self/home/failure_start"
 DESTINATION="/tmp/$NAME"
 SUCCESS="False"
+ELAPSED=0
 mkdir -p $DESTINATION
 
 while [ $ELAPSED -le $TIMEOUT ] && [ "$SUCCESS" == "False" ] ; do
