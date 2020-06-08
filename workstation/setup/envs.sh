@@ -9,7 +9,6 @@ ETC_PROFILE="/etc/profile"
 source $ETC_PROFILE &> /dev/null
 if [ "$DEBUG_MODE" == "True" ] ; then set -x ; else set +x ; fi
 
-
 CARGO_ENV="/home/$KIRA_USER/.cargo/env"
 
 KIRA_STATE=/kira/state
@@ -18,6 +17,7 @@ KIRA_REGISTRY="localhost:$KIRA_REGISTRY_PORT"
 
 KIRA_IMG="${KIRA_INFRA}/common/img"
 KIRA_DOCKER="${KIRA_INFRA}/docker"
+WORKSTATION_SCRIPTS=$"$KIRA_WORKSTATION/scripts"
 
 GO_VERSION="1.14.2"
 NGINX_SERVICED_PATH="/etc/systemd/system/nginx.service.d"
@@ -34,7 +34,7 @@ mkdir -p "/home/$KIRA_USER/.cargo"
 mkdir -p "/home/$KIRA_USER/Desktop"
 mkdir -p $SOURCES_LIST
 
-KIRA_SETUP_KIRA_ENV="$KIRA_SETUP/kira-env-v0.0.25" 
+KIRA_SETUP_KIRA_ENV="$KIRA_SETUP/kira-env-v0.0.26" 
 if [ ! -f "$KIRA_SETUP_KIRA_ENV" ] ; then
     echo "INFO: Setting up kira environment variables"
     touch $CARGO_ENV
@@ -43,6 +43,7 @@ if [ ! -f "$KIRA_SETUP_KIRA_ENV" ] ; then
     rm -f /var/crash/*
     CDHelper text lineswap --insert="enabled=0" --prefix="enabled=" --path=/etc/default/apport --append-if-found-not=True
 
+    CDHelper text lineswap --insert="WORKSTATION_SCRIPTS=$WORKSTATION_SCRIPTS" --prefix="WORKSTATION_SCRIPTS=" --path=$ETC_PROFILE --append-if-found-not=True --silent=$SILENT_MODE
     CDHelper text lineswap --insert="SOURCES_LIST=$SOURCES_LIST" --prefix="SOURCES_LIST=" --path=$ETC_PROFILE --append-if-found-not=True --silent=$SILENT_MODE
     CDHelper text lineswap --insert="GO_VERSION=$GO_VERSION" --prefix="GO_VERSION=" --path=$ETC_PROFILE --append-if-found-not=True --silent=$SILENT_MODE
     CDHelper text lineswap --insert="KIRA_IMG=$KIRA_IMG" --prefix="KIRA_IMG=" --path=$ETC_PROFILE --append-if-found-not=True --silent=$SILENT_MODE

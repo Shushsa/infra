@@ -75,10 +75,18 @@ docker run -d \
  validator:latest
 
 echo "INFO: Witing for validator-1 to start..."
-sleep 5
+source $KIRA_WORKSTATION/scripts/await-container-init.sh "validator-1" 300
+
+echo "INFO: Saving genesis file..."
+GENESIS_SOUCE="/root/.sekai/config/genesis.json"
+GENESIS_DESTINATION="/tmp/genesis.json"
+rm -f $GENESIS_DESTINATION
+docker cp $NAME:$GENESIS_SOUCE $GENESIS_DESTINATION
 
 echo "INFO: Inspecting if validator-1 is running..."
 docker exec -it validator-1 sekaid version || echo "ERROR: sekai not found"
+
+# success_end file is created when docker startup suceeds
 
 echo "------------------------------------------------"
 echo "| FINISHED: KIRA INFRA START v0.0.1            |"

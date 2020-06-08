@@ -181,13 +181,12 @@ systemctl2 restart sekaid || systemctl2 status sekaid.service || echo "Failed to
 systemctl2 restart lcd || systemctl2 status lcd.service || echo "Failed to re-start lcd service" && echo "$(cat /etc/systemd/system/lcd.service)" || true
 #systemctl2 restart faucet || echo "Failed to re-start faucet service" && echo "$(cat /etc/systemd/system/faucet.service)" || true
 
-[ "$NOTIFICATIONS" == "True" ] && CDHelper email send \
+if [ "$NOTIFICATIONS" == "True" ] ; then
+CDHelper email send \
  --to="$EMAIL_NOTIFY" \
  --subject="[$MONIKER] Was Initalized Sucessfully" \
  --body="[$(date)] Attached $(find $SELF_LOGS -type f | wc -l) Log Files" \
  --html="false" \
  --recursive="true" \
  --attachments="$SELF_LOGS,$JOURNAL_LOGS"
-
-
-
+fi

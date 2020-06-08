@@ -74,6 +74,7 @@ while : ; do
         docker inspect $(docker ps --no-trunc -aqf name=$NAME) > $CONTAINER_DUPM/container-inspect.json || echo "WARNING: Failed to inspect container"
         docker inspect $(docker ps --no-trunc -aqf name=$NAME) > $CONTAINER_DUPM/printenv.txt || echo "WARNING: Failed to fetch printenv"
         docker exec -it $NAME printenv > $CONTAINER_DUPM/printenv.txt || echo "WARNING: Failed to fetch printenv"
+        docker logs --timestamps --details $(docker inspect --format="{{.Id}}" ${NAME} 2> /dev/null) > $CONTAINER_DUPM/docker-logs.txt || echo "WARNING: Failed to save docker logs"
         chmod -R 777 $CONTAINER_DUPM
         echo "INFO: Starting code editor..."
         USER_DATA_DIR="/usr/code$CONTAINER_DUPM"
