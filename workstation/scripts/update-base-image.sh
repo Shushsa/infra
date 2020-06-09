@@ -15,10 +15,6 @@ cd $KIRA_WORKSTATION
 
 BASE_IMAGE_EXISTS=$(./image-updated.sh "$KIRA_DOCKER/base-image" "base-image" || echo "error")
 if [ "$BASE_IMAGE_EXISTS" == "False" ] ; then
-    $KIRA_SCRIPTS/container-delete.sh "validator-1"
-    $KIRA_SCRIPTS/container-delete.sh "validator-2"
-    $KIRA_SCRIPTS/container-delete.sh "validator-3"
-    $KIRA_SCRIPTS/container-delete.sh "validator-4"
     ./delete-image.sh "$KIRA_DOCKER/tools-image" "tools-image"
     ./delete-image.sh "$KIRA_DOCKER/validator" "validator"
 

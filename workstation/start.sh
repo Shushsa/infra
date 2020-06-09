@@ -37,16 +37,20 @@ echo "INFO: Updating infra repository and fetching changes..."
 $KIRA_WORKSTATION/setup.sh "$SKIP_UPDATE"
 source $ETC_PROFILE &> /dev/null
 
+$KIRA_SCRIPTS/container-restart.sh "registry"
+$KIRA_SCRIPTS/container-delete.sh "validator-1"
+$KIRA_SCRIPTS/container-delete.sh "validator-2"
+$KIRA_SCRIPTS/container-delete.sh "validator-3"
+$KIRA_SCRIPTS/container-delete.sh "validator-4"
+systemctl restart docker
+
+sleep 3
+
 source $KIRA_WORKSTATION/scripts/update-base-image.sh 
 source $KIRA_WORKSTATION/scripts/update-tools-image.sh 
 source $KIRA_WORKSTATION/scripts/update-validator-image.sh 
 
 cd $KIRA_WORKSTATION
-
-$KIRA_SCRIPTS/container-delete.sh "validator-1"
-$KIRA_SCRIPTS/container-delete.sh "validator-2"
-$KIRA_SCRIPTS/container-delete.sh "validator-3"
-$KIRA_SCRIPTS/container-delete.sh "validator-4"
 VALIDATOR_1_EXISTS=$($KIRA_SCRIPTS/container-exists.sh "validator-1" || echo "error")
 VALIDATOR_2_EXISTS=$($KIRA_SCRIPTS/container-exists.sh "validator-2" || echo "error")
 VALIDATOR_3_EXISTS=$($KIRA_SCRIPTS/container-exists.sh "validator-3" || echo "error")
