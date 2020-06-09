@@ -44,7 +44,7 @@ docker exec -it registry sh -c "rm -rfv /var/lib/registry/docker/registry/v2/rep
 docker exec -it registry bin/registry garbage-collect /etc/docker/registry/config.yml -m  || echo "Failed to collect registry garbage"
 docker exec -it registry sh -c "reboot" || echo "Docker Registry Reboot" && sleep 1
 
-docker images --no-trunc
+docker images
 
 echo "------------------------------------------------"
 echo "|        FINISHED: IMAGE DELETE v0.0.1         |"
