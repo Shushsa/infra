@@ -50,7 +50,7 @@ echo "|     BUILD ARG 2: $BUILD_ARG2"
 echo "|     BUILD ARG 3: $BUILD_ARG3"
 echo "------------------------------------------------"
 
-if [[ $($KIRA_WORKSTATION/image-updated.sh "$IMAGE_DIR" "$IMAGE_NAME" "$IMAGE_TAG" "$INTEGRITY") != "True" ]] ; then
+if [[ $($WORKSTATION_SCRIPTS/image-updated.sh "$IMAGE_DIR" "$IMAGE_NAME" "$IMAGE_TAG" "$INTEGRITY") != "True" ]] ; then
     
     if [ "$OLD_HASH" != "$NEW_HASH" ] ; then
         echo "WARNING: Image '$IMAGE_DIR' hash changed from $OLD_HASH to $NEW_HASH"
@@ -59,7 +59,7 @@ if [[ $($KIRA_WORKSTATION/image-updated.sh "$IMAGE_DIR" "$IMAGE_NAME" "$IMAGE_TA
     fi
 
     # NOTE: This script automaitcaly removes KIRA_SETUP_FILE file (rm -fv $KIRA_SETUP_FILE)
-    $KIRA_WORKSTATION/delete-image.sh "$IMAGE_DIR" "$IMAGE_NAME" "$IMAGE_TAG"
+    $WORKSTATION_SCRIPTS/delete-image.sh "$IMAGE_DIR" "$IMAGE_NAME" "$IMAGE_TAG"
 
     echo "Creating new '$IMAGE_NAME' image..."
     docker build --network=host --tag $IMAGE_NAME ./ --build-arg BUILD_HASH=$NEW_HASH --build-arg $BUILD_ARG1 --build-arg $BUILD_ARG2 --build-arg $BUILD_ARG3

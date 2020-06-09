@@ -14,8 +14,6 @@ echo "------------------------------------------------"
 echo "|      STARTED: KIRA INFRA DELETE v0.0.1       |"
 echo "------------------------------------------------"
 
-cd $KIRA_WORKSTATION
-
 $KIRA_SCRIPTS/container-delete.sh "validator-1"
 $KIRA_SCRIPTS/container-delete.sh "validator-2"
 $KIRA_SCRIPTS/container-delete.sh "validator-3"

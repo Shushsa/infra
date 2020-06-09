@@ -46,9 +46,9 @@ systemctl restart docker
 
 sleep 3
 
-source $KIRA_WORKSTATION/scripts/update-base-image.sh 
-source $KIRA_WORKSTATION/scripts/update-tools-image.sh 
-source $KIRA_WORKSTATION/scripts/update-validator-image.sh 
+source $WORKSTATION_SCRIPTS/update-base-image.sh 
+source $WORKSTATION_SCRIPTS/update-tools-image.sh 
+source $WORKSTATION_SCRIPTS/update-validator-image.sh 
 
 cd $KIRA_WORKSTATION
 VALIDATOR_1_EXISTS=$($KIRA_SCRIPTS/container-exists.sh "validator-1" || echo "error")
@@ -87,7 +87,7 @@ docker run -d \
  validator:latest
 
 echo "INFO: Witing for validator-1 to start..."
-source $KIRA_WORKSTATION/scripts/await-container-init.sh "validator-1" "300" "10"
+source $WORKSTATION_SCRIPTS/await-container-init.sh "validator-1" "300" "10"
 
 echo "INFO: Inspecting if validator-1 is running..."
 docker exec -it validator-1 sekaid version || echo "ERROR: sekai not found"

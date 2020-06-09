@@ -13,8 +13,6 @@ echo "------------------------------------------------"
 echo "|    STARTED: VALIDATOR IMAGE UPDATE v0.0.1    |"
 echo "------------------------------------------------"
 
-cd $KIRA_WORKSTATION
-
 VALIDATOR_IMAGE_EXISTS=$($WORKSTATION_SCRIPTS/image-updated.sh "$KIRA_DOCKER/validator" "validator" "latest" "$SEKAI_INTEGRITY" || echo "error")
 if [ "$VALIDATOR_IMAGE_EXISTS" == "False" ] ; then
     echo "All imags were updated, starting validator image..."
