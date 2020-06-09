@@ -98,11 +98,13 @@ if [ $VALIDATOR_INDEX -eq 1 ] ; then
         echo ${KEYRINGPASS} | sekaid add-genesis-account $(sekaicli keys show "test-$i" -a) 100000000000000$DENOM,10000000samoleans
         #signing key has to be rotated as it is used by default by the gentx
         cat "$SELF_CONFIGS/signing-keys/signing-$i.key" > $SIGNING_KEY_PATH
-        echo "INFO: Creating validator-$i account..."
+        cat "$SELF_CONFIGS/node-keys/node-key-$i.key" > $NODE_KEY_PATH
+        TMP_NODE_ID=$(sekaid tendermint show-node-id)
+        echo "INFO: Creating validator-$i account, Node Id: $TMP_NODE_ID..."
         $SELF_SCRIPTS/add-account.sh "validator-$i" "validator-keys/validator-$i" $KEYRINGPASS $PASSPHRASE
         echo ${KEYRINGPASS} | sekaid add-genesis-account $(sekaicli keys show "validator-$i" -a) 100000000000000$DENOM
         echo "INFO: Creating genesis transaction for validator-$i account..."
-        sekaid gentx --trace --name "validator-$i" --amount 90000000000000$DENOM << EOF
+        sekaid gentx --trace --name "validator-$i" --amount "1000${DENOM}" --node-id "$TMP_NODE_ID" << EOF
 $KEYRINGPASS
 $KEYRINGPASS
 $KEYRINGPASS
@@ -122,7 +124,8 @@ else
     exit 1
 fi
 
-# original signing key has to recovered
+# original signing key and node-id has to be recovered
+cat $NODE_KEY > $NODE_KEY_PATH
 cat $SIGNING_KEY > $SIGNING_KEY_PATH
 
 cat > /etc/systemd/system/sekaid.service << EOL
