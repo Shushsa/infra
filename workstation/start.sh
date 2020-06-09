@@ -42,7 +42,6 @@ $KIRA_SCRIPTS/container-delete.sh "validator-1"
 $KIRA_SCRIPTS/container-delete.sh "validator-2"
 $KIRA_SCRIPTS/container-delete.sh "validator-3"
 $KIRA_SCRIPTS/container-delete.sh "validator-4"
-systemctl restart docker
 
 sleep 3
 
