@@ -13,7 +13,7 @@ CARGO_ENV="/home/$KIRA_USER/.cargo/env"
 
 KIRA_STATE=/kira/state
 KIRA_REGISTRY_PORT=5000
-KIRA_REGISTRY="localhost:$KIRA_REGISTRY_PORT"
+KIRA_REGISTRY="127.0.0.1:$KIRA_REGISTRY_PORT"
 
 KIRA_IMG="${KIRA_INFRA}/common/img"
 KIRA_DOCKER="${KIRA_INFRA}/docker"
@@ -34,7 +34,7 @@ mkdir -p "/home/$KIRA_USER/.cargo"
 mkdir -p "/home/$KIRA_USER/Desktop"
 mkdir -p $SOURCES_LIST
 
-KIRA_SETUP_KIRA_ENV="$KIRA_SETUP/kira-env-v0.0.26" 
+KIRA_SETUP_KIRA_ENV="$KIRA_SETUP/kira-env-v0.0.27" 
 if [ ! -f "$KIRA_SETUP_KIRA_ENV" ] ; then
     echo "INFO: Setting up kira environment variables"
     touch $CARGO_ENV
