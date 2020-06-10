@@ -1,5 +1,5 @@
 # (rm -fv $KIRA_INFRA/docker/validator/Dockerfile) && nano $KIRA_INFRA/docker/validator/Dockerfile
-FROM kira-local.docker.reg:5001/tools-image:latest
+FROM localhost:5000/tools-image:latest
 
 ARG BUILD_HASH
 ARG BRANCH
