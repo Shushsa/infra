@@ -76,7 +76,7 @@ if [[ $($WORKSTATION_SCRIPTS/image-updated.sh "$IMAGE_DIR" "$IMAGE_NAME" "$IMAGE
      --build-arg $ARG1_KEY="$ARG1_VAL" \
      --build-arg $ARG2_KEY="$ARG2_VAL" \
      --build-arg $ARG3_KEY="$ARG3_VAL" \
-     --f file "$IMAGE_DIR/Dockerfile" . 
+     --file "$IMAGE_DIR/Dockerfile" . 
 
     docker image ls # list docker images
 
