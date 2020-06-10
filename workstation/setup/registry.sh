@@ -9,13 +9,12 @@ source $ETC_PROFILE &> /dev/null
 if [ "$DEBUG_MODE" == "True" ] ; then set -x ; else set +x ; fi
 
 # ensure docker registry exists
-KIRA_SETUP_REGISTRY="$KIRA_SETUP/registry-v0.0.6-$KIRA_REGISTRY_PORT"
+KIRA_SETUP_REGISTRY="$KIRA_SETUP/registry-v0.0.7-$KIRA_REGISTRY_PORT"
 if [[ $(${KIRA_SCRIPTS}/container-exists.sh "registry") != "True" ]] || [ ! -f "$KIRA_SETUP_REGISTRY" ] ; then
     echo "Container 'registry' does NOT exist or update is required, creating..."
     ${KIRA_SCRIPTS}/container-delete.sh "registry"
     docker run -d \
  -p $KIRA_REGISTRY_PORT:5000 \
- --network host \
  --restart=always \
  --name registry \
  -e REGISTRY_STORAGE_DELETE_ENABLED=true \
