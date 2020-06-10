@@ -98,7 +98,7 @@ if [ $VALIDATOR_INDEX -eq 1 ] ; then
         echo ${KEYRINGPASS} | sekaid add-genesis-account $(sekaicli keys show "test-$i" -a) 100000000000000$DENOM,10000000samoleans
         #signing key has to be rotated as it is used by default by the gentx
         cat "$SELF_CONFIGS/signing-keys/signing-$i.key" > $SIGNING_KEY_PATH
-        cat "$SELF_CONFIGS/node-keys/node-key-$i.key" > $NODE_KEY_PATH
+        cat "$SELF_CONFIGS/node-keys/node-key-$i.json" > $NODE_KEY_PATH
         TMP_NODE_ID=$(sekaid tendermint show-node-id)
         echo "INFO: Creating validator-$i account, Node Id: $TMP_NODE_ID..."
         $SELF_SCRIPTS/add-account.sh "validator-$i" "validator-keys/validator-$i" $KEYRINGPASS $PASSPHRASE
