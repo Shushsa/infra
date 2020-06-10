@@ -61,7 +61,7 @@ while : ; do
     [ ! -z "$ACCEPT" ] && break
     
     if [ "${OPTION,,}" == "i" ] ; then
-        gnome-terminal -- docker exec -it $(docker ps -aqf "name=^${NAME}$") bash
+        gnome-terminal -- docker exec -it $(docker ps -aqf "name=^${NAME}$") /bin/bash
         break
     elif [ "${OPTION,,}" == "l" ] ; then
         rm -rfv $CONTAINER_DUPM
@@ -111,5 +111,6 @@ while : ; do
     fi
 done
 
+read -d'' -s -n1 -p 'Press any key to continue...'
 sleep 1
 source $KIRA_MANAGER/container-manager.sh $NAME
