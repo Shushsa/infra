@@ -40,7 +40,7 @@ while : ; do
     BREAK="False"
     for ((i=1;i<=$VALIDATORS_COUNT;i++)); do
         if [ "$OPTION" == "$i" ] ; then
-            gnome-terminal -- bash -c "$KIRA_MANAGER/container-manager.sh 'validator-1' ; read -d'' -s -n1 -p 'Press any key to exit...' && exit"
+            gnome-terminal -- bash -c "$KIRA_MANAGER/container-manager.sh validator-$i ; read -d'' -s -n1 -p 'Press any key to exit...' && exit"
             BREAK="True"
             break
         fi 
