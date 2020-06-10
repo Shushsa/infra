@@ -36,8 +36,6 @@ echo "|_______________________________________________"
 echo "INFO: Updating infra repository and fetching changes..."
 $KIRA_WORKSTATION/setup.sh "$SKIP_UPDATE"
 source $ETC_PROFILE &> /dev/null
-MAX_VALIDATORS_COUNT=4
-VALIDATORS_COUNT=2
 
 $KIRA_SCRIPTS/container-restart.sh "registry"
 for ((i=1;i<=$MAX_VALIDATORS_COUNT;i++)); do
@@ -58,7 +56,6 @@ source $WORKSTATION_SCRIPTS/update-validator-image.sh
 cd $KIRA_WORKSTATION
 
 GENESIS_SOUCE="/root/.sekaid/config/genesis.json"
-DOCKER_COMMON="/docker/shared/common"
 GENESIS_DESTINATION="$DOCKER_COMMON/genesis.json"
 mkdir -p $DOCKER_COMMON
 rm -f $GENESIS_DESTINATION
@@ -104,7 +101,6 @@ for ((i=1;i<=$VALIDATORS_COUNT;i++)); do
     else 
         echo "SUCCESS: sekaid $SEKAID_VERSION was found" 
     fi 
-
 
     if [ $VALIDATOR_INDEX -eq 1 ] ; then
         echo "INFO: Saving genesis file..."

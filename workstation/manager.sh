@@ -10,8 +10,7 @@ while : ; do
     source $ETC_PROFILE &> /dev/null
     if [ "$DEBUG_MODE" == "True" ] ; then set -x ; else set +x ; fi
     REGISTRY_STATUS=$(docker inspect $(docker ps --no-trunc -aqf name=registry) | jq -r '.[0].State.Status' || echo "Error")
-    VALIDATOR_1_STATUS=$(docker inspect $(docker ps --no-trunc -aqf name=validator-1) | jq -r '.[0].State.Status' || echo "Error")
-    
+
     clear
     
     echo -e "\e[33;1m------------------------------------------------"
@@ -19,7 +18,10 @@ while : ; do
     echo "|             $(date '+%d/%m/%Y %H:%M:%S')              |"
     echo "|----------------------------------------------|"
     echo "| [0] | Inspect registry container             : $REGISTRY_STATUS"
-    echo "| [1] | Inspect validator-1 container          : $VALIDATOR_1_STATUS"
+    for ((i=1;i<=$VALIDATORS_COUNT;i++)); do
+        VALIDATOR_STATUS=$(docker inspect $(docker ps --no-trunc -aqf name=validator-$i) | jq -r '.[0].State.Status' || echo "Error")
+        echo "| [$i] | Inspect validator-$i container          : $VALIDATOR_STATUS"
+    done
     echo "|----------------------------------------------|"
     echo "| [I] | Re-INITALIZE Environment               |"
     echo "| [R] | Hard RESET Repos & Infrastructure      |"
@@ -34,12 +36,20 @@ while : ; do
     read  -d'' -s -n1 -t 5 -p "Press [KEY] to select option: " OPTION || OPTION=""
     [ ! -z "$OPTION" ] && echo "" && read -d'' -s -n1 -p "Press [ENTER] to confirm [${OPTION^^}] option or any other key to try again" ACCEPT
     [ ! -z "$ACCEPT" ] && break
+
+    BREAK="False"
+    for ((i=1;i<=$VALIDATORS_COUNT;i++)); do
+        if [ "$OPTION" == "$i" ] ; then
+            gnome-terminal -- bash -c "$KIRA_MANAGER/container-manager.sh 'validator-1' ; read -d'' -s -n1 -p 'Press any key to exit...' && exit"
+            BREAK="True"
+            break
+        fi 
+    done
+
+    [ "$BREAK" == "True" ] && break
     
     if [ "$OPTION" == "0" ] ; then
         gnome-terminal -- bash -c "$KIRA_MANAGER/container-manager.sh 'registry' ; read -d'' -s -n1 -p 'Press any key to exit...' && exit"
-        break
-    elif [ "$OPTION" == "1" ] ; then
-        gnome-terminal -- bash -c "$KIRA_MANAGER/container-manager.sh 'validator-1' ; read -d'' -s -n1 -p 'Press any key to exit...' && exit"
         break
     elif [ "${OPTION,,}" == "a" ] ; then
         echo "INFO: Starting git manager..."

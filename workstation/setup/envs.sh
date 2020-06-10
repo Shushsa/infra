@@ -15,6 +15,8 @@ KIRA_STATE=/kira/state
 KIRA_REGISTRY_PORT=5000
 KIRA_REGISTRY_NAME="localhost"
 KIRA_REGISTRY="$KIRA_REGISTRY_NAME:$KIRA_REGISTRY_PORT"
+MAX_VALIDATORS_COUNT=4
+VALIDATORS_COUNT=2
 
 KIRA_IMG="${KIRA_INFRA}/common/img"
 KIRA_DOCKER="${KIRA_INFRA}/docker"
@@ -29,13 +31,14 @@ GOBIN="${GOROOT}/bin"
 RUSTFLAGS="-Ctarget-feature=+aes,+ssse3"
 DOTNET_ROOT="/usr/bin/dotnet"
 SOURCES_LIST="/etc/apt/sources.list.d"
+DOCKER_COMMON="/docker/shared/common"
 
 mkdir -p $KIRA_STATE
 mkdir -p "/home/$KIRA_USER/.cargo"
 mkdir -p "/home/$KIRA_USER/Desktop"
 mkdir -p $SOURCES_LIST
 
-KIRA_SETUP_KIRA_ENV="$KIRA_SETUP/kira-env-v0.0.30" 
+KIRA_SETUP_KIRA_ENV="$KIRA_SETUP/kira-env-v0.0.31" 
 if [ ! -f "$KIRA_SETUP_KIRA_ENV" ] ; then
     echo "INFO: Setting up kira environment variables"
     touch $CARGO_ENV
@@ -44,6 +47,9 @@ if [ ! -f "$KIRA_SETUP_KIRA_ENV" ] ; then
     rm -f /var/crash/*
     CDHelper text lineswap --insert="enabled=0" --prefix="enabled=" --path=/etc/default/apport --append-if-found-not=True
 
+    CDHelper text lineswap --insert="DOCKER_COMMON=$DOCKER_COMMON" --prefix="DOCKER_COMMON=" --path=$ETC_PROFILE --append-if-found-not=True --silent=$SILENT_MODE
+    CDHelper text lineswap --insert="VALIDATORS_COUNT=$VALIDATORS_COUNT" --prefix="VALIDATORS_COUNT=" --path=$ETC_PROFILE --append-if-found-not=True --silent=$SILENT_MODE
+    CDHelper text lineswap --insert="MAX_VALIDATORS_COUNT=$MAX_VALIDATORS_COUNT" --prefix="MAX_VALIDATORS_COUNT=" --path=$ETC_PROFILE --append-if-found-not=True --silent=$SILENT_MODE
     CDHelper text lineswap --insert="WORKSTATION_SCRIPTS=$WORKSTATION_SCRIPTS" --prefix="WORKSTATION_SCRIPTS=" --path=$ETC_PROFILE --append-if-found-not=True --silent=$SILENT_MODE
     CDHelper text lineswap --insert="SOURCES_LIST=$SOURCES_LIST" --prefix="SOURCES_LIST=" --path=$ETC_PROFILE --append-if-found-not=True --silent=$SILENT_MODE
     CDHelper text lineswap --insert="GO_VERSION=$GO_VERSION" --prefix="GO_VERSION=" --path=$ETC_PROFILE --append-if-found-not=True --silent=$SILENT_MODE
