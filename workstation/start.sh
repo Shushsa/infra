@@ -90,19 +90,21 @@ for ((i=1;i<=$VALIDATORS_COUNT;i++)); do
      -v $DOCKER_COMMON:"/common" \
      validator:latest
 
+    # NOTE: Following actions destroy $i variable so VALIDATOR_INDEX is needed
     echo "INFO: Witing for validator-$i to start..."
+    VALIDATOR_INDEX=$i
     sleep 5
-    $WORKSTATION_SCRIPTS/await-container-init.sh "validator-$i" "300" "10"
+    source $WORKSTATION_SCRIPTS/await-container-init.sh "validator-$i" "300" "10"
 
-    echo "INFO: Inspecting if validator-$i is running..."
-    docker exec -it "validator-$i" sekaid version || echo "ERROR: sekaid not found" && exit 1
+    echo "INFO: Inspecting if validator-$VALIDATOR_INDEX is running..."
+    docker exec -it "validator-$VALIDATOR_INDEX" sekaid version || echo "ERROR: sekaid not found" && exit 1
 
-    if [ $i -eq 1 ] ; then
+    if [ $VALIDATOR_INDEX -eq 1 ] ; then
         echo "INFO: Saving genesis file..."
         docker cp $NAME:$GENESIS_SOUCE $GENESIS_DESTINATION
         
         if [ ! -f "$GENESIS_DESTINATION" ] ; then
-            echo "ERROR: Failed to copy genesis file from validator-1"
+            echo "ERROR: Failed to copy genesis file from validator-$VALIDATOR_INDEX"
             exit 1
         fi
     fi
