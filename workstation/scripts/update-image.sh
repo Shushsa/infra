@@ -61,8 +61,21 @@ if [[ $($WORKSTATION_SCRIPTS/image-updated.sh "$IMAGE_DIR" "$IMAGE_NAME" "$IMAGE
     # NOTE: This script automaitcaly removes KIRA_SETUP_FILE file (rm -fv $KIRA_SETUP_FILE)
     $WORKSTATION_SCRIPTS/delete-image.sh "$IMAGE_DIR" "$IMAGE_NAME" "$IMAGE_TAG"
 
+    ARG1_KEY="$( cut -d '=' -f 1 <<< "$BUILD_ARG1" )"
+    ARG1_VAL="$( cut -d '=' -f 2 <<< "$BUILD_ARG1" )"
+    ARG2_KEY="$( cut -d '=' -f 1 <<< "$BUILD_ARG2" )"
+    ARG2_VAL="$( cut -d '=' -f 2 <<< "$BUILD_ARG2" )"
+    ARG3_KEY="$( cut -d '=' -f 1 <<< "$BUILD_ARG3" )"
+    ARG3_VAL="$( cut -d '=' -f 2 <<< "$BUILD_ARG3" )"
+
     echo "Creating new '$IMAGE_NAME' image..."
-    docker build --network=host --tag $IMAGE_NAME ./ --build-arg BUILD_HASH=$NEW_HASH --build-arg $BUILD_ARG1 --build-arg $BUILD_ARG2 --build-arg $BUILD_ARG3
+    docker build ./ \
+     --network=host \
+     --tag $IMAGE_NAME \
+     --build-arg BUILD_HASH="$NEW_HASH" \ 
+     --build-arg $ARG1_KEY="$ARG1_VAL" \
+     --build-arg $ARG2_KEY="$ARG2_VAL" \
+     --build-arg $ARG3_KEY="$ARG3_VAL" \
 
     docker image ls # list docker images
 
