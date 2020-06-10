@@ -61,7 +61,7 @@ while : ; do
     [ ! -z "$ACCEPT" ] && break
     
     if [ "${OPTION,,}" == "i" ] ; then
-        gnome-terminal -- docker exec -it $(docker ps -aqf "name=^${NAME}$") /bin/bash
+        gnome-terminal --disable-factory -- bash -c "docker exec -it $ID /bin/bash || docker exec -it $ID /bin/sh ; read -d'' -s -n1 -p 'Press any key to exit...' && exit"
         break
     elif [ "${OPTION,,}" == "l" ] ; then
         rm -rfv $CONTAINER_DUPM
