@@ -108,6 +108,10 @@ for ((i=1;i<=$VALIDATORS_COUNT;i++)); do
             exit 1
         fi
     fi
+
+    # we have to recover the index back before progressing
+    i=$VALIDATOR_INDEX
+    echo "SUCCESS: validator-$i is up and running"
 done
 
 # success_end file is created when docker startup suceeds
