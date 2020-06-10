@@ -65,6 +65,7 @@ ${KIRA_SCRIPTS}/awshelper-update.sh "v0.12.4"
 
 source $KIRA_WORKSTATION/setup/certs.sh
 source $KIRA_WORKSTATION/setup/envs.sh
+source $KIRA_WORKSTATION/setup/hosts.sh
 source $KIRA_WORKSTATION/setup/tools.sh
 source $KIRA_WORKSTATION/setup/npm.sh
 source $KIRA_WORKSTATION/setup/rust.sh

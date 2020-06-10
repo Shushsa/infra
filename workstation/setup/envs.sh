@@ -13,7 +13,8 @@ CARGO_ENV="/home/$KIRA_USER/.cargo/env"
 
 KIRA_STATE=/kira/state
 KIRA_REGISTRY_PORT=5001
-KIRA_REGISTRY="127.0.0.1:$KIRA_REGISTRY_PORT"
+KIRA_REGISTRY_NAME="kira-local.docker.reg"
+KIRA_REGISTRY="$KIRA_REGISTRY_NAME:$KIRA_REGISTRY_PORT"
 
 KIRA_IMG="${KIRA_INFRA}/common/img"
 KIRA_DOCKER="${KIRA_INFRA}/docker"
@@ -34,7 +35,7 @@ mkdir -p "/home/$KIRA_USER/.cargo"
 mkdir -p "/home/$KIRA_USER/Desktop"
 mkdir -p $SOURCES_LIST
 
-KIRA_SETUP_KIRA_ENV="$KIRA_SETUP/kira-env-v0.0.28" 
+KIRA_SETUP_KIRA_ENV="$KIRA_SETUP/kira-env-v0.0.29" 
 if [ ! -f "$KIRA_SETUP_KIRA_ENV" ] ; then
     echo "INFO: Setting up kira environment variables"
     touch $CARGO_ENV
@@ -50,6 +51,7 @@ if [ ! -f "$KIRA_SETUP_KIRA_ENV" ] ; then
     CDHelper text lineswap --insert="ETC_PROFILE=$ETC_PROFILE" --prefix="ETC_PROFILE=" --path=$ETC_PROFILE --append-if-found-not=True --silent=$SILENT_MODE
     CDHelper text lineswap --insert="KIRA_STATE=$KIRA_STATE" --prefix="KIRA_STATE=" --path=$ETC_PROFILE --append-if-found-not=True --silent=$SILENT_MODE
     CDHelper text lineswap --insert="KIRA_REGISTRY_PORT=$KIRA_REGISTRY_PORT" --prefix="KIRA_REGISTRY_PORT=" --path=$ETC_PROFILE --append-if-found-not=True --silent=$SILENT_MODE
+    CDHelper text lineswap --insert="KIRA_REGISTRY_NAME=$KIRA_REGISTRY_NAME" --prefix="KIRA_REGISTRY_NAME=" --path=$ETC_PROFILE --append-if-found-not=True --silent=$SILENT_MODE
     CDHelper text lineswap --insert="KIRA_REGISTRY=$KIRA_REGISTRY" --prefix="KIRA_REGISTRY=" --path=$ETC_PROFILE --append-if-found-not=True --silent=$SILENT_MODE
     CDHelper text lineswap --insert="KIRA_DOCKER=$KIRA_DOCKER" --prefix="KIRA_DOCKER=" --path=$ETC_PROFILE --append-if-found-not=True --silent=$SILENT_MODE
     CDHelper text lineswap --insert="NGINX_CONFIG=$NGINX_CONFIG" --prefix="NGINX_CONFIG=" --path=$ETC_PROFILE --append-if-found-not=True --silent=$SILENT_MODE
