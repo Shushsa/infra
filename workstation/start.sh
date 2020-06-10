@@ -97,7 +97,14 @@ for ((i=1;i<=$VALIDATORS_COUNT;i++)); do
     source $WORKSTATION_SCRIPTS/await-container-init.sh "validator-$i" "300" "10"
 
     echo "INFO: Inspecting if validator-$VALIDATOR_INDEX is running..."
-    docker exec -it "validator-$VALIDATOR_INDEX" sekaid version || echo "ERROR: sekaid not found" && exit 1
+    SEKAID_VERSION=$(docker exec -it "validator-$VALIDATOR_INDEX" sekaid version || echo "error")
+    if [ "$SEKAID_VERSION" == "error" ] ; then 
+        echo "ERROR: sekaid was NOT found" 
+        exit 1
+    else 
+        echo "SUCCESS: sekaid $SEKAID_VERSION was found" 
+    fi 
+
 
     if [ $VALIDATOR_INDEX -eq 1 ] ; then
         echo "INFO: Saving genesis file..."
