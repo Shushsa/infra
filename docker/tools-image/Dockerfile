@@ -1,4 +1,4 @@
-FROM localhost:5000/base-image:latest
+FROM 127.0.0.1:5001/base-image:latest
 
 # Local Update
 # (rm -fv $KIRA_INFRA/docker/tools-image/Dockerfile) && nano $KIRA_INFRA/docker/tools-image/Dockerfile

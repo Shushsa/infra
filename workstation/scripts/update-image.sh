@@ -73,7 +73,7 @@ else
     echo "INFO: Image '$IMAGE_DIR' ($NEW_HASH) did NOT change" 
 fi
 
-curl localhost:5000/v2/_catalog
+curl "$KIRA_REGISTRY/v2/_catalog"
 curl "$KIRA_REGISTRY/v2/$IMAGE_NAME/tags/list"
 
 echo "------------------------------------------------"

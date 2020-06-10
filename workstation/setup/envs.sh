@@ -12,7 +12,7 @@ if [ "$DEBUG_MODE" == "True" ] ; then set -x ; else set +x ; fi
 CARGO_ENV="/home/$KIRA_USER/.cargo/env"
 
 KIRA_STATE=/kira/state
-KIRA_REGISTRY_PORT=5000
+KIRA_REGISTRY_PORT=5001
 KIRA_REGISTRY="127.0.0.1:$KIRA_REGISTRY_PORT"
 
 KIRA_IMG="${KIRA_INFRA}/common/img"

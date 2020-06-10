@@ -9,24 +9,26 @@ source $ETC_PROFILE &> /dev/null
 if [ "$DEBUG_MODE" == "True" ] ; then set -x ; else set +x ; fi
 
 # ensure docker registry exists
-KIRA_SETUP_REGISTRY="$KIRA_SETUP/registry-v0.0.2"
+KIRA_SETUP_REGISTRY="$KIRA_SETUP/registry-v0.0.3-$KIRA_REGISTRY_PORT"
 if [[ $(${KIRA_SCRIPTS}/container-exists.sh "registry") != "True" ]] || [ ! -f "$KIRA_SETUP_REGISTRY" ] ; then
     echo "Container 'registry' does NOT exist or update is required, creating..."
     ${KIRA_SCRIPTS}/container-delete.sh "registry"
     docker run -d \
- -p $KIRA_REGISTRY:$KIRA_REGISTRY_PORT \
+ -p $KIRA_REGISTRY:5000 \
  --restart=always \
  --name registry \
  -e REGISTRY_STORAGE_DELETE_ENABLED=true \
+ -e REGISTRY_LOG_LEVEL=debug \
  registry:2.7.1
 
     DOCKER_DAEMON_JSON="/etc/docker/daemon.json"
     rm -f -v $DOCKER_DAEMON_JSON
     cat > $DOCKER_DAEMON_JSON << EOL
 {
-  "insecure-registries" : ["localhost:5000","127.0.0.1:5000"]
+  "insecure-registries" : ["http://localhost:$KIRA_REGISTRY_PORT","http://127.0.0.1:$KIRA_REGISTRY_PORT","localhost:$KIRA_REGISTRY_PORT","127.0.0.1:$KIRA_REGISTRY_PORT"]
 }
 EOL
+    systemctl restart docker
     touch $KIRA_SETUP_REGISTRY
 else
     echo "Container 'registry' already exists."
