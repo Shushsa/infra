@@ -111,6 +111,5 @@ while : ; do
     fi
 done
 
-read -d'' -s -n1 -p 'Press any key to continue...'
 sleep 1
 source $KIRA_MANAGER/container-manager.sh $NAME

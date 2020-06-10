@@ -20,8 +20,8 @@ SIGNING_KEY_PATH="$SEKAID_CONFIG/priv_validator_key.json"
 
 # key's can be passed from json in the config directory 
 [ -z "$VALIDATOR_INDEX" ] && VALIDATOR_INDEX=1
-[ -z "$NODE_KEY" ] && NODE_KEY="$SELF_CONFIGS/node-keys/node-key-${VALIDATOR_INDEX}.json"
-[ -z "$SIGNING_KEY" ] && SIGNING_KEY="$SELF_CONFIGS/signing-keys/signing-${VALIDATOR_INDEX}.key"
+[ ! -f "$NODE_KEY" ] && NODE_KEY="$SELF_CONFIGS/node-keys/node-key-${VALIDATOR_INDEX}.json"
+[ ! -f "$SIGNING_KEY" ] && SIGNING_KEY="$SELF_CONFIGS/signing-keys/signing-${VALIDATOR_INDEX}.key"
 
 # external variables: P2P_PROXY_PORT, RPC_PROXY_PORT, LCD_PROXY_PORT, RLY_PROXY_PORT
 P2P_LOCAL_PORT=26656
@@ -69,6 +69,9 @@ if [ -f "$NODE_KEY" ] ; then
     rm -f -v $NODE_KEY_PATH
     cat $NODE_KEY > $NODE_KEY_PATH
     sed -i 's/\\\"/\"/g' $NODE_KEY_PATH # unescape if needed
+else
+    echo "ERROR: Node key was not found"
+    exit 1
 fi
 
 echo "INFO: Node ID: $(sekaid tendermint show-node-id)"
@@ -81,7 +84,8 @@ if [ -f "$SIGNING_KEY" ] ; then
     cat $SIGNING_KEY > $SIGNING_KEY_PATH
     sed -i 's/\\\"/\"/g' $SIGNING_KEY_PATH # unescape
 else
-   echo "Signing key will NOT be imported"
+   echo "ERROR: Signing key was not found"
+   exit 1
 fi
 
 # NOTE: ensure that the sekai rpc is open to all connections

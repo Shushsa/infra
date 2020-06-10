@@ -173,7 +173,12 @@ else
     echo "INFO: Your current public SSH Key:"
     echo -e "\e[33;1m$SSH_KEY_PUB\e[0m"
     
-    echo -e "\e[36;1mInput your PRIVATE git SSH key or press [ENTER] to skip: \e[0m\c" && read NEW_SSH_KEY
+    echo -e "\e[36;1mPress [Y] and input your PRIVATE git SSH key or press [ENTER] to skip: \e[0m\c" && read NEW_SSH_KEY
+    if [ "${NEW_SSH_KEY,,}" == "y" ] ; then
+        echo "INFO: To save input press [Ctrl+D] or [Ctrl+C] to exit without making changes"
+        NEW_SSH_KEY=$(</dev/stdin) || echo "WARNING: Failed to save your private key" && NEW_SSH_KEY=""
+    fi
+
     if [ ! -z "$NEW_SSH_KEY" ] ; then
         echo $NEW_SSH_KEY > $SSH_KEY_PRIV_PATH
         ssh-keygen -y -f $SSH_KEY_PRIV_PATH > $SSH_KEY_PUB_PATH
