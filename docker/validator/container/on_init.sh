@@ -19,9 +19,9 @@ SEKAICLI_HOME=$HOME/.sekaicli
 SIGNING_KEY_PATH="$SEKAID_CONFIG/priv_validator_key.json"
 
 # key's can be passed from json in the config directory 
-[ ! -z "$NODE_KEY" ] && NODE_KEY="$SELF_CONFIGS/node-keys/${NODE_KEY}.json"
-[ ! -z "$SIGNING_KEY" ] && SIGNING_KEY="$SELF_CONFIGS/signing-keys/${SIGNING_KEY}.key"
-[ ! -z "$VALIDATOR_INDEX" ] && VALIDATOR_INDEX=1
+[ -z "$VALIDATOR_INDEX" ] && VALIDATOR_INDEX=1
+[ -z "$NODE_KEY" ] && NODE_KEY="$SELF_CONFIGS/node-keys/node-key-${VALIDATOR_INDEX}.json"
+[ -z "$SIGNING_KEY" ] && SIGNING_KEY="$SELF_CONFIGS/signing-keys/signing-${VALIDATOR_INDEX}.key"
 
 # external variables: P2P_PROXY_PORT, RPC_PROXY_PORT, LCD_PROXY_PORT, RLY_PROXY_PORT
 P2P_LOCAL_PORT=26656
@@ -29,6 +29,10 @@ RPC_LOCAL_PORT=26657
 LCD_LOCAL_PORT=1317
 RLY_LOCAL_PORT=8000
 
+[ -z "$P2P_PROXY_PORT" ] && P2P_PROXY_PORT="10000"
+[ -z "$RPC_PROXY_PORT" ] && RPC_PROXY_PORT="10001"
+[ -z "$LCD_PROXY_PORT" ] && LCD_PROXY_PORT="10002"
+[ -z "$RLY_PROXY_PORT" ] && RLY_PROXY_PORT="10003"
 
 [ -z "$NODE_ADDESS" ] && NODE_ADDESS="tcp://localhost:$RPC_LOCAL_PORT"
 [ -z "$CHAIN_JSON_FULL_PATH" ] && CHAIN_JSON_FULL_PATH="$SELF_CONFIGS/$CHAIN_ID.json"
@@ -36,10 +40,6 @@ RLY_LOCAL_PORT=8000
 [ -z "$KEYRINGPASS" ] && KEYRINGPASS="1234567890"
 [ -z "$MONIKER" ] && MONIKER="Test Chain Moniker"
 
-[ -z "$P2P_PROXY_PORT" ] && P2P_PROXY_PORT="10000"
-[ -z "$RPC_PROXY_PORT" ] && RPC_PROXY_PORT="10001"
-[ -z "$LCD_PROXY_PORT" ] && LCD_PROXY_PORT="10002"
-[ -z "$RLY_PROXY_PORT" ] && RLY_PROXY_PORT="10003"
 
 if [ -f "$CHAIN_JSON_FULL_PATH" ] ; then
     echo "Chain configuration file was defined, loading JSON"
@@ -104,7 +104,7 @@ if [ $VALIDATOR_INDEX -eq 1 ] ; then
         $SELF_SCRIPTS/add-account.sh "validator-$i" "validator-keys/validator-$i" $KEYRINGPASS $PASSPHRASE
         echo ${KEYRINGPASS} | sekaid add-genesis-account $(sekaicli keys show "validator-$i" -a) 100000000000000$DENOM
         echo "INFO: Creating genesis transaction for validator-$i account..."
-        sekaid gentx --trace --name "validator-$i" --amount "1000${DENOM}" --node-id "$TMP_NODE_ID" << EOF
+        sekaid gentx --trace --name "validator-$i" --amount "1000${DENOM}" --node-id "$TMP_NODE_ID" --details "Kira Hub Validator $i" << EOF
 $KEYRINGPASS
 $KEYRINGPASS
 $KEYRINGPASS

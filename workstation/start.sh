@@ -36,75 +36,34 @@ echo "|_______________________________________________"
 echo "INFO: Updating infra repository and fetching changes..."
 $KIRA_WORKSTATION/setup.sh "$SKIP_UPDATE"
 source $ETC_PROFILE &> /dev/null
+MAX_VALIDATORS_COUNT=4
+VALIDATORS_COUNT=2
 
 $KIRA_SCRIPTS/container-restart.sh "registry"
-$KIRA_SCRIPTS/container-delete.sh "validator-1"
-$KIRA_SCRIPTS/container-delete.sh "validator-2"
-$KIRA_SCRIPTS/container-delete.sh "validator-3"
-$KIRA_SCRIPTS/container-delete.sh "validator-4"
+for ((i=1;i<=$MAX_VALIDATORS_COUNT;i++)); do
+    $KIRA_SCRIPTS/container-delete.sh "validator-$i"
 
-sleep 3
+    VALIDATOR_EXISTS=$($KIRA_SCRIPTS/container-exists.sh "validator-$i" || echo "error")
+
+    if [ "$VALIDATOR_EXISTS" != "False" ] ; then
+        echo "ERROR: Failed to delete validator-$i container, status: ${VALIDATOR_EXISTS}"
+        exit 1
+    fi
+done
 
 source $WORKSTATION_SCRIPTS/update-base-image.sh 
 source $WORKSTATION_SCRIPTS/update-tools-image.sh 
 source $WORKSTATION_SCRIPTS/update-validator-image.sh 
 
 cd $KIRA_WORKSTATION
-VALIDATOR_1_EXISTS=$($KIRA_SCRIPTS/container-exists.sh "validator-1" || echo "error")
-VALIDATOR_2_EXISTS=$($KIRA_SCRIPTS/container-exists.sh "validator-2" || echo "error")
-VALIDATOR_3_EXISTS=$($KIRA_SCRIPTS/container-exists.sh "validator-3" || echo "error")
-VALIDATOR_4_EXISTS=$($KIRA_SCRIPTS/container-exists.sh "validator-4" || echo "error")
 
-if [ "$VALIDATOR_1_EXISTS" != "False" ] || [ "$VALIDATOR_2_EXISTS" != "False" ] || [ "$VALIDATOR_3_EXISTS" != "False" ]  || [ "$VALIDATOR_4_EXISTS" != "False" ] ; then
-    echo "ERROR: Failed to delete validator-1 container, status-v1: ${VALIDATOR_1_EXISTS}, status-v2: ${VALIDATOR_2_EXISTS}, status-v3: ${VALIDATOR_3_EXISTS}, status-v4: ${VALIDATOR_4_EXISTS}"
-    exit 1
-fi
-
-VALIDATORS_COUNT=2
-
-echo "INFO: Creating 'validator-1' container..."
-rm -fr "${KIRA_STATE}/validator-1"
-mkdir -p "${KIRA_STATE}/validator-1"
-docker run -d \
- --network="host" \
- --restart=always \
- --name validator-1 \
- -e VALIDATOR_INDEX=1 \
- -e VALIDATORS_COUNT=$VALIDATORS_COUNT \
- -e MONIKER="Local Kira Hub Validator 1" \
- -e P2P_PROXY_PORT=1100 \
- -e RPC_PROXY_PORT=1101 \
- -e LCD_PROXY_PORT=1102 \
- -e RLY_PROXY_PORT=1103 \
- -e EMAIL_NOTIFY="$EMAIL_NOTIFY" \
- -e SMTP_SECRET="$SMTP_SECRET" \
- -e NOTIFICATIONS="$NOTIFICATIONS" \
- -e DEBUG_MODE="$DEBUG_MODE" \
- -e SILENT_MODE="$SILENT_MODE" \
- -e NODE_KEY="node-key-1" \
- -e SIGNING_KEY="signing-1" \
- validator:latest
-
-echo "INFO: Witing for validator-1 to start..."
-source $WORKSTATION_SCRIPTS/await-container-init.sh "validator-1" "300" "10"
-
-echo "INFO: Inspecting if validator-1 is running..."
-docker exec -it validator-1 sekaid version || echo "ERROR: sekai not found"
-
-echo "INFO: Saving genesis file..."
-GENESIS_SOUCE="/root/.sekai/config/genesis.json"
+GENESIS_SOUCE="/root/.sekaid/config/genesis.json"
 DOCKER_COMMON="/docker/shared/common"
 GENESIS_DESTINATION="$DOCKER_COMMON/genesis.json"
 mkdir -p $DOCKER_COMMON
 rm -f $GENESIS_DESTINATION
-docker cp $NAME:$GENESIS_SOUCE $GENESIS_DESTINATION
 
-if [ ! -f "$GENESIS_DESTINATION" ] ; then
-    echo "ERROR: Failed to copy genesis file from validator-1"
-    exit 1
-fi
-
-for ((i=2;i<=$VALIDATORS_COUNT;i++)); do
+for ((i=1;i<=$VALIDATORS_COUNT;i++)); do
     echo "INFO: Creating validator-$i container..."
     rm -fr "${KIRA_STATE}/validator-$i"
     mkdir -p "${KIRA_STATE}/validator-$i"
@@ -119,27 +78,37 @@ for ((i=2;i<=$VALIDATORS_COUNT;i++)); do
      -e RPC_PROXY_PORT="${i}101" \
      -e LCD_PROXY_PORT="${i}102" \
      -e RLY_PROXY_PORT="${i}103" \
+     -p "${i}100":"${i}100" \
+     -p "${i}101":"${i}101" \
+     -p "${i}102":"${i}102" \
+     -p "${i}103":"${i}103" \
      -e EMAIL_NOTIFY="$EMAIL_NOTIFY" \
      -e SMTP_SECRET="$SMTP_SECRET" \
      -e NOTIFICATIONS="$NOTIFICATIONS" \
      -e DEBUG_MODE="$DEBUG_MODE" \
      -e SILENT_MODE="$SILENT_MODE" \
-     -e NODE_KEY="node-key-$i" \
-     -e SIGNING_KEY="signing-$i" \
      -v $DOCKER_COMMON:"/common"
      validator:latest
 
+    echo "INFO: Witing for validator-$i to start..."
+    sleep 5
+    source $WORKSTATION_SCRIPTS/await-container-init.sh "validator-$i" "300" "10"
+
     echo "INFO: Inspecting if validator-$i is running..."
-    docker exec -it "validator-$i" sekaid version || echo "ERROR: sekai not found"
+    docker exec -it "validator-$i" sekaid version || echo "ERROR: sekaid not found" && exit 1
+
+    if [ $i -eq 1 ] ; then
+        echo "INFO: Saving genesis file..."
+        docker cp $NAME:$GENESIS_SOUCE $GENESIS_DESTINATION
+        
+        if [ ! -f "$GENESIS_DESTINATION" ] ; then
+            echo "ERROR: Failed to copy genesis file from validator-1"
+            exit 1
+        fi
+    fi
 done
 
-
-
-
-
-
 # success_end file is created when docker startup suceeds
-
 echo "------------------------------------------------"
 echo "| FINISHED: KIRA INFRA START v0.0.1            |"
 echo "|  ELAPSED: $(($(date -u +%s)-$START_TIME_INFRA)) seconds"
