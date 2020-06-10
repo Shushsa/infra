@@ -87,7 +87,7 @@ for ((i=1;i<=$VALIDATORS_COUNT;i++)); do
      -e NOTIFICATIONS="$NOTIFICATIONS" \
      -e DEBUG_MODE="$DEBUG_MODE" \
      -e SILENT_MODE="$SILENT_MODE" \
-     -v $DOCKER_COMMON:"/common"
+     -v $DOCKER_COMMON:"/common" \
      validator:latest
 
     echo "INFO: Witing for validator-$i to start..."
