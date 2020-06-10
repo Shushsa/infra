@@ -15,7 +15,6 @@ if [[ $(${KIRA_SCRIPTS}/container-exists.sh "registry") != "True" ]] || [ ! -f "
     ${KIRA_SCRIPTS}/container-delete.sh "registry"
 docker run -d \
  -p $KIRA_REGISTRY_PORT:5000 \
- --expose 5000 \
  --restart=always \
  --name registry \
  -e REGISTRY_STORAGE_DELETE_ENABLED=true \
