@@ -92,7 +92,7 @@ for ((i=1;i<=$VALIDATORS_COUNT;i++)); do
 
     echo "INFO: Witing for validator-$i to start..."
     sleep 5
-    source $WORKSTATION_SCRIPTS/await-container-init.sh "validator-$i" "300" "10"
+    $WORKSTATION_SCRIPTS/await-container-init.sh "validator-$i" "300" "10"
 
     echo "INFO: Inspecting if validator-$i is running..."
     docker exec -it "validator-$i" sekaid version || echo "ERROR: sekaid not found" && exit 1
