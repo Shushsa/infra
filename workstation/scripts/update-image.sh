@@ -69,14 +69,7 @@ if [[ $($WORKSTATION_SCRIPTS/image-updated.sh "$IMAGE_DIR" "$IMAGE_NAME" "$IMAGE
     ARG3_VAL="$( cut -d '=' -f 2 <<< "$BUILD_ARG3" )"
 
     echo "Creating new '$IMAGE_NAME' image..."
-    docker build \
-     --network=host \
-     --tag $IMAGE_NAME \
-     --build-arg BUILD_HASH="$NEW_HASH" \ 
-     --build-arg $ARG1_KEY="$ARG1_VAL" \
-     --build-arg $ARG2_KEY="$ARG2_VAL" \
-     --build-arg $ARG3_KEY="$ARG3_VAL" \
-     --file "$IMAGE_DIR/Dockerfile" . 
+    docker build --network=host --tag="$IMAGE_NAME" --build-arg BUILD_HASH="$NEW_HASH" --build-arg "$ARG1_KEY=$ARG1_VAL"  --build-arg "$ARG2_KEY=$ARG2_VAL" --build-arg "$ARG3_KEY=$ARG3_VAL" --file "$IMAGE_DIR/Dockerfile" .
 
     docker image ls # list docker images
 
