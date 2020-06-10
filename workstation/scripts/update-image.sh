@@ -25,6 +25,15 @@ BUILD_ARG3=$7
 [ -z "$BUILD_ARG1" ] && BUILD_ARG1="BUILD_ARG1=none"
 [ -z "$BUILD_ARG2" ] && BUILD_ARG2="BUILD_ARG2=none"
 [ -z "$BUILD_ARG3" ] && BUILD_ARG3="BUILD_ARG3=none"
+ARG1_KEY="$( cut -d '=' -f 1 <<< "$BUILD_ARG1" )"
+ARG1_VAL="$( cut -d '=' -f 2 <<< "$BUILD_ARG1" )"
+ARG2_KEY="$( cut -d '=' -f 1 <<< "$BUILD_ARG2" )"
+ARG2_VAL="$( cut -d '=' -f 2 <<< "$BUILD_ARG2" )"
+ARG3_KEY="$( cut -d '=' -f 1 <<< "$BUILD_ARG3" )"
+ARG3_VAL="$( cut -d '=' -f 2 <<< "$BUILD_ARG3" )"
+[ -z "$ARG1_VAL" ] && ARG1_VAL="none"
+[ -z "$ARG2_VAL" ] && ARG2_VAL="none"
+[ -z "$ARG3_VAL" ] && ARG3_VAL="none"
 
 KIRA_SETUP_FILE="$KIRA_SETUP/$IMAGE_NAME-$IMAGE_TAG"
 
@@ -45,9 +54,9 @@ echo "|      IMAGE NAME: $IMAGE_NAME"
 echo "|       IMAGE TAG: $IMAGE_TAG"
 echo "|   OLD REPO HASH: $OLD_HASH"
 echo "|   NEW REPO HASH: $NEW_HASH"
-echo "|     BUILD ARG 1: $BUILD_ARG1"
-echo "|     BUILD ARG 2: $BUILD_ARG2"
-echo "|     BUILD ARG 3: $BUILD_ARG3"
+echo "|     BUILD ARG 1: $ARG1_KEY=$ARG1_VAL"
+echo "|     BUILD ARG 2: $ARG2_KEY=$ARG2_VAL"
+echo "|     BUILD ARG 3: $ARG3_KEY=$ARG3_VAL"
 echo "------------------------------------------------"
 
 if [[ $($WORKSTATION_SCRIPTS/image-updated.sh "$IMAGE_DIR" "$IMAGE_NAME" "$IMAGE_TAG" "$INTEGRITY") != "True" ]] ; then
@@ -60,13 +69,6 @@ if [[ $($WORKSTATION_SCRIPTS/image-updated.sh "$IMAGE_DIR" "$IMAGE_NAME" "$IMAGE
 
     # NOTE: This script automaitcaly removes KIRA_SETUP_FILE file (rm -fv $KIRA_SETUP_FILE)
     $WORKSTATION_SCRIPTS/delete-image.sh "$IMAGE_DIR" "$IMAGE_NAME" "$IMAGE_TAG"
-
-    ARG1_KEY="$( cut -d '=' -f 1 <<< "$BUILD_ARG1" )"
-    ARG1_VAL="$( cut -d '=' -f 2 <<< "$BUILD_ARG1" )"
-    ARG2_KEY="$( cut -d '=' -f 1 <<< "$BUILD_ARG2" )"
-    ARG2_VAL="$( cut -d '=' -f 2 <<< "$BUILD_ARG2" )"
-    ARG3_KEY="$( cut -d '=' -f 1 <<< "$BUILD_ARG3" )"
-    ARG3_VAL="$( cut -d '=' -f 2 <<< "$BUILD_ARG3" )"
 
     echo "Creating new '$IMAGE_NAME' image..."
     docker build --network=host --tag="$IMAGE_NAME" --build-arg BUILD_HASH="$NEW_HASH" --build-arg "$ARG1_KEY=$ARG1_VAL"  --build-arg "$ARG2_KEY=$ARG2_VAL" --build-arg "$ARG3_KEY=$ARG3_VAL" --file "$IMAGE_DIR/Dockerfile" .
