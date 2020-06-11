@@ -52,7 +52,7 @@ while : ; do
 
     read -n4 -t 30 -p "Input option then press [ENTER]: " OPTION || OPTION=""
     [ ! -z "$OPTION" ] && echo "" && read -d'' -s -n1 -p "Press [Y] to confirm option [${OPTION^^}] or any other key to abandon action: " ACCEPT
-    [ "${ACCEPT,,}" != "y" ] && break
+    [ "${ACCEPT,,}" != "y" ] && continue
 
     BREAK="False"
     for ((i=1;i<=$VALIDATORS_COUNT;i++)); do
@@ -63,7 +63,7 @@ while : ; do
         fi 
     done
 
-    [ "$BREAK" == "True" ] && break
+    [ "$BREAK" == "True" ] && continue
     
     if [ "$OPTION" == "0" ] ; then
         gnome-terminal -- bash -c "$KIRA_MANAGER/container-manager.sh 'registry' ; read -d'' -s -n1 -p 'Press any key to exit...' && exit"

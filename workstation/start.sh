@@ -68,6 +68,10 @@ SEEDS=""
 for ((i=1;i<=$VALIDATORS_COUNT;i++)); do
     echo "INFO: Creating validator-$i container..."
     NODE_HOSTNAME="validator-$i.local"
+    P2P_PROXY_PORT="10000"
+    RPC_PROXY_PORT="10001"
+    LCD_PROXY_PORT="10002"
+    RLY_PROXY_PORT="10003" 
     rm -fr "${KIRA_STATE}/validator-$i"
     mkdir -p "${KIRA_STATE}/validator-$i"
     docker run -d \
@@ -78,11 +82,11 @@ for ((i=1;i<=$VALIDATORS_COUNT;i++)); do
      --hostname $NODE_HOSTNAME \
      -e VALIDATOR_INDEX=$i \
      -e VALIDATORS_COUNT=$VALIDATORS_COUNT \
-     -e MONIKER="Local Kira Hub Validator $i" \
-     -e P2P_PROXY_PORT="10000" \
-     -e RPC_PROXY_PORT="10001" \
-     -e LCD_PROXY_PORT="10002" \
-     -e RLY_PROXY_PORT="10003" \
+     -e MONIKER="Local Kira Hub Validator" \
+     -e P2P_PROXY_PORT=$P2P_PROXY_PORT \
+     -e RPC_PROXY_PORT=$RPC_PROXY_PORT \
+     -e LCD_PROXY_PORT=$LCD_PROXY_PORT \
+     -e RLY_PROXY_PORT=$RLY_PROXY_PORT \
      -e EMAIL_NOTIFY="$EMAIL_NOTIFY" \
      -e SMTP_SECRET="$SMTP_SECRET" \
      -e NOTIFICATIONS="$NOTIFICATIONS" \
@@ -119,7 +123,7 @@ for ((i=1;i<=$VALIDATORS_COUNT;i++)); do
 
     NODE_ID=$(docker exec -it "validator-$VALIDATOR_INDEX" sekaid tendermint show-node-id || echo "error")
     # NOTE: New lines have to be removed
-    SEEDS=$(echo "${NODE_ID}@${NODE_HOSTNAME}" | xargs | tr -d '\n' | tr -d '\r')
+    SEEDS=$(echo "${NODE_ID}@${NODE_HOSTNAME}:$P2P_PROXY_PORT" | xargs | tr -d '\n' | tr -d '\r')
 
     # we have to recover the index back before progressing
     i=$VALIDATOR_INDEX

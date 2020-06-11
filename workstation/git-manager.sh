@@ -80,7 +80,7 @@ while : ; do
     
     read  -d'' -s -n1 -t 3 -p "INFO: Press [KEY] to select option: " OPTION || OPTION=""
     [ ! -z "$OPTION" ] && echo "" && read -d'' -s -n1 -p "Press [ENTER] to confirm option [${OPTION^^}] or any other key to try again: " ACCEPT
-    [ ! -z "$ACCEPT" ] && break
+    [ ! -z "$ACCEPT" ] && continue
     FAILED="False"
     
     if [ "${OPTION,,}" == "v" ] ; then
