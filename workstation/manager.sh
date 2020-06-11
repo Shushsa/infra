@@ -44,8 +44,8 @@ while : ; do
     echo -e "------------------------------------------------\e[0m"
     
     TIMEOUT=False
-    read  -d'' -s -n3 -t 10 -p "Input option then press [ENTER]: " OPTION || TIMEOUT="True"
-    [ "$TIMEOUT" == "True" ] && read  -d'' -s -n3 -t 10 -p "Input option then press [ENTER]: $OPTION" OPTION || OPTION=""
+    read -n3 -t 10 -p "Input option then press [ENTER]: " OPTION || TIMEOUT="True"
+    [ "$TIMEOUT" == "True" ] && read -n3 -t 10 -p "Input option then press [ENTER]: $OPTION" OPTION || OPTION=""
     [ ! -z "$OPTION" ] && echo "" && read -d'' -s -n1 -p "Press [Y] to confirm [${OPTION^^}] option or any other key to abandon action" ACCEPT
     [ "${ACCEPT,,}" != "y" ] && break
 
