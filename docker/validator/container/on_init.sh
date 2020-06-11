@@ -89,7 +89,7 @@ CDHelper text lineswap --insert="pruning = \"nothing\"" --prefix="pruning =" --p
 
 # NOTE: In some cases '@' characters cause line splits
 if [ ! -z "$SEEDS" ] ; then 
-    SEEDS=$(echo "seeds = \"${NODE_ID}@${NODE_HOSTNAME}\"" | xargs | tr -d '\n' | tr -d '\r')
+    SEEDS=$(echo "seeds = \"$SEEDS\"" | xargs | tr -d '\n' | tr -d '\r')
     CDHelper text lineswap --insert=$SEEDS --prefix="seeds =" --path=$CONFIG_TOML_PATH
 fi
 
