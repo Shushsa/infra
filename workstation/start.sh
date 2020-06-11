@@ -128,7 +128,7 @@ for ((i=1;i<=$VALIDATORS_COUNT;i++)); do
 
     NODE_ID=$(docker exec -it "validator-$VALIDATOR_INDEX" sekaid tendermint show-node-id || echo "error")
     # NOTE: New lines have to be removed
-    SEEDS=$(echo "${NODE_ID}@${NODE_HOSTNAME}:$P2P_PROXY_PORT" | xargs | tr -d '\n' | tr -d '\r')
+    SEEDS=$(echo "${NODE_ID}@101.0.1.$VALIDATOR_INDEX:$P2P_PROXY_PORT" | xargs | tr -d '\n' | tr -d '\r')
 
     # we have to recover the index back before progressing
     i=$VALIDATOR_INDEX
