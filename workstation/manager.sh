@@ -12,7 +12,10 @@ ETC_PROFILE="/etc/profile"
 while : ; do
     source $ETC_PROFILE &> /dev/null
     if [ "$DEBUG_MODE" == "True" ] ; then set -x ; else set +x ; fi
-    REGISTRY_STATUS=$(docker inspect $(docker ps --no-trunc -aqf name=registry) | jq -r '.[0].State.Status' || echo "error")
+
+    REGISTRY_STATUS=""
+    CONTAINER_ID=$(docker ps --no-trunc -aqf name=registry || echo "")
+    [ ! -z "$CONTAINER_ID" ] && REGISTRY_STATUS=$(docker inspect $CONTAINER_ID || echo "error")
 
     for ((i=1;i<=$VALIDATORS_COUNT;i++)); do
         CONTAINER_ID=$(docker ps --no-trunc -aqf name=validator-$i || echo "")
@@ -28,7 +31,8 @@ while : ; do
     echo "|         KIRA NETWORK MANAGER v0.0.3          |"
     echo "|             $(date '+%d/%m/%Y %H:%M:%S')              |"
     echo "|----------------------------------------------|"
-    echo "| [0] | Inspect registry container             : $REGISTRY_STATUS"
+    [ ! -z "$REGISTRY_STATUS" ] && \
+        echo "| [0] | Inspect registry container             : $REGISTRY_STATUS"
     for ((i=1;i<=$VALIDATORS_COUNT;i++)); do
         CONTAINER_ID="CONTAINER_ID_$i"
         [ -z "${!CONTAINER_ID}" ] && continue
