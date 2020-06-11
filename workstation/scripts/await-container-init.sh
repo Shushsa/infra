@@ -43,6 +43,7 @@ while [ $ELAPSED -le $TIMEOUT ] && [ "$SUCCESS" == "False" ] ; do
         exit 1
     fi
 
+    echo "INFO: Waiting for trigger file..."
     sleep $DELAY
 done
 

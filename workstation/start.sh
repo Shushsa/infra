@@ -65,7 +65,6 @@ for ((i=1;i<=$VALIDATORS_COUNT;i++)); do
     rm -fr "${KIRA_STATE}/validator-$i"
     mkdir -p "${KIRA_STATE}/validator-$i"
     docker run -d \
-     --network="host" \
      --restart=always \
      --name "validator-$i" \
      -e VALIDATOR_INDEX=$i \
@@ -75,10 +74,7 @@ for ((i=1;i<=$VALIDATORS_COUNT;i++)); do
      -e RPC_PROXY_PORT="${i}101" \
      -e LCD_PROXY_PORT="${i}102" \
      -e RLY_PROXY_PORT="${i}103" \
-     -p "${i}100":"${i}100" \
-     -p "${i}101":"${i}101" \
-     -p "${i}102":"${i}102" \
-     -p "${i}103":"${i}103" \
+     -p "${i}100-${i}199":"${i}100-${i}199" \
      -e EMAIL_NOTIFY="$EMAIL_NOTIFY" \
      -e SMTP_SECRET="$SMTP_SECRET" \
      -e NOTIFICATIONS="$NOTIFICATIONS" \
@@ -90,7 +86,7 @@ for ((i=1;i<=$VALIDATORS_COUNT;i++)); do
     # NOTE: Following actions destroy $i variable so VALIDATOR_INDEX is needed
     echo "INFO: Witing for validator-$i to start..."
     VALIDATOR_INDEX=$i
-    sleep 5
+    sleep 10
     source $WORKSTATION_SCRIPTS/await-container-init.sh "validator-$i" "300" "10"
 
     echo "INFO: Inspecting if validator-$VALIDATOR_INDEX is running..."

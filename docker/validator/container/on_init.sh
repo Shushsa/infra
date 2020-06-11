@@ -114,11 +114,11 @@ $KEYRINGPASS
 $KEYRINGPASS
 EOF
     done
-
+    echo "INFO: Collecting gen tx'es..."
     sekaid collect-gentxs
 elif [ -f "$COMMON_DIR/genesis.json" ] ; then
     echo "INFO: Adding test-$VALIDATOR_INDEX account..."
-    $SELF_SCRIPTS/add-account.sh test-$VALIDATOR_INDEX "test-keys/test-1" $KEYRINGPASS $PASSPHRASE
+    $SELF_SCRIPTS/add-account.sh test-$VALIDATOR_INDEX "test-keys/test-$VALIDATOR_INDEX" $KEYRINGPASS $PASSPHRASE
     echo "INFO: Adding validator-$VALIDATOR_INDEX account..."
     $SELF_SCRIPTS/add-account.sh "validator-$VALIDATOR_INDEX" "validator-keys/validator-$VALIDATOR_INDEX" $KEYRINGPASS $PASSPHRASE
     echo "INFO: Loading existing genesis file..."
@@ -129,8 +129,10 @@ else
 fi
 
 # original signing key and node-id has to be recovered
+echo "INFO: Key recovery and chain hard reset"
 cat $NODE_KEY > $NODE_KEY_PATH
 cat $SIGNING_KEY > $SIGNING_KEY_PATH
+sekaid unsafe-reset-all
 
 cat > /etc/systemd/system/sekaid.service << EOL
 [Unit]
