@@ -117,8 +117,8 @@ for ((i=1;i<=$VALIDATORS_COUNT;i++)); do
         fi
     fi
 
-    NODE_ID=$(docker exec -it "validator-$VALIDATOR_INDEX" sekaid tendermint show-node-id || echo "error")
-    SEEDS="$NODE_ID@$NODE_HOSTNAME"
+    NODE_ID=$(echo $(docker exec -it "validator-$VALIDATOR_INDEX" sekaid tendermint show-node-id || echo "error") | xargs)
+    SEEDS="${NODE_ID}@${NODE_HOSTNAME}"
 
     # we have to recover the index back before progressing
     i=$VALIDATOR_INDEX
