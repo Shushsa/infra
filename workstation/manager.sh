@@ -9,7 +9,7 @@ ETC_PROFILE="/etc/profile"
 while : ; do
     source $ETC_PROFILE &> /dev/null
     if [ "$DEBUG_MODE" == "True" ] ; then set -x ; else set +x ; fi
-    REGISTRY_STATUS=$(docker inspect $(docker ps --no-trunc -aqf name=registry) | jq -r '.[0].State.Status' || echo "Error")
+    REGISTRY_STATUS=$(docker inspect $(docker ps --no-trunc -aqf name=registry) | jq -r '.[0].State.Status' || echo "error")
 
     for ((i=1;i<=$VALIDATORS_COUNT;i++)); do
         CONTAINER_ID=$(docker ps --no-trunc -aqf name=validator-$i || echo "")
@@ -30,22 +30,24 @@ while : ; do
         CONTAINER_ID="CONTAINER_ID_$i"
         [ -z "${!CONTAINER_ID}" ] && continue
         VALIDATOR_STATUS="VALIDATOR_STATUS_$i"
-        echo "| [$i] | Inspect validator-$i container          : ${!CONTAINER_ID}"
+        echo "| [$i] | Inspect validator-$i container          : ${!VALIDATOR_STATUS}"
     done
+    echo "|----------------------------------------------|"
+    echo "| [A] | Mange INFRA Repo ($INFRA_BRANCH)"
+    echo "| [B] | Mange SEKAI Repo ($SEKAI_BRANCH)"
     echo "|----------------------------------------------|"
     echo "| [I] | Re-INITALIZE Environment               |"
     echo "| [R] | Hard RESET Repos & Infrastructure      |"
     echo "| [D] | DELETE Repos & Infrastructure          |"
     echo "|----------------------------------------------|"
-    echo "| [A] | Mange INFRA Repo ($INFRA_BRANCH)"
-    echo "| [B] | Mange SEKAI Repo ($SEKAI_BRANCH)"
-    echo "|----------------------------------------------|"
     echo "| [X] | Exit | [W] | Refresh Window            |"
     echo -e "------------------------------------------------\e[0m"
     
-    read  -d'' -s -n1 -t 5 -p "Press [KEY] to select option: " OPTION || OPTION=""
-    [ ! -z "$OPTION" ] && echo "" && read -d'' -s -n1 -p "Press [ENTER] to confirm [${OPTION^^}] option or any other key to try again" ACCEPT
-    [ ! -z "$ACCEPT" ] && break
+    TIMEOUT=False
+    read  -d'' -s -n3 -t 10 -p "Input option then press [ENTER]: " OPTION || TIMEOUT="True"
+    [ "$TIMEOUT" == "True" ] && read  -d'' -s -n3 -t 10 -p "Input option then press [ENTER]: $OPTION" OPTION || OPTION=""
+    [ ! -z "$OPTION" ] && echo "" && read -d'' -s -n1 -p "Press [Y] to confirm [${OPTION^^}] option or any other key to abandon action" ACCEPT
+    [ "${ACCEPT,,}" != "y" ] && break
 
     BREAK="False"
     for ((i=1;i<=$VALIDATORS_COUNT;i++)); do

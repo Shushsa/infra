@@ -61,31 +61,24 @@ fi
 
 sekaid init --chain-id $CHAIN_ID "$MONIKER"
 
-# import node key from file (if present)
+# NOTE: can be supplied from parameter, in such case following instruction can be used: sed -i 's/\\\"/\"/g' $PATH_TO_FILE
+# NOTE: to VALIDATOR_KEY new key delete $SIGNING_KEY_PATH and run sekaid start 
 # NOTE: to create new key delete $NODE_KEY_PATH and run sekaid start
-if [ -f "$NODE_KEY" ] ; then
-    echo "INFO: Node key was defined in the configuration, replacing auto-generated key..."
-    rm -f -v $NODE_KEY_PATH
-    cat $NODE_KEY > $NODE_KEY_PATH
-    sed -i 's/\\\"/\"/g' $NODE_KEY_PATH # unescape if needed
-else
+
+if [ ! -f "$NODE_KEY" ] ; then
     echo "ERROR: Node key was not found"
     exit 1
 fi
 
-echo "INFO: Node ID: $(sekaid tendermint show-node-id)"
-
-# import validator signing key from file (if present)
-# NOTE: to VALIDATOR_KEY new key delete $SIGNING_KEY_PATH and run sekaid start 
-if [ -f "$SIGNING_KEY" ] ; then
-    echo "INFO: Signing key was defined in the configuration, replacing auto-generated key..."
-    rm -f -v $SIGNING_KEY_PATH
-    cat $SIGNING_KEY > $SIGNING_KEY_PATH
-    sed -i 's/\\\"/\"/g' $SIGNING_KEY_PATH # unescape
-else
+if [ ! -f "$SIGNING_KEY" ] ; then
    echo "ERROR: Signing key was not found"
    exit 1
 fi
+
+cat $NODE_KEY > $NODE_KEY_PATH
+echo "INFO: Node ID: $(sekaid tendermint show-node-id)"
+cat $SIGNING_KEY > $SIGNING_KEY_PATH
+echo "INFO: Signing key: $(sekaid tendermint show-validator)"
 
 CDHelper text replace --old="stake" --new="$DENOM" --input=$GENESIS_JSON_PATH
 # NOTE: ensure that the sekai rpc is open to all connections
@@ -106,7 +99,8 @@ if [ $VALIDATOR_INDEX -eq 1 ] ; then
         cat "$SELF_CONFIGS/signing-keys/signing-$i.key" > $SIGNING_KEY_PATH
         cat "$SELF_CONFIGS/node-keys/node-key-$i.json" > $NODE_KEY_PATH
         TMP_NODE_ID=$(sekaid tendermint show-node-id)
-        echo "INFO: Creating validator-$i account, Node Id: $TMP_NODE_ID..."
+        TMP_CONSPUB=$(sekaid tendermint show-validator)
+        echo "INFO: Creating validator-$i account, Node Id: $TMP_NODE_ID, Cons Pub: $TMP_CONSPUB ..."
         $SELF_SCRIPTS/add-account.sh "validator-$i" "validator-keys/validator-$i" $KEYRINGPASS $PASSPHRASE
         echo ${KEYRINGPASS} | sekaid add-genesis-account $(sekaicli keys show "validator-$i" -a) 100000000000000$DENOM
         echo "INFO: Creating genesis transaction for validator-$i account..."
@@ -134,7 +128,7 @@ fi
 echo "INFO: Key recovery and chain hard reset"
 cat $NODE_KEY > $NODE_KEY_PATH
 cat $SIGNING_KEY > $SIGNING_KEY_PATH
-sekaid unsafe-reset-all
+#sekaid unsafe-reset-all
 
 echo "INFO: Setting up services..."
 cat > /etc/systemd/system/sekaid.service << EOL
