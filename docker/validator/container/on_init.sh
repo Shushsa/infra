@@ -63,7 +63,7 @@ fi
 if [ -f "$COMMON_DIR/extra_hosts" ] ; then 
     echo "INFO: Adding extra hosts"
     (cat "$COMMON_DIR/extra_hosts"; cat /etc/hosts) > /etc/hosts
-else
+fi
 
 sekaid init --chain-id $CHAIN_ID "$MONIKER"
 
