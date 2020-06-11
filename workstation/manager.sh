@@ -11,6 +11,14 @@ while : ; do
     if [ "$DEBUG_MODE" == "True" ] ; then set -x ; else set +x ; fi
     REGISTRY_STATUS=$(docker inspect $(docker ps --no-trunc -aqf name=registry) | jq -r '.[0].State.Status' || echo "Error")
 
+    for ((i=1;i<=$VALIDATORS_COUNT;i++)); do
+        CONTAINER_ID=$(docker ps --no-trunc -aqf name=validator-$i || echo "")
+        declare "CONTAINER_ID_$i"="$CONTAINER_ID"
+        [ -z "$CONTAINER_ID" ] && continue
+        VALIDATOR_STATUS=$(docker inspect $CONTAINER_ID | jq -r '.[0].State.Status' || echo "error")
+        declare "VALIDATOR_STATUS_$i"="$VALIDATOR_STATUS"
+    done
+
     clear
     
     echo -e "\e[33;1m------------------------------------------------"
@@ -19,9 +27,9 @@ while : ; do
     echo "|----------------------------------------------|"
     echo "| [0] | Inspect registry container             : $REGISTRY_STATUS"
     for ((i=1;i<=$VALIDATORS_COUNT;i++)); do
-        CONTAINER_ID=$(docker ps --no-trunc -aqf name=validator-$i || echo "")
-        [ -z "$CONTAINER_ID" ] && continue
-        VALIDATOR_STATUS=$(docker inspect $CONTAINER_ID | jq -r '.[0].State.Status' || echo "error")
+        CONTAINER_ID="CONTAINER_ID_$i"
+        [ -z "${!CONTAINER_ID}" ] && continue
+        VALIDATOR_STATUS="VALIDATOR_STATUS_$i"
         echo "| [$i] | Inspect validator-$i container          : $VALIDATOR_STATUS"
     done
     echo "|----------------------------------------------|"
