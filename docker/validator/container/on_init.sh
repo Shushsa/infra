@@ -86,8 +86,12 @@ CDHelper text replace --old="stake" --new="$DENOM" --input=$GENESIS_JSON_PATH
 
 CDHelper text lineswap --insert="cors_allowed_origins = [\"*\"]" --prefix="cors_allowed_origins =" --path=$CONFIG_TOML_PATH
 CDHelper text lineswap --insert="pruning = \"nothing\"" --prefix="pruning =" --path=$APP_TOML_PATH
-[ ! -z "$SEEDS" ] && CDHelper text lineswap --insert="seeds = \"$SEEDS\"" --prefix="seeds =" --path=$CONFIG_TOML_PATH
 
+# NOTE: In some cases '@' characters cause line splits
+if [ ! -z "$SEEDS" ] ; then 
+    SEEDS=$(echo "seeds = \"${NODE_ID}@${NODE_HOSTNAME}\"" | xargs | tr -d '\n' | tr -d '\r')
+    CDHelper text lineswap --insert=$SEEDS --prefix="seeds =" --path=$CONFIG_TOML_PATH
+fi
 
 if [ $VALIDATOR_INDEX -eq 1 ] ; then # first validator always creates a genesis tx
     echo "INFO: Creating genesis file..."

@@ -50,7 +50,7 @@ while : ; do
     echo "| [X] | Exit | [W] | Refresh Window            |"
     echo -e "------------------------------------------------\e[0m"
 
-    read -n4 -t 15 -p "Input option then press [ENTER]: " OPTION || OPTION=""
+    read -n4 -t 30 -p "Input option then press [ENTER]: " OPTION || OPTION=""
     [ ! -z "$OPTION" ] && echo "" && read -d'' -s -n1 -p "Press [Y] to confirm option [${OPTION^^}] or any other key to abandon action: " ACCEPT
     [ "${ACCEPT,,}" != "y" ] && break
 
