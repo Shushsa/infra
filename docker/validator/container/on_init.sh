@@ -88,24 +88,38 @@ CDHelper text lineswap --insert="cors_allowed_origins = [\"*\"]" --prefix="cors_
 CDHelper text lineswap --insert="pruning = \"nothing\"" --prefix="pruning =" --path=$APP_TOML_PATH
 [ ! -z "$SEEDS" ] && CDHelper text lineswap --insert="seeds = \"$SEEDS\"" --prefix="seeds =" --path=$CONFIG_TOML_PATH
 
-echo ${KEYRINGPASS} | sekaicli keys list
+
 if [ $VALIDATOR_INDEX -eq 1 ] ; then
     echo "INFO: Creating genesis file..."
     for ((i=1;i<=$VALIDATORS_COUNT;i++)); do
-        echo "INFO: Adding test-$i account..."
-        $SELF_SCRIPTS/add-account.sh test-$i "test-keys/test-$i" $KEYRINGPASS $PASSPHRASE
-        echo ${KEYRINGPASS} | sekaid add-genesis-account $(sekaicli keys show "test-$i" -a) 100000000000000$DENOM,10000000samoleans
+        TEST_ACC_NAME="test-$1"
+        VALIDATOR_ACC_NAME="validator-$1"
+
+        echo "INFO: Adding $TEST_ACC_NAME account..."
+        echo "INFO: Adding $VALIDATOR_ACC_NAME account..."
+        $SELF_SCRIPTS/add-account.sh $TEST_ACC_NAME "test-keys/$TEST_ACC_NAME" $KEYRINGPASS $PASSPHRASE
+        $SELF_SCRIPTS/add-account.sh $VALIDATOR_ACC_NAME "validator-keys/$VALIDATOR_ACC_NAME" $KEYRINGPASS $PASSPHRASE
+        echo ${KEYRINGPASS} | sekaicli keys list
+        TESTACC_ADDR=$(sekaicli keys show "$TEST_ACC_NAME" -a)
+        VALIDATOR_ACC_ADDR=$(sekaicli keys show "$VALIDATOR_ACC_NAME" -a)
+        echo "SUCCESS: Accounts $TESTACC_ADDR and $VALIDATOR_ACC_ADDR were created"
+
+        echo "INFO: Adding genesis accounts..."
+        echo ${KEYRINGPASS} | sekaid add-genesis-account $TESTACC_ADDR 100000000000000$DENOM,10000000samoleans
+        echo ${KEYRINGPASS} | sekaid add-genesis-account $VALIDATOR_ACC_ADDR 200000000000000$DENOM,20000000samoleans
+
+        echo "INFO: Creating $VALIDATOR_ACC_NAME genesis tx..."
         #signing key has to be rotated as it is used by default by the gentx
         cat "$SELF_CONFIGS/node-keys/node-key-$i.json" > $NODE_KEY_PATH
         cat "$SELF_CONFIGS/signing-keys/signing-$i.key" > $SIGNING_KEY_PATH
         TMP_NODE_ID=$(sekaid tendermint show-node-id)
         TMP_CONSPUB=$(sekaid tendermint show-validator)
-        echo "INFO: Creating validator-$i account, Node Id: $TMP_NODE_ID, Cons Pub: $TMP_CONSPUB ..."
-        $SELF_SCRIPTS/add-account.sh "validator-$i" "validator-keys/validator-$i" $KEYRINGPASS $PASSPHRASE
-        echo ${KEYRINGPASS} | sekaid add-genesis-account $(sekaicli keys show "validator-$i" -a) 100000000000000$DENOM
-        echo "INFO: Creating genesis transaction for validator-$i account..."
+        TMP_ADDRESS=$(sekaid tendermint show-address)
+        echo "INFO: Node Id: $TMP_NODE_ID"
+        echo "INFO: Cons Pub: $TMP_CONSPUB"
+        echo "INFO: Address: $TMP_ADDRESS"
         #--node-id "$TMP_NODE_ID" --details "Kira Hub Validator $i"
-        sekaid gentx --trace --name "validator-$i" --amount "1000${DENOM}" << EOF
+        sekaid gentx --trace --name $VALIDATOR_ACC_NAME --amount 1000${DENOM} << EOF
 $KEYRINGPASS
 $KEYRINGPASS
 $KEYRINGPASS
@@ -126,9 +140,9 @@ else
 fi
 
 # original signing key and node-id has to be recovered
-echo "INFO: Key recovery and chain hard reset"
-cat $NODE_KEY > $NODE_KEY_PATH
-cat $SIGNING_KEY > $SIGNING_KEY_PATH
+#echo "INFO: Key recovery and chain hard reset"
+#cat $NODE_KEY > $NODE_KEY_PATH
+#cat $SIGNING_KEY > $SIGNING_KEY_PATH
 #sekaid unsafe-reset-all
 
 echo "INFO: Setting up services..."
