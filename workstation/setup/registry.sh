@@ -9,17 +9,18 @@ source $ETC_PROFILE &> /dev/null
 if [ "$DEBUG_MODE" == "True" ] ; then set -x ; else set +x ; fi
 
 # ensure docker registry exists
-KIRA_SETUP_REGISTRY="$KIRA_SETUP/registry-v0.0.10"
+KIRA_SETUP_REGISTRY="$KIRA_SETUP/registry-v0.0.11-$KIRA_REGISTRY_IP-$KIRA_REGISTRY_NAME"
 if [[ $(${KIRA_SCRIPTS}/container-exists.sh "registry") != "True" ]] || [ ! -f "$KIRA_SETUP_REGISTRY" ] ; then
     echo "Container 'registry' does NOT exist or update is required, creating..."
 
     docker network rm regnet || echo "Failed to remove registry network"
-    docker network create --subnet=100.0.0.0/8 regnet
+    docker network create --subnet=$KIRA_REGISTRY_SUBNET regnet
 
     ${KIRA_SCRIPTS}/container-delete.sh "registry"
     docker run -d \
      --network regnet \
-     --ip "100.0.0.1" \
+     --ip $KIRA_REGISTRY_IP \
+     --hostname $KIRA_REGISTRY_NAME \
      --restart=always \
      --name registry \
      -e REGISTRY_STORAGE_DELETE_ENABLED=true \
@@ -30,10 +31,9 @@ if [[ $(${KIRA_SCRIPTS}/container-exists.sh "registry") != "True" ]] || [ ! -f "
     rm -f -v $DOCKER_DAEMON_JSON
     cat > $DOCKER_DAEMON_JSON << EOL
 {
-  "insecure-registries" : ["http://$KIRA_REGISTRY_NAME:$KIRA_REGISTRY_PORT","$KIRA_REGISTRY_NAME:$KIRA_REGISTRY_PORT","http://100.0.0.1:$KIRA_REGISTRY_PORT","100.0.0.1:$KIRA_REGISTRY_PORT"]
+  "insecure-registries" : ["http://$KIRA_REGISTRY_NAME:$KIRA_REGISTRY_PORT","$KIRA_REGISTRY_NAME:$KIRA_REGISTRY_PORT","http://$KIRA_REGISTRY_IP:$KIRA_REGISTRY_PORT","$KIRA_REGISTRY_IP:$KIRA_REGISTRY_PORT"]
 }
 EOL
-
     systemctl restart docker
     touch $KIRA_SETUP_REGISTRY
 else

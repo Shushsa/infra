@@ -13,6 +13,9 @@ CARGO_ENV="/home/$KIRA_USER/.cargo/env"
 
 KIRA_STATE=/kira/state
 KIRA_REGISTRY_PORT=5000
+KIRA_REGISTRY_SUBNET="100.0.0.0/8"
+KIRA_VALIDATORS_SUBNET="101.0.0.0/8"
+KIRA_REGISTRY_IP="100.0.1.1"
 KIRA_REGISTRY_NAME="registry.local"
 KIRA_REGISTRY="$KIRA_REGISTRY_NAME:$KIRA_REGISTRY_PORT"
 MAX_VALIDATORS_COUNT=4
@@ -22,6 +25,7 @@ KIRA_IMG="${KIRA_INFRA}/common/img"
 KIRA_DOCKER="${KIRA_INFRA}/docker"
 WORKSTATION_SCRIPTS=$"$KIRA_WORKSTATION/scripts"
 
+HOSTS_PATH="/etc/hosts"
 GO_VERSION="1.14.2"
 NGINX_SERVICED_PATH="/etc/systemd/system/nginx.service.d"
 NGINX_CONFIG="/etc/nginx/nginx.conf"
@@ -38,7 +42,7 @@ mkdir -p "/home/$KIRA_USER/.cargo"
 mkdir -p "/home/$KIRA_USER/Desktop"
 mkdir -p $SOURCES_LIST
 
-KIRA_SETUP_KIRA_ENV="$KIRA_SETUP/kira-env-v0.0.31" 
+KIRA_SETUP_KIRA_ENV="$KIRA_SETUP/kira-env-v0.0.33" 
 if [ ! -f "$KIRA_SETUP_KIRA_ENV" ] ; then
     echo "INFO: Setting up kira environment variables"
     touch $CARGO_ENV
@@ -47,6 +51,9 @@ if [ ! -f "$KIRA_SETUP_KIRA_ENV" ] ; then
     rm -f /var/crash/*
     CDHelper text lineswap --insert="enabled=0" --prefix="enabled=" --path=/etc/default/apport --append-if-found-not=True
 
+    CDHelper text lineswap --insert="KIRA_REGISTRY_SUBNET=$KIRA_REGISTRY_SUBNET" --prefix="KIRA_REGISTRY_SUBNET=" --path=$ETC_PROFILE --append-if-found-not=True --silent=$SILENT_MODE
+    CDHelper text lineswap --insert="KIRA_VALIDATORS_SUBNET=$KIRA_VALIDATORS_SUBNET" --prefix="KIRA_VALIDATORS_SUBNET=" --path=$ETC_PROFILE --append-if-found-not=True --silent=$SILENT_MODE
+    CDHelper text lineswap --insert="HOSTS_PATH=$HOSTS_PATH" --prefix="HOSTS_PATH=" --path=$ETC_PROFILE --append-if-found-not=True --silent=$SILENT_MODE
     CDHelper text lineswap --insert="DOCKER_COMMON=$DOCKER_COMMON" --prefix="DOCKER_COMMON=" --path=$ETC_PROFILE --append-if-found-not=True --silent=$SILENT_MODE
     CDHelper text lineswap --insert="VALIDATORS_COUNT=$VALIDATORS_COUNT" --prefix="VALIDATORS_COUNT=" --path=$ETC_PROFILE --append-if-found-not=True --silent=$SILENT_MODE
     CDHelper text lineswap --insert="MAX_VALIDATORS_COUNT=$MAX_VALIDATORS_COUNT" --prefix="MAX_VALIDATORS_COUNT=" --path=$ETC_PROFILE --append-if-found-not=True --silent=$SILENT_MODE
@@ -58,6 +65,7 @@ if [ ! -f "$KIRA_SETUP_KIRA_ENV" ] ; then
     CDHelper text lineswap --insert="KIRA_STATE=$KIRA_STATE" --prefix="KIRA_STATE=" --path=$ETC_PROFILE --append-if-found-not=True --silent=$SILENT_MODE
     CDHelper text lineswap --insert="KIRA_REGISTRY_PORT=$KIRA_REGISTRY_PORT" --prefix="KIRA_REGISTRY_PORT=" --path=$ETC_PROFILE --append-if-found-not=True --silent=$SILENT_MODE
     CDHelper text lineswap --insert="KIRA_REGISTRY_NAME=$KIRA_REGISTRY_NAME" --prefix="KIRA_REGISTRY_NAME=" --path=$ETC_PROFILE --append-if-found-not=True --silent=$SILENT_MODE
+    CDHelper text lineswap --insert="KIRA_REGISTRY_IP=$KIRA_REGISTRY_IP" --prefix="KIRA_REGISTRY_IP=" --path=$ETC_PROFILE --append-if-found-not=True --silent=$SILENT_MODE
     CDHelper text lineswap --insert="KIRA_REGISTRY=$KIRA_REGISTRY" --prefix="KIRA_REGISTRY=" --path=$ETC_PROFILE --append-if-found-not=True --silent=$SILENT_MODE
     CDHelper text lineswap --insert="KIRA_DOCKER=$KIRA_DOCKER" --prefix="KIRA_DOCKER=" --path=$ETC_PROFILE --append-if-found-not=True --silent=$SILENT_MODE
     CDHelper text lineswap --insert="NGINX_CONFIG=$NGINX_CONFIG" --prefix="NGINX_CONFIG=" --path=$ETC_PROFILE --append-if-found-not=True --silent=$SILENT_MODE

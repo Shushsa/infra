@@ -56,7 +56,7 @@ source $WORKSTATION_SCRIPTS/update-validator-image.sh
 cd $KIRA_WORKSTATION
 
 docker network rm kiranet || echo "Failed to remove kira network"
-docker network create --subnet=101.0.0.0/8 kiranet
+docker network create --subnet=$KIRA_VALIDATORS_SUBNET kiranet
 
 GENESIS_SOUCE="/root/.sekaid/config/genesis.json"
 GENESIS_DESTINATION="$DOCKER_COMMON/genesis.json"
@@ -71,7 +71,8 @@ for ((i=1;i<=$VALIDATORS_COUNT;i++)); do
      --restart=always \
      --name "validator-$i" \
      --network kiranet \
-     --ip "101.0.0.$i" \
+     --ip "101.0.1.$i" \
+     --hostname "validator-$i.local" \
      -e VALIDATOR_INDEX=$i \
      -e VALIDATORS_COUNT=$VALIDATORS_COUNT \
      -e MONIKER="Local Kira Hub Validator $i" \
