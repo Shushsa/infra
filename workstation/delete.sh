@@ -14,10 +14,10 @@ echo "------------------------------------------------"
 echo "|      STARTED: KIRA INFRA DELETE v0.0.1       |"
 echo "------------------------------------------------"
 
-$KIRA_SCRIPTS/container-delete.sh "validator-1"
-$KIRA_SCRIPTS/container-delete.sh "validator-2"
-$KIRA_SCRIPTS/container-delete.sh "validator-3"
-$KIRA_SCRIPTS/container-delete.sh "validator-4"
+for ((i=1;i<=$MAX_VALIDATORS_COUNT;i++)); do
+    $KIRA_SCRIPTS/container-delete.sh "validator-$i"
+done
+
 $KIRA_SCRIPTS/container-delete.sh "registry"
 $WORKSTATION_SCRIPTS/delete-image.sh "$KIRA_DOCKER/base-image" "base-image"
 $WORKSTATION_SCRIPTS/delete-image.sh "$KIRA_DOCKER/tools-image" "tools-image"
@@ -28,6 +28,9 @@ docker rmi -f `docker images -qa` || echo "WARNING: Faile to remove all docker i
 docker system prune -a -f || echo "WARNING: Docker prune failed"
 docker volume prune -f || echo "WARNING: Failed to prune volumes"
 
+docker network rm kiranet || echo "WARNING: Failed to remove kira network"
+docker network rm regnet || echo "WARNING: Failed to remove registry network"
+docker network prune -f || echo "WARNING: Failed to prune all networks"
 echo "------------------------------------------------"
 echo "|      STARTED: KIRA INFRA DELETE v0.0.1       |"
 echo "------------------------------------------------"

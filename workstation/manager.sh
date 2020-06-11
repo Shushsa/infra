@@ -19,7 +19,9 @@ while : ; do
     echo "|----------------------------------------------|"
     echo "| [0] | Inspect registry container             : $REGISTRY_STATUS"
     for ((i=1;i<=$VALIDATORS_COUNT;i++)); do
+        set +e
         VALIDATOR_STATUS=$(docker inspect $(docker ps --no-trunc -aqf name=validator-$i) | jq -r '.[0].State.Status' || echo "Error")
+        set -e
         echo "| [$i] | Inspect validator-$i container          : $VALIDATOR_STATUS"
     done
     echo "|----------------------------------------------|"

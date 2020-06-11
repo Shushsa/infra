@@ -55,6 +55,9 @@ source $WORKSTATION_SCRIPTS/update-validator-image.sh
 
 cd $KIRA_WORKSTATION
 
+docker network rm kiranet || echo "Failed to remove kira network"
+docker network create --subnet=101.0.0.0/8 kiranet
+
 GENESIS_SOUCE="/root/.sekaid/config/genesis.json"
 GENESIS_DESTINATION="$DOCKER_COMMON/genesis.json"
 mkdir -p $DOCKER_COMMON
@@ -67,14 +70,15 @@ for ((i=1;i<=$VALIDATORS_COUNT;i++)); do
     docker run -d \
      --restart=always \
      --name "validator-$i" \
+     --network kiranet \
+     --ip "101.0.0.$i" \
      -e VALIDATOR_INDEX=$i \
      -e VALIDATORS_COUNT=$VALIDATORS_COUNT \
      -e MONIKER="Local Kira Hub Validator $i" \
-     -e P2P_PROXY_PORT="${i}100" \
-     -e RPC_PROXY_PORT="${i}101" \
-     -e LCD_PROXY_PORT="${i}102" \
-     -e RLY_PROXY_PORT="${i}103" \
-     -p "${i}100-${i}199":"${i}100-${i}199" \
+     -e P2P_PROXY_PORT="10000" \
+     -e RPC_PROXY_PORT="10001" \
+     -e LCD_PROXY_PORT="10002" \
+     -e RLY_PROXY_PORT="10003" \
      -e EMAIL_NOTIFY="$EMAIL_NOTIFY" \
      -e SMTP_SECRET="$SMTP_SECRET" \
      -e NOTIFICATIONS="$NOTIFICATIONS" \
