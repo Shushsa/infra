@@ -88,9 +88,10 @@ CDHelper text lineswap --insert="cors_allowed_origins = [\"*\"]" --prefix="cors_
 CDHelper text lineswap --insert="pruning = \"nothing\"" --prefix="pruning =" --path=$APP_TOML_PATH
 
 # NOTE: In some cases '@' characters cause line splits
-if [ ! -z "$SEEDS" ] ; then 
-    SEEDS=$(echo "seeds = \"$SEEDS\"" | xargs | tr -d '\n' | tr -d '\r')
-    CDHelper text lineswap --insert=$SEEDS --prefix="seeds =" --path=$CONFIG_TOML_PATH
+if [ ! -z "$SEEDS" ] ; then
+    SEEDS=$(echo $SEEDS | xargs) 
+    SEEDS=$(echo "seeds = \"$SEEDS\"" | tr -d '\n' | tr -d '\r')
+    CDHelper text lineswap --insert="$SEEDS" --prefix="seeds =" --path=$CONFIG_TOML_PATH
 fi
 
 if [ $VALIDATOR_INDEX -eq 1 ] ; then # first validator always creates a genesis tx
