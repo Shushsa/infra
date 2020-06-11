@@ -15,7 +15,7 @@ while : ; do
 
     REGISTRY_STATUS=""
     CONTAINER_ID=$(docker ps --no-trunc -aqf name=registry || echo "")
-    [ ! -z "$CONTAINER_ID" ] && REGISTRY_STATUS=$(docker inspect $CONTAINER_ID || echo "error")
+    [ ! -z "$CONTAINER_ID" ] && REGISTRY_STATUS=$(docker inspect $CONTAINER_ID | jq -r '.[0].State.Status' || echo "error")
 
     for ((i=1;i<=$VALIDATORS_COUNT;i++)); do
         CONTAINER_ID=$(docker ps --no-trunc -aqf name=validator-$i || echo "")
