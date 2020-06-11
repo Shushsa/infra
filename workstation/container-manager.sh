@@ -108,7 +108,7 @@ while : ; do
     elif [ "${OPTION,,}" == "w" ] ; then
         break
     elif [ "${OPTION,,}" == "x" ] ; then
-        exit
+        exit 0
     fi
 done
 
