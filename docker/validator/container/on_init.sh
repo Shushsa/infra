@@ -88,7 +88,7 @@ CDHelper text replace --old="stake" --new="$DENOM" --input=$GENESIS_JSON_PATH
 
 
 CDHelper text lineswap --insert="addr_book_strict = false" --prefix="addr_book_strict =" --path=$CONFIG_TOML_PATH
-CDHelper text lineswap --insert="external_address = \"tcp://$HOST_IP:$P2P_PROXY_PORT\"" --prefix="external_address =" --path=$CONFIG_TOML_PATH
+CDHelper text lineswap --insert="external_address = \"tcp://$HOST_IP:$P2P_LOCAL_PORT\"" --prefix="external_address =" --path=$CONFIG_TOML_PATH
 CDHelper text lineswap --insert="cors_allowed_origins = [\"*\"]" --prefix="cors_allowed_origins =" --path=$CONFIG_TOML_PATH
 CDHelper text lineswap --insert="unsafe = true" --prefix="unsafe =" --path=$CONFIG_TOML_PATH
 CDHelper text lineswap --insert="pruning = \"nothing\"" --prefix="pruning =" --path=$APP_TOML_PATH

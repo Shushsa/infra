@@ -73,6 +73,7 @@ PEERS=""
 
 for ((i=1;i<=$VALIDATORS_COUNT;i++)); do
     echo "INFO: Creating validator-$i container..."
+    P2P_LOCAL_PORT="26656"
     P2P_PROXY_PORT="10000"
     RPC_PROXY_PORT="10001"
     LCD_PROXY_PORT="10002"
@@ -128,7 +129,7 @@ for ((i=1;i<=$VALIDATORS_COUNT;i++)); do
 
     NODE_ID=$(docker exec -it "validator-$VALIDATOR_INDEX" sekaid tendermint show-node-id || echo "error")
     # NOTE: New lines have to be removed
-    SEEDS=$(echo "${NODE_ID}@101.1.0.$VALIDATOR_INDEX:$P2P_PROXY_PORT" | xargs | tr -d '\n' | tr -d '\r')
+    SEEDS=$(echo "${NODE_ID}@101.1.0.$VALIDATOR_INDEX:$P2P_LOCAL_PORT" | xargs | tr -d '\n' | tr -d '\r')
     PEERS=$SEEDS
     # we have to recover the index back before progressing
     i=$VALIDATOR_INDEX
