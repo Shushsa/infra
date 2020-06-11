@@ -96,15 +96,16 @@ if [ $VALIDATOR_INDEX -eq 1 ] ; then
         $SELF_SCRIPTS/add-account.sh test-$i "test-keys/test-$i" $KEYRINGPASS $PASSPHRASE
         echo ${KEYRINGPASS} | sekaid add-genesis-account $(sekaicli keys show "test-$i" -a) 100000000000000$DENOM,10000000samoleans
         #signing key has to be rotated as it is used by default by the gentx
-        cat "$SELF_CONFIGS/signing-keys/signing-$i.key" > $SIGNING_KEY_PATH
         cat "$SELF_CONFIGS/node-keys/node-key-$i.json" > $NODE_KEY_PATH
+        cat "$SELF_CONFIGS/signing-keys/signing-$i.key" > $SIGNING_KEY_PATH
         TMP_NODE_ID=$(sekaid tendermint show-node-id)
         TMP_CONSPUB=$(sekaid tendermint show-validator)
         echo "INFO: Creating validator-$i account, Node Id: $TMP_NODE_ID, Cons Pub: $TMP_CONSPUB ..."
         $SELF_SCRIPTS/add-account.sh "validator-$i" "validator-keys/validator-$i" $KEYRINGPASS $PASSPHRASE
         echo ${KEYRINGPASS} | sekaid add-genesis-account $(sekaicli keys show "validator-$i" -a) 100000000000000$DENOM
         echo "INFO: Creating genesis transaction for validator-$i account..."
-        sekaid gentx --trace --name "validator-$i" --amount "1000${DENOM}" --node-id "$TMP_NODE_ID" --details "Kira Hub Validator $i" << EOF
+        #--node-id "$TMP_NODE_ID" --details "Kira Hub Validator $i"
+        sekaid gentx --trace --name "validator-$i" --amount "1000${DENOM}" << EOF
 $KEYRINGPASS
 $KEYRINGPASS
 $KEYRINGPASS
