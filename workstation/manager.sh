@@ -19,9 +19,9 @@ while : ; do
     echo "|----------------------------------------------|"
     echo "| [0] | Inspect registry container             : $REGISTRY_STATUS"
     for ((i=1;i<=$VALIDATORS_COUNT;i++)); do
-        VALIDATOR_STATUS="not-found"
         CONTAINER_ID=$(docker ps --no-trunc -aqf name=validator-$i || echo "")
-        [ ! -z "$CONTAINER_ID" ] && VALIDATOR_STATUS=$(docker inspect $CONTAINER_ID | jq -r '.[0].State.Status' || echo "error")
+        [ -z "$CONTAINER_ID" ] && continue
+        VALIDATOR_STATUS=$(docker inspect $CONTAINER_ID | jq -r '.[0].State.Status' || echo "error")
         echo "| [$i] | Inspect validator-$i container          : $VALIDATOR_STATUS"
     done
     echo "|----------------------------------------------|"
