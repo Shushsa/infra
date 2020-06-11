@@ -92,8 +92,8 @@ CDHelper text lineswap --insert="pruning = \"nothing\"" --prefix="pruning =" --p
 if [ $VALIDATOR_INDEX -eq 1 ] ; then
     echo "INFO: Creating genesis file..."
     for ((i=1;i<=$VALIDATORS_COUNT;i++)); do
-        TEST_ACC_NAME="test-$1"
-        VALIDATOR_ACC_NAME="validator-$1"
+        TEST_ACC_NAME="test-$i"
+        VALIDATOR_ACC_NAME="validator-$i"
 
         echo "INFO: Adding $TEST_ACC_NAME account..."
         echo "INFO: Adding $VALIDATOR_ACC_NAME account..."
