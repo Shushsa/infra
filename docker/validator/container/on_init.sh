@@ -100,13 +100,13 @@ if [ $VALIDATOR_INDEX -eq 1 ] ; then
         $SELF_SCRIPTS/add-account.sh $TEST_ACC_NAME "test-keys/$TEST_ACC_NAME" $KEYRINGPASS $PASSPHRASE
         $SELF_SCRIPTS/add-account.sh $VALIDATOR_ACC_NAME "validator-keys/$VALIDATOR_ACC_NAME" $KEYRINGPASS $PASSPHRASE
         echo ${KEYRINGPASS} | sekaicli keys list
-        TESTACC_ADDR=$(sekaicli keys show "$TEST_ACC_NAME" -a)
-        VALIDATOR_ACC_ADDR=$(sekaicli keys show "$VALIDATOR_ACC_NAME" -a)
-        echo "SUCCESS: Accounts $TESTACC_ADDR and $VALIDATOR_ACC_ADDR were created"
+        TEST_ACC_ADDR=$(echo ${KEYRINGPASS} | sekaicli keys show "$TEST_ACC_NAME" -a)
+        VALIDATOR_ACC_ADDR=$(echo ${KEYRINGPASS} | sekaicli keys show "$VALIDATOR_ACC_NAME" -a)
+        echo "SUCCESS: Accounts $TEST_ACC_ADDR and $VALIDATOR_ACC_ADDR were created"
 
         echo "INFO: Adding genesis accounts..."
-        echo ${KEYRINGPASS} | sekaid add-genesis-account $TESTACC_ADDR 100000000000000$DENOM,10000000samoleans
-        echo ${KEYRINGPASS} | sekaid add-genesis-account $VALIDATOR_ACC_ADDR 200000000000000$DENOM,20000000samoleans
+        sekaid add-genesis-account $TEST_ACC_ADDR 100000000000000$DENOM,10000000samoleans
+        sekaid add-genesis-account $VALIDATOR_ACC_ADDR 200000000000000$DENOM,20000000samoleans
 
         echo "INFO: Creating $VALIDATOR_ACC_NAME genesis tx..."
         #signing key has to be rotated as it is used by default by the gentx
