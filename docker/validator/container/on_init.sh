@@ -59,6 +59,12 @@ else
     echo "{\"key\":\"$RLYKEY\",\"chain-id\":\"$CHAIN_ID\",\"rpc-addr\":\"$RPC_ADDR\",\"account-prefix\":\"$ACCOUNT_PREFIX\",\"gas\":$GAS,\"gas-prices\":\"$GAS_PRICES\",\"default-denom\":\"$DENOM\",\"trusting-period\":\"$RLYTRUSTING\"}" > $CHAIN_ID.json
 fi
 
+# add extra hosts
+if [ -f "$COMMON_DIR/extra_hosts" ] ; then 
+    echo "INFO: Adding extra hosts"
+    (cat "$COMMON_DIR/extra_hosts"; cat /etc/hosts) > /etc/hosts
+else
+
 sekaid init --chain-id $CHAIN_ID "$MONIKER"
 
 # NOTE: can be supplied from parameter, in such case following instruction can be used: sed -i 's/\\\"/\"/g' $PATH_TO_FILE

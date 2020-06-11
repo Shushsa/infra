@@ -64,6 +64,11 @@ mkdir -p $DOCKER_COMMON
 rm -f $GENESIS_DESTINATION
 
 SEEDS=""
+DOCKER_EXTRA_HOSTS="$DOCKER_COMMON/extra_hosts"
+rm -f $DOCKER_EXTRA_HOSTS && touch $DOCKER_EXTRA_HOSTS
+for ((i=1;i<=$VALIDATORS_COUNT;i++)); do
+    CDHelper text lineswap --insert="101.0.1.$i validator-$i.local validator-$i" --contains="101.0.1.$i" --path=$DOCKER_EXTRA_HOSTS --prepend-if-found-not=True --silent=$SILENT_MODE
+done
 
 for ((i=1;i<=$VALIDATORS_COUNT;i++)); do
     echo "INFO: Creating validator-$i container..."

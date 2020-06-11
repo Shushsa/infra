@@ -14,7 +14,7 @@ if [ ! -f "$KIRA_SETUP_HOSTS" ] ; then
     CDHelper text lineswap --insert="$KIRA_REGISTRY_IP $KIRA_REGISTRY_NAME" --prefix="$KIRA_REGISTRY_IP" --path=$HOSTS_PATH --prepend-if-found-not=True --silent=$SILENT_MODE
     
     for ((i=1;i<=$MAX_VALIDATORS_COUNT;i++)); do
-        CDHelper text lineswap --insert="101.0.1.$i validator-$i.local" --prefix="101.0.1.$i" --path=$HOSTS_PATH --prepend-if-found-not=True --silent=$SILENT_MODE
+        CDHelper text lineswap --insert="101.0.1.$i validator-$i.local" --contains="101.0.1.$i" --path=$HOSTS_PATH --prepend-if-found-not=True --silent=$SILENT_MODE
     done
     
     touch $KIRA_SETUP_HOSTS
