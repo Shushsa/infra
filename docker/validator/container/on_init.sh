@@ -59,14 +59,6 @@ else
     echo "{\"key\":\"$RLYKEY\",\"chain-id\":\"$CHAIN_ID\",\"rpc-addr\":\"$RPC_ADDR\",\"account-prefix\":\"$ACCOUNT_PREFIX\",\"gas\":$GAS,\"gas-prices\":\"$GAS_PRICES\",\"default-denom\":\"$DENOM\",\"trusting-period\":\"$RLYTRUSTING\"}" > $CHAIN_ID.json
 fi
 
-# add extra hosts
-if [ -f "$COMMON_DIR/extra_hosts" ] ; then 
-    echo "INFO: Adding extra hosts"
-    cat /etc/hosts > /etc/backup_hosts
-    cat "$COMMON_DIR/extra_hosts" > /etc/hosts
-    cat /etc/backup_hosts >> /etc/hosts
-fi
-
 sekaid init --chain-id $CHAIN_ID "$MONIKER"
 
 # NOTE: can be supplied from parameter, in such case following instruction can be used: sed -i 's/\\\"/\"/g' $PATH_TO_FILE
@@ -89,7 +81,7 @@ cat $SIGNING_KEY > $SIGNING_KEY_PATH
 echo "INFO: Signing key: $(sekaid tendermint show-validator)"
 
 # NOTE: ensure that the sekai rpc is open to all connections
-CDHelper text replace --old="tcp://127.0.0.1:26657" --new="tcp://0.0.0.0:$RPC_LOCAL_PORT" --input=$CONFIG_TOML_PATH
+# CDHelper text replace --old="tcp://127.0.0.1:26657" --new="tcp://0.0.0.0:$RPC_LOCAL_PORT" --input=$CONFIG_TOML_PATH
 CDHelper text replace --old="stake" --new="$DENOM" --input=$GENESIS_JSON_PATH
 
 CDHelper text lineswap --insert="cors_allowed_origins = [\"*\"]" --prefix="cors_allowed_origins =" --path=$CONFIG_TOML_PATH

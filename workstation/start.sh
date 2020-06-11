@@ -64,15 +64,9 @@ mkdir -p $DOCKER_COMMON
 rm -f $GENESIS_DESTINATION
 
 SEEDS=""
-DOCKER_EXTRA_HOSTS="$DOCKER_COMMON/extra_hosts"
-rm -f $DOCKER_EXTRA_HOSTS && touch $DOCKER_EXTRA_HOSTS
-for ((i=1;i<=$VALIDATORS_COUNT;i++)); do
-    CDHelper text lineswap --insert="101.0.1.$i validator-$i.local validator-$i" --contains="101.0.1.$i" --path=$DOCKER_EXTRA_HOSTS --prepend-if-found-not=True --silent=$SILENT_MODE
-done
 
 for ((i=1;i<=$VALIDATORS_COUNT;i++)); do
     echo "INFO: Creating validator-$i container..."
-    NODE_HOSTNAME="validator-$i.local"
     P2P_PROXY_PORT="10000"
     RPC_PROXY_PORT="10001"
     LCD_PROXY_PORT="10002"
@@ -83,8 +77,7 @@ for ((i=1;i<=$VALIDATORS_COUNT;i++)); do
      --restart=always \
      --name "validator-$i" \
      --network kiranet \
-     --ip "101.0.1.$i" \
-     --hostname $NODE_HOSTNAME \
+     --ip "101.1.0.$i" \
      -e VALIDATOR_INDEX=$i \
      -e VALIDATORS_COUNT=$VALIDATORS_COUNT \
      -e MONIKER="Local Kira Hub Validator" \
@@ -128,7 +121,7 @@ for ((i=1;i<=$VALIDATORS_COUNT;i++)); do
 
     NODE_ID=$(docker exec -it "validator-$VALIDATOR_INDEX" sekaid tendermint show-node-id || echo "error")
     # NOTE: New lines have to be removed
-    SEEDS=$(echo "${NODE_ID}@101.0.1.$VALIDATOR_INDEX:$P2P_PROXY_PORT" | xargs | tr -d '\n' | tr -d '\r')
+    SEEDS=$(echo "${NODE_ID}@101.1.0.$VALIDATOR_INDEX:$P2P_PROXY_PORT" | xargs | tr -d '\n' | tr -d '\r')
 
     # we have to recover the index back before progressing
     i=$VALIDATOR_INDEX
