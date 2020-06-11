@@ -89,7 +89,7 @@ CDHelper text lineswap --insert="pruning = \"nothing\"" --prefix="pruning =" --p
 [ ! -z "$SEEDS" ] && CDHelper text lineswap --insert="seeds = \"$SEEDS\"" --prefix="seeds =" --path=$CONFIG_TOML_PATH
 
 
-if [ $VALIDATOR_INDEX -eq 1 ] ; then
+if [ $VALIDATOR_INDEX -eq 1 ] ; then # first validator always creates a genesis tx
     echo "INFO: Creating genesis file..."
     for ((i=1;i<=$VALIDATORS_COUNT;i++)); do
         TEST_ACC_NAME="test-$i"
@@ -127,7 +127,7 @@ EOF
     done
     echo "INFO: Collecting gen tx'es..."
     sekaid collect-gentxs
-elif [ -f "$COMMON_DIR/genesis.json" ] ; then
+elif [ -f "$COMMON_DIR/genesis.json" ] ; then # import genesis if shared file already exists
     echo "INFO: Adding test-$VALIDATOR_INDEX account..."
     $SELF_SCRIPTS/add-account.sh test-$VALIDATOR_INDEX "test-keys/test-$VALIDATOR_INDEX" $KEYRINGPASS $PASSPHRASE
     echo "INFO: Adding validator-$VALIDATOR_INDEX account..."
@@ -140,10 +140,10 @@ else
 fi
 
 # original signing key and node-id has to be recovered
-#echo "INFO: Key recovery and chain hard reset"
-#cat $NODE_KEY > $NODE_KEY_PATH
-#cat $SIGNING_KEY > $SIGNING_KEY_PATH
-#sekaid unsafe-reset-all
+echo "INFO: Key recovery and chain hard reset"
+cat $NODE_KEY > $NODE_KEY_PATH
+cat $SIGNING_KEY > $SIGNING_KEY_PATH
+sekaid unsafe-reset-all
 
 echo "INFO: Setting up services..."
 cat > /etc/systemd/system/sekaid.service << EOL
