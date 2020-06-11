@@ -63,8 +63,11 @@ GENESIS_DESTINATION="$DOCKER_COMMON/genesis.json"
 mkdir -p $DOCKER_COMMON
 rm -f $GENESIS_DESTINATION
 
+SEEDS=""
+
 for ((i=1;i<=$VALIDATORS_COUNT;i++)); do
     echo "INFO: Creating validator-$i container..."
+    NODE_HOSTNAME="validator-$i.local"
     rm -fr "${KIRA_STATE}/validator-$i"
     mkdir -p "${KIRA_STATE}/validator-$i"
     docker run -d \
@@ -72,7 +75,7 @@ for ((i=1;i<=$VALIDATORS_COUNT;i++)); do
      --name "validator-$i" \
      --network kiranet \
      --ip "101.0.1.$i" \
-     --hostname "validator-$i.local" \
+     --hostname $NODE_HOSTNAME \
      -e VALIDATOR_INDEX=$i \
      -e VALIDATORS_COUNT=$VALIDATORS_COUNT \
      -e MONIKER="Local Kira Hub Validator $i" \
@@ -85,6 +88,7 @@ for ((i=1;i<=$VALIDATORS_COUNT;i++)); do
      -e NOTIFICATIONS="$NOTIFICATIONS" \
      -e DEBUG_MODE="$DEBUG_MODE" \
      -e SILENT_MODE="$SILENT_MODE" \
+     -e SEEDS="$SEEDS" \
      -v $DOCKER_COMMON:"/common" \
      validator:latest
 
@@ -113,9 +117,12 @@ for ((i=1;i<=$VALIDATORS_COUNT;i++)); do
         fi
     fi
 
+    NODE_ID=$(docker exec -it "validator-$VALIDATOR_INDEX" sekaid tendermint show-node-id || echo "error")
+    SEEDS="$NODE_ID@$NODE_HOSTNAME"
+
     # we have to recover the index back before progressing
     i=$VALIDATOR_INDEX
-    echo "SUCCESS: validator-$i is up and running"
+    echo "SUCCESS: validator-$i is up and running, seed: $SEEDS"
 done
 
 # success_end file is created when docker startup suceeds

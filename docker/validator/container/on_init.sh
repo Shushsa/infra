@@ -40,7 +40,6 @@ RLY_LOCAL_PORT=8000
 [ -z "$KEYRINGPASS" ] && KEYRINGPASS="1234567890"
 [ -z "$MONIKER" ] && MONIKER="Test Chain Moniker"
 
-
 if [ -f "$CHAIN_JSON_FULL_PATH" ] ; then
     echo "Chain configuration file was defined, loading JSON"
     CHAIN_ID="$(cat $CHAIN_JSON_FULL_PATH | jq -r '.["chain-id"]')"
@@ -88,10 +87,13 @@ else
    exit 1
 fi
 
+CDHelper text replace --old="stake" --new="$DENOM" --input=$GENESIS_JSON_PATH
 # NOTE: ensure that the sekai rpc is open to all connections
-sed -i 's#tcp://127.0.0.1:26657#tcp://0.0.0.0:26657#g' $CONFIG_TOML_PATH
-sed -i "s/stake/$DENOM/g" $GENESIS_JSON_PATH
-sed -i 's/pruning = "syncable"/pruning = "nothing"/g' $APP_TOML_PATH
+CDHelper text replace --old="tcp://127.0.0.1:26657" --new="tcp://0.0.0.0:$RPC_LOCAL_PORT" --input=$CONFIG_TOML_PATH
+
+CDHelper text lineswap --insert="cors_allowed_origins = [\"*\"]" --prefix="cors_allowed_origins =" --path=$CONFIG_TOML_PATH
+CDHelper text lineswap --insert="pruning = \"nothing\"" --prefix="pruning =" --path=$APP_TOML_PATH
+[ ! -z "$SEEDS" ] && CDHelper text lineswap --insert="seeds = \"$SEEDS\"" --prefix="seeds =" --path=$CONFIG_TOML_PATH
 
 echo ${KEYRINGPASS} | sekaicli keys list
 if [ $VALIDATOR_INDEX -eq 1 ] ; then
@@ -134,6 +136,7 @@ cat $NODE_KEY > $NODE_KEY_PATH
 cat $SIGNING_KEY > $SIGNING_KEY_PATH
 sekaid unsafe-reset-all
 
+echo "INFO: Setting up services..."
 cat > /etc/systemd/system/sekaid.service << EOL
 [Unit]
 Description=sekaid
@@ -205,11 +208,18 @@ ${SELF_SCRIPTS}/local-cors-proxy-v0.0.1.sh $P2P_PROXY_PORT http://127.0.0.1:$P2P
 #
 #aws configure list
 
-echo "Starting services..."
+echo "INFO: Starting services..."
 systemctl2 restart nginx || systemctl2 status nginx.service || echo "Failed to re-start nginx service"
 systemctl2 restart sekaid || systemctl2 status sekaid.service || echo "Failed to re-start sekaid service" && echo "$(cat /etc/systemd/system/sekaid.service)" || true
 systemctl2 restart lcd || systemctl2 status lcd.service || echo "Failed to re-start lcd service" && echo "$(cat /etc/systemd/system/lcd.service)" || true
 #systemctl2 restart faucet || echo "Failed to re-start faucet service" && echo "$(cat /etc/systemd/system/faucet.service)" || true
+
+
+echo "INFO: Setting up CLI..."
+sekaicli config trust-node true
+sekaicli config chain-id $(cat $GENESIS_JSON_PATH | jq -r '.chain_id')
+sekaicli config node tcp://localhost:$RPC_LOCAL_PORT
+
 
 if [ "$NOTIFICATIONS" == "True" ] ; then
 CDHelper email send \

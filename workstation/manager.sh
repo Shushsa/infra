@@ -30,7 +30,7 @@ while : ; do
         CONTAINER_ID="CONTAINER_ID_$i"
         [ -z "${!CONTAINER_ID}" ] && continue
         VALIDATOR_STATUS="VALIDATOR_STATUS_$i"
-        echo "| [$i] | Inspect validator-$i container          : $VALIDATOR_STATUS"
+        echo "| [$i] | Inspect validator-$i container          : ${!CONTAINER_ID}"
     done
     echo "|----------------------------------------------|"
     echo "| [I] | Re-INITALIZE Environment               |"
