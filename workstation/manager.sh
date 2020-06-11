@@ -3,6 +3,9 @@
 exec 2>&1
 set -e
 
+# Local Update Shortcut:
+# (rm -fv $KIRA_MANAGER/manager.sh) && nano $KIRA_MANAGER/manager.sh && chmod 777 $KIRA_MANAGER/manager.sh
+
 START_TIME="$(date -u +%s)"
 ETC_PROFILE="/etc/profile"
 
@@ -22,7 +25,7 @@ while : ; do
     clear
     
     echo -e "\e[33;1m------------------------------------------------"
-    echo "|         KIRA NETWORK MANAGER v0.0.2          |"
+    echo "|         KIRA NETWORK MANAGER v0.0.3          |"
     echo "|             $(date '+%d/%m/%Y %H:%M:%S')              |"
     echo "|----------------------------------------------|"
     echo "| [0] | Inspect registry container             : $REGISTRY_STATUS"
@@ -42,11 +45,9 @@ while : ; do
     echo "|----------------------------------------------|"
     echo "| [X] | Exit | [W] | Refresh Window            |"
     echo -e "------------------------------------------------\e[0m"
-    
-    TIMEOUT=False
-    read -n3 -t 10 -p "Input option then press [ENTER]: " OPTION || TIMEOUT="True"
-    [ "$TIMEOUT" == "True" ] && read -n3 -t 10 -p "Input option then press [ENTER]: $OPTION" OPTION || OPTION=""
-    [ ! -z "$OPTION" ] && echo "" && read -d'' -s -n1 -p "Press [Y] to confirm [${OPTION^^}] option or any other key to abandon action" ACCEPT
+
+    read -n4 -t 15 -p "Input option then press [ENTER]: " OPTION || OPTION=""
+    [ ! -z "$OPTION" ] && echo "" && read -d'' -s -n1 -p "Press [Y] to confirm option [${OPTION^^}] or any other key to abandon action: " ACCEPT
     [ "${ACCEPT,,}" != "y" ] && break
 
     BREAK="False"

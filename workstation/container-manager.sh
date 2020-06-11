@@ -56,9 +56,9 @@ while : ; do
     echo "| [X] | Exit | [W] | Refresh Window            |"
     echo -e "------------------------------------------------\e[0m"
     
-    read  -d'' -s -n1 -t 5 -p "INFO: Press [KEY] to select option" OPTION || OPTION=""
-    [ ! -z "$OPTION" ] && echo "" && read -d'' -s -n1 -p "Press [ENTER] to confirm [${OPTION^^}] option or any other key to try again" ACCEPT
-    [ ! -z "$ACCEPT" ] && break
+    read  -d'' -s -n1 -t 5 -p "INFO: Press [KEY] to select option: " OPTION || OPTION=""
+    [ ! -z "$OPTION" ] && echo "" && read -d'' -s -n1 -p "Press [ENTER] to confirm [${OPTION^^}] option or any other key to try again: " ACCEPT
+    [ ! -z "$ACCEPT" ] && continue
     
     if [ "${OPTION,,}" == "i" ] ; then
         gnome-terminal --disable-factory -- bash -c "docker exec -it $ID /bin/bash || docker exec -it $ID /bin/sh ; read -d'' -s -n1 -p 'Press any key to exit...' && exit"

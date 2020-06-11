@@ -4,9 +4,6 @@
 exec 2>&1
 set -e
 
-# Local Update Shortcut:
-# (rm -fv /tmp/init.sh) && nano /tmp/init.sh && chmod 777 /tmp/init.sh
-
 ETC_PROFILE="/etc/profile"
 source $ETC_PROFILE &> /dev/null
 if [ "$DEBUG_MODE" == "True" ] ; then set -x ; else set +x ; fi
