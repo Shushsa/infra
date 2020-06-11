@@ -34,6 +34,8 @@ RLY_LOCAL_PORT=8000
 [ -z "$LCD_PROXY_PORT" ] && LCD_PROXY_PORT="10002"
 [ -z "$RLY_PROXY_PORT" ] && RLY_PROXY_PORT="10003"
 
+HOST_IP=$(hostname -i)
+
 [ -z "$NODE_ADDESS" ] && NODE_ADDESS="tcp://localhost:$RPC_LOCAL_PORT"
 [ -z "$CHAIN_JSON_FULL_PATH" ] && CHAIN_JSON_FULL_PATH="$SELF_CONFIGS/$CHAIN_ID.json"
 [ -z "$PASSPHRASE" ] && PASSPHRASE="1234567890"
@@ -84,15 +86,26 @@ echo "INFO: Signing key: $(sekaid tendermint show-validator)"
 # CDHelper text replace --old="tcp://127.0.0.1:26657" --new="tcp://0.0.0.0:$RPC_LOCAL_PORT" --input=$CONFIG_TOML_PATH
 CDHelper text replace --old="stake" --new="$DENOM" --input=$GENESIS_JSON_PATH
 
+
+CDHelper text lineswap --insert="addr_book_strict = false" --prefix="addr_book_strict =" --path=$CONFIG_TOML_PATH
+CDHelper text lineswap --insert="external_address = \"tcp://$HOST_IP:$P2P_PROXY_PORT\"" --prefix="external_address =" --path=$CONFIG_TOML_PATH
 CDHelper text lineswap --insert="cors_allowed_origins = [\"*\"]" --prefix="cors_allowed_origins =" --path=$CONFIG_TOML_PATH
+CDHelper text lineswap --insert="unsafe = true" --prefix="unsafe =" --path=$CONFIG_TOML_PATH
 CDHelper text lineswap --insert="pruning = \"nothing\"" --prefix="pruning =" --path=$APP_TOML_PATH
 
-# NOTE: In some cases '@' characters cause line splits
-if [ ! -z "$SEEDS" ] ; then
-    SEEDS=$(echo $SEEDS | xargs) 
+if [ ! -z "$SEEDS" ] ; then # NOTE: In some cases '@' characters cause line splits
+    SEEDS=$(echo $SEEDS | xargs)
+     
     SEEDS=$(echo "seeds = \"$SEEDS\"" | tr -d '\n' | tr -d '\r')
     CDHelper text lineswap --insert="$SEEDS" --prefix="seeds =" --path=$CONFIG_TOML_PATH
 fi
+if [ ! -z "$PEERS" ] ; then # NOTE: In some cases '@' characters cause line splits
+    PEERS=$(echo $PEERS | xargs)
+    PEERS=$(echo "persistent_peers = \"$PEERS\"" | tr -d '\n' | tr -d '\r')
+    CDHelper text lineswap --insert="$PEERS" --prefix="persistent_peers =" --path=$CONFIG_TOML_PATH
+fi
+
+
 
 if [ $VALIDATOR_INDEX -eq 1 ] ; then # first validator always creates a genesis tx
     echo "INFO: Creating genesis file..."
