@@ -17,7 +17,7 @@ source $ETC_PROFILE &> /dev/null
 [ "$DEBUG_MODE" == "True" ] && set -x
 
 echo "------------------------------------------------"
-echo "|       STARTED: KIRA INFRA START v0.0.1       |"
+echo "|       STARTED: KIRA INFRA START v0.0.2       |"
 echo "|----------------------------------------------|"
 echo "|       INFRA BRANCH: $INFRA_BRANCH"
 echo "|       SEKAI BRANCH: $SEKAI_BRANCH"
@@ -34,7 +34,12 @@ echo "|_______________________________________________"
 [ -z "$EMAIL_NOTIFY" ] && echo "ERROR: EMAIL_NOTIFY env was not defined" && exit 1
 
 echo "INFO: Updating infra repository and fetching changes..."
-$KIRA_WORKSTATION/setup.sh "$SKIP_UPDATE"
+if [ "$SKIP_UPDATE" == "False" ] ; then
+    $KIRA_MANAGER/setup.sh "$SKIP_UPDATE"
+    source $KIRA_WORKSTATION/start.sh "True"
+    exit 0
+fi
+
 source $ETC_PROFILE &> /dev/null
 
 $KIRA_SCRIPTS/container-restart.sh "registry"
@@ -130,6 +135,6 @@ done
 
 # success_end file is created when docker startup suceeds
 echo "------------------------------------------------"
-echo "| FINISHED: KIRA INFRA START v0.0.1            |"
+echo "| FINISHED: KIRA INFRA START v0.0.2            |"
 echo "|  ELAPSED: $(($(date -u +%s)-$START_TIME_INFRA)) seconds"
 echo "------------------------------------------------"

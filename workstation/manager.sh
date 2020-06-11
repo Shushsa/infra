@@ -50,9 +50,17 @@ while : ; do
     echo "| [X] | Exit | [W] | Refresh Window            |"
     echo -e "------------------------------------------------\e[0m"
 
-    read -n4 -t 30 -p "Input option then press [ENTER]: " OPTION || OPTION=""
-    [ ! -z "$OPTION" ] && echo "" && read -d'' -s -n1 -p "Press [Y] to confirm option [${OPTION^^}] or any other key to abandon action: " ACCEPT
-    [ "${ACCEPT,,}" != "y" ] && continue
+    OPTION="" && KEY="x" && TIMEOUT="False"
+    echo "Input option then press [ENTER]: "
+    while [ ! -z "$KEY" ] ; do
+        read -n1 -t3 KEY || TIMEOUT="True"
+        [ "$TIMEOUT" == "True" ] && TIMEOUT="False" && KEY="x" && continue
+        [ ! -z "$KEY" ] && OPTION="${OPTION}${KEY}"
+    done
+    [ -z "$OPTION" ] && continue
+
+    ACCEPT="" && while [ "${ACCEPT,,}" != "y" ] && [ "${ACCEPT,,}" != "n" ] ; do echo -e "\n\e[36;1mPress [Y]es to confirm option (${OPTION^^}) or [N]o to cancel: \e[0m\c" && read  -d'' -s -n1 ACCEPT ; done
+    [ "${ACCEPT,,}" == "n" ] && echo "WARINIG: Operation was cancelled" && continue
 
     BREAK="False"
     for ((i=1;i<=$VALIDATORS_COUNT;i++)); do

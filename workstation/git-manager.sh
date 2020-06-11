@@ -96,7 +96,7 @@ while : ; do
             echo "WARINIG: Commit message was not set"
             FORCE="" && while [ "${FORCE,,}" != "y" ] && [ "${FORCE,,}" != "n" ] ; do echo -e "\n\e[36;1mPress [Y]es to commit empty message or [N]o to cancel: \e[0m\c" && read  -d'' -s -n1 FORCE ; done
             [ "${FORCE,,}" == "y" ] && COMMIT="Forced commit or minor changes"
-            [ "${FORCE,,}" == "n" ] && "WARINIG: Commit was cancelled" && break
+            [ "${FORCE,,}" == "n" ] && echo "WARINIG: Commit was cancelled" && break
         fi
         echo "INFO: Commiting changes..."
         git add -A || FAILED="True"
