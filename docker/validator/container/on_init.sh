@@ -80,11 +80,11 @@ echo "INFO: Node ID: $(sekaid tendermint show-node-id)"
 cat $SIGNING_KEY > $SIGNING_KEY_PATH
 echo "INFO: Signing key: $(sekaid tendermint show-validator)"
 
-CDHelper text replace --old="stake" --new="$DENOM" --input=$GENESIS_JSON_PATH
 # NOTE: ensure that the sekai rpc is open to all connections
 CDHelper text replace --old="tcp://127.0.0.1:26657" --new="tcp://0.0.0.0:$RPC_LOCAL_PORT" --input=$CONFIG_TOML_PATH
+CDHelper text replace --old="stake" --new="$DENOM" --input=$GENESIS_JSON_PATH
 
-CDHelper text lineswap --insert="cors_allowed_origins = [\"*\"]" --prefix="cors_allowed_origins =" --path=$CONFIG_TOML_PATH
+#CDHelper text lineswap --insert="cors_allowed_origins = [\"*\"]" --prefix="cors_allowed_origins =" --path=$CONFIG_TOML_PATH
 CDHelper text lineswap --insert="pruning = \"nothing\"" --prefix="pruning =" --path=$APP_TOML_PATH
 [ ! -z "$SEEDS" ] && CDHelper text lineswap --insert="seeds = \"$SEEDS\"" --prefix="seeds =" --path=$CONFIG_TOML_PATH
 
@@ -119,7 +119,7 @@ if [ $VALIDATOR_INDEX -eq 1 ] ; then
         echo "INFO: Cons Pub: $TMP_CONSPUB"
         echo "INFO: Address: $TMP_ADDRESS"
         #--node-id "$TMP_NODE_ID" --details "Kira Hub Validator $i"
-        sekaid gentx --trace --name $VALIDATOR_ACC_NAME --amount 1000${DENOM} << EOF
+        sekaid gentx --trace --name $VALIDATOR_ACC_NAME --amount 90000000000${DENOM} << EOF
 $KEYRINGPASS
 $KEYRINGPASS
 $KEYRINGPASS
