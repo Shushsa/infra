@@ -29,7 +29,7 @@ fi
 if [ "$DEBUG_MODE" == "True" ] ; then set -x ; else set +x ; fi
 
 MAX_VALIDATORS=254
-[ -z "$INFRA_BRANCH" ] && INFRA_BRANCH="v0.0.2"
+[ -z "$INFRA_BRANCH" ] && INFRA_BRANCH="master"
 [ -z "$SEKAI_BRANCH" ] && SEKAI_BRANCH="master"
 [ -z "$EMAIL_NOTIFY" ] && EMAIL_NOTIFY="noreply.example.email@gmail.com"
 [ -z "$SMTP_LOGIN" ] && SMTP_LOGIN="noreply.example.email@gmail.com"
