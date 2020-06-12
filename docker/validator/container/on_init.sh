@@ -21,7 +21,9 @@ SIGNING_KEY_PATH="$SEKAID_CONFIG/priv_validator_key.json"
 # key's can be passed from json in the config directory 
 [ -z "$VALIDATOR_INDEX" ] && VALIDATOR_INDEX=1
 [ ! -f "$NODE_KEY" ] && NODE_KEY="$SELF_CONFIGS/node-keys/node-key-${VALIDATOR_INDEX}.json"
+[ ! -f "$NODE_KEY" ] && NODE_KEY="$COMMON_DIR/node-keys/node-key-${VALIDATOR_INDEX}.json"
 [ ! -f "$SIGNING_KEY" ] && SIGNING_KEY="$SELF_CONFIGS/signing-keys/signing-${VALIDATOR_INDEX}.key"
+[ ! -f "$SIGNING_KEY" ] && SIGNING_KEY="$COMMON_DIR/signing-keys/signing-${VALIDATOR_INDEX}.key"
 
 # external variables: P2P_PROXY_PORT, RPC_PROXY_PORT, LCD_PROXY_PORT, RLY_PROXY_PORT
 P2P_LOCAL_PORT=26656
@@ -86,7 +88,6 @@ echo "INFO: Signing key: $(sekaid tendermint show-validator)"
 # CDHelper text replace --old="tcp://127.0.0.1:26657" --new="tcp://0.0.0.0:$RPC_LOCAL_PORT" --input=$CONFIG_TOML_PATH
 CDHelper text replace --old="stake" --new="$DENOM" --input=$GENESIS_JSON_PATH
 
-
 CDHelper text lineswap --insert="addr_book_strict = false" --prefix="addr_book_strict =" --path=$CONFIG_TOML_PATH
 CDHelper text lineswap --insert="external_address = \"tcp://$HOST_IP:$P2P_LOCAL_PORT\"" --prefix="external_address =" --path=$CONFIG_TOML_PATH
 CDHelper text lineswap --insert="cors_allowed_origins = [\"*\"]" --prefix="cors_allowed_origins =" --path=$CONFIG_TOML_PATH
@@ -105,7 +106,8 @@ if [ ! -z "$PEERS" ] ; then # NOTE: In some cases '@' characters cause line spli
     CDHelper text lineswap --insert="$PEERS" --prefix="persistent_peers =" --path=$CONFIG_TOML_PATH
 fi
 
-
+mkdir -p "$COMMON_DIR/node-keys"
+mkdir -p "$COMMON_DIR/signing-keys"
 
 if [ $VALIDATOR_INDEX -eq 1 ] ; then # first validator always creates a genesis tx
     echo "INFO: Creating genesis file..."
@@ -117,6 +119,8 @@ if [ $VALIDATOR_INDEX -eq 1 ] ; then # first validator always creates a genesis 
         echo "INFO: Adding $VALIDATOR_ACC_NAME account..."
         $SELF_SCRIPTS/add-account.sh $TEST_ACC_NAME "test-keys/$TEST_ACC_NAME" $KEYRINGPASS $PASSPHRASE
         $SELF_SCRIPTS/add-account.sh $VALIDATOR_ACC_NAME "validator-keys/$VALIDATOR_ACC_NAME" $KEYRINGPASS $PASSPHRASE
+        $SELF_SCRIPTS/export-account.sh $TEST_ACC_NAME "$COMMON_DIR/test-keys/$TEST_ACC_NAME.key" $KEYRINGPASS $PASSPHRASE
+        $SELF_SCRIPTS/export-account.sh $TEST_ACC_NAME "$COMMON_DIR/validator-keys/$VALIDATOR_ACC_NAME.key" $KEYRINGPASS $PASSPHRASE
         echo ${KEYRINGPASS} | sekaicli keys list
         TEST_ACC_ADDR=$(echo ${KEYRINGPASS} | sekaicli keys show "$TEST_ACC_NAME" -a)
         VALIDATOR_ACC_ADDR=$(echo ${KEYRINGPASS} | sekaicli keys show "$VALIDATOR_ACC_NAME" -a)
@@ -127,9 +131,25 @@ if [ $VALIDATOR_INDEX -eq 1 ] ; then # first validator always creates a genesis 
         sekaid add-genesis-account $VALIDATOR_ACC_ADDR 200000000000000$DENOM,20000000samoleans
 
         echo "INFO: Creating $VALIDATOR_ACC_NAME genesis tx..."
+        TMP_NODE_KEY="$SELF_CONFIGS/node-keys/node-key-$i.json"
+        COM_NODE_KEY="$COMMON_DIR/node-keys/node-key-$i.json"
+        TMP_SIGNING_KEY="$SELF_CONFIGS/signing-keys/signing-$i.key"
+        COM_SIGNING_KEY="$COMMON_DIR/signing-keys/signing-$i.key"
+
+        if [ ! -f "$TMP_NODE_KEY" ] || [ ! -f "$TMP_SIGNING_KEY" ] ; then
+            echo "INFO: Generating new node & signing keys..."
+            rm -f $NODE_KEY_PATH
+            rm -f $SIGNING_KEY_PATH
+            timeout 2 sekaid start --home=$SEKAID_HOME || echo "INFO: Forced timeout"
+            cat $NODE_KEY_PATH > $TMP_NODE_KEY
+            cat $TMP_SIGNING_KEY > $TMP_SIGNING_KEY
+        fi
+
         #signing key has to be rotated as it is used by default by the gentx
-        cat "$SELF_CONFIGS/node-keys/node-key-$i.json" > $NODE_KEY_PATH
-        cat "$SELF_CONFIGS/signing-keys/signing-$i.key" > $SIGNING_KEY_PATH
+        cat $TMP_NODE_KEY > $NODE_KEY_PATH
+        cat $TMP_NODE_KEY > $COM_NODE_KEY
+        cat $TMP_SIGNING_KEY > $SIGNING_KEY_PATH
+        cat $TMP_SIGNING_KEY > $COM_SIGNING_KEY
         TMP_NODE_ID=$(sekaid tendermint show-node-id)
         TMP_CONSPUB=$(sekaid tendermint show-validator)
         TMP_ADDRESS=$(sekaid tendermint show-address)

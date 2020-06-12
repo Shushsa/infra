@@ -11,13 +11,17 @@ KEY=$2
 KEYRINGPASS=$3
 PASSPHRASE=$4
 
-if [ ! -f "$KEY" ] && [ ! -z "$KEY" ] ; then # use key as key filename
-    KEY="$SELF_CONFIGS/${KEY}.key"
-fi
+# check configs directory
+[ ! -f "$KEY" ] && KEY="$SELF_CONFIGS/${KEY}"
+[ ! -f "$KEY" ] && KEY="$SELF_CONFIGS/${KEY}.key" # use key as key filename
+[ ! -f "$KEY" ] && KEY="$SELF_CONFIGS/${NAME}"
+[ ! -f "$KEY" ] && KEY="$SELF_CONFIGS/${NAME}.key" # use name as key filename
 
-if [ ! -f "$KEY" ] ; then # use name as key filename
-    KEY="$SELF_CONFIGS/${NAME}.key"
-fi
+# check common folder if still does not exists
+[ ! -f "$KEY" ] && KEY="$COMMON_DIR/${KEY}"
+[ ! -f "$KEY" ] && KEY="$COMMON_DIR/${KEY}.key" # use key as key filename
+[ ! -f "$KEY" ] && KEY="$COMMON_DIR/${NAME}"
+[ ! -f "$KEY" ] && KEY="$COMMON_DIR/${NAME}.key" # use name as key filename
 
 if [ -f "$KEY" ] ; then
    echo "INFO: Key $NAME ($KEY) was found and will be imported..."
