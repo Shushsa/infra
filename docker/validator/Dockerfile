@@ -1,5 +1,5 @@
 # (rm -fv $KIRA_INFRA/docker/validator/Dockerfile) && nano $KIRA_INFRA/docker/validator/Dockerfile
-FROM localhost:5000/tools-image:latest
+FROM registry.local:5000/tools-image:latest
 
 ARG BUILD_HASH
 ARG BRANCH
@@ -8,12 +8,14 @@ ARG REPO
 ENV SEKAI="${GOPATH}/src/github.com/kiracore/sekai"
 ENV SEKAID_BIN="${GOBIN}/sekaid"
 ENV SEKAICLI_BIN="${GOBIN}/sekaicli"
+ENV COMMON_DIR="/common"
 
 RUN echo "Build hash: ${BUILD_HASH}"
 
 RUN ${SELF_SCRIPTS}/git-pull.sh "${REPO}" "${BRANCH}" "${SEKAI}"
 RUN cd ${SEKAI} && make install
 RUN sekaid version --long
+RUN mkdir -p "${COMMON_DIR}"
 
 ADD ./configs ${SELF_CONFIGS}
 ADD ./container ${SELF_CONTAINER}

@@ -11,15 +11,12 @@ echo "------------------------------------------------"
 echo "|      STARTED: TOOLS IMAGE UPDATE v0.0.1      |"
 echo "------------------------------------------------"
 
-cd $KIRA_WORKSTATION
-
-TOOLS_IMAGE_EXISTS=$(./image-updated.sh "$KIRA_DOCKER/tools-image" "tools-image" || echo "error")
+TOOLS_IMAGE_EXISTS=$($WORKSTATION_SCRIPTS/image-updated.sh "$KIRA_DOCKER/tools-image" "tools-image" || echo "error")
 if [ "$TOOLS_IMAGE_EXISTS" == "False" ] ; then
-    $KIRA_SCRIPTS/container-delete.sh "validator-1"
-    ./delete-image.sh "$KIRA_DOCKER/validator" "validator"
+    $WORKSTATION_SCRIPTS/delete-image.sh "$KIRA_DOCKER/validator" "validator"
 
     echo "INFO: Updating tools image..."
-    ./update-image.sh "$KIRA_DOCKER/tools-image" "tools-image"
+    $WORKSTATION_SCRIPTS/update-image.sh "$KIRA_DOCKER/tools-image" "tools-image"
 elif [ "$TOOLS_IMAGE_EXISTS" == "True" ] ; then
     echo "INFO: tools-image is up to date"
 else

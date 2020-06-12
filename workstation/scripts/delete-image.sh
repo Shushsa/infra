@@ -35,14 +35,16 @@ cd $IMAGE_DIR
 
 rm -fv $KIRA_SETUP_FILE
 docker images -f "dangling=true" -q 
-docker images | grep "<none>" | awk '{print $3}' | xargs sudo docker rmi -f || echo "Likely detected child imaged dependencies"
+docker images | grep "<none>" | awk '{print $3}' | xargs docker rmi -f || echo "Likely detected child imaged dependencies"
 [ "$IMAGE" != "none" ] && docker rmi -f $IMAGE || echo "Image not found"
-[ "$REGISTRY_IMAGE" != "none" ] &&  rmi -f $REGISTRY_IMAGE || echo "Image not found"
+[ "$REGISTRY_IMAGE" != "none" ] && docker rmi -f $REGISTRY_IMAGE || echo "Image not found"
 
 # ensure registry cleanup
 docker exec -it registry sh -c "rm -rfv /var/lib/registry/docker/registry/v2/repositories/${IMAGE_NAME}" || echo "Imgae was not present in the registry"
 docker exec -it registry bin/registry garbage-collect /etc/docker/registry/config.yml -m  || echo "Failed to collect registry garbage"
 docker exec -it registry sh -c "reboot" || echo "Docker Registry Reboot" && sleep 1
+
+docker images
 
 echo "------------------------------------------------"
 echo "|        FINISHED: IMAGE DELETE v0.0.1         |"

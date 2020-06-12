@@ -3,43 +3,79 @@
 exec 2>&1
 set -e
 
-START_TIME="$(date -u +%s)"
+# Local Update Shortcut:
+# (rm -fv $KIRA_MANAGER/manager.sh) && nano $KIRA_MANAGER/manager.sh && chmod 777 $KIRA_MANAGER/manager.sh
+
 ETC_PROFILE="/etc/profile"
+LOOP_FILE="/tmp/manager_loop"
 
 while : ; do
+    START_TIME="$(date -u +%s)"
     source $ETC_PROFILE &> /dev/null
     if [ "$DEBUG_MODE" == "True" ] ; then set -x ; else set +x ; fi
-    REGISTRY_STATUS=$(docker inspect $(docker ps --no-trunc -aqf name=registry) | jq -r '.[0].State.Status' || echo "Error")
-    VALIDATOR_1_STATUS=$(docker inspect $(docker ps --no-trunc -aqf name=validator-1) | jq -r '.[0].State.Status' || echo "Error")
-    
+
+    REGISTRY_STATUS=""
+    CONTAINER_ID=$(docker ps --no-trunc -aqf name=registry || echo "")
+    [ ! -z "$CONTAINER_ID" ] && REGISTRY_STATUS=$(docker inspect $CONTAINER_ID | jq -r '.[0].State.Status' || echo "error")
+
+    for ((i=1;i<=$VALIDATORS_COUNT;i++)); do
+        CONTAINER_ID=$(docker ps --no-trunc -aqf name=validator-$i || echo "")
+        declare "CONTAINER_ID_$i"="$CONTAINER_ID"
+        [ -z "$CONTAINER_ID" ] && continue
+        VALIDATOR_STATUS=$(docker inspect $CONTAINER_ID | jq -r '.[0].State.Status' || echo "error")
+        declare "VALIDATOR_STATUS_$i"="$VALIDATOR_STATUS"
+    done
+
     clear
     
     echo -e "\e[33;1m------------------------------------------------"
-    echo "|         KIRA NETWORK MANAGER v0.0.2          |"
+    echo "|         KIRA NETWORK MANAGER v0.0.3          |"
     echo "|             $(date '+%d/%m/%Y %H:%M:%S')              |"
     echo "|----------------------------------------------|"
-    echo "| [0] | Inspect registry container             : $REGISTRY_STATUS"
-    echo "| [1] | Inspect validator-1 container          : $VALIDATOR_1_STATUS"
+    [ ! -z "$REGISTRY_STATUS" ] && \
+        echo "| [0] | Inspect registry container             : $REGISTRY_STATUS"
+    for ((i=1;i<=$VALIDATORS_COUNT;i++)); do
+        CONTAINER_ID="CONTAINER_ID_$i"
+        [ -z "${!CONTAINER_ID}" ] && continue
+        VALIDATOR_STATUS="VALIDATOR_STATUS_$i"
+        echo "| [$i] | Inspect validator-$i container          : ${!VALIDATOR_STATUS}"
+    done
+    echo "|----------------------------------------------|"
+    echo "| [A] | Mange INFRA Repo ($INFRA_BRANCH)"
+    echo "| [B] | Mange SEKAI Repo ($SEKAI_BRANCH)"
     echo "|----------------------------------------------|"
     echo "| [I] | Re-INITALIZE Environment               |"
     echo "| [R] | Hard RESET Repos & Infrastructure      |"
     echo "| [D] | DELETE Repos & Infrastructure          |"
     echo "|----------------------------------------------|"
-    echo "| [A] | Mange INFRA Repo ($INFRA_BRANCH)"
-    echo "| [B] | Mange SEKAI Repo ($SEKAI_BRANCH)"
-    echo "|----------------------------------------------|"
     echo "| [X] | Exit | [W] | Refresh Window            |"
     echo -e "------------------------------------------------\e[0m"
     
-    read  -d'' -s -n1 -t 5 -p "Press [KEY] to select option: " OPTION || OPTION=""
-    [ ! -z "$OPTION" ] && echo "" && read -d'' -s -n1 -p "Press [ENTER] to confirm [${OPTION^^}] option or any other key to try again" ACCEPT
-    [ ! -z "$ACCEPT" ] && break
+    echo "Input option then press [ENTER] or [SPACE]: " && rm -f $LOOP_FILE && touch $LOOP_FILE
+    while : ; do
+        OPTION=$(cat $LOOP_FILE)
+        [ -z "$OPTION" ] && [ $(($(date -u +%s)-$START_TIME)) -ge 8 ] && break
+        read -n 1 -t 3 KEY || continue
+        [ ! -z "$KEY" ] && echo "${OPTION}${KEY}" > $LOOP_FILE
+        [ -z "$KEY" ] && break
+    done
+    OPTION=$(cat $LOOP_FILE || echo "") && [ -z "$OPTION" ] && continue
+    ACCEPT="" && while [ "${ACCEPT,,}" != "y" ] && [ "${ACCEPT,,}" != "n" ] ; do echo -e "\e[36;1mPress [Y]es to confirm option (${OPTION^^}) or [N]o to cancel: \e[0m\c" && read  -d'' -s -n1 ACCEPT ; done
+    echo "" && [ "${ACCEPT,,}" == "n" ] && echo "WARINIG: Operation was cancelled" && continue
+
+    BREAK="False"
+    for ((i=1;i<=$VALIDATORS_COUNT;i++)); do
+        if [ "$OPTION" == "$i" ] ; then
+            gnome-terminal -- bash -c "$KIRA_MANAGER/container-manager.sh validator-$i ; read -d'' -s -n1 -p 'Press any key to exit...' && exit"
+            BREAK="True"
+            break
+        fi 
+    done
+
+    [ "$BREAK" == "True" ] && continue
     
     if [ "$OPTION" == "0" ] ; then
         gnome-terminal -- bash -c "$KIRA_MANAGER/container-manager.sh 'registry' ; read -d'' -s -n1 -p 'Press any key to exit...' && exit"
-        break
-    elif [ "$OPTION" == "1" ] ; then
-        gnome-terminal -- bash -c "$KIRA_MANAGER/container-manager.sh 'validator-1' ; read -d'' -s -n1 -p 'Press any key to exit...' && exit"
         break
     elif [ "${OPTION,,}" == "a" ] ; then
         echo "INFO: Starting git manager..."

@@ -4,10 +4,11 @@ exec 2>&1
 set -e
 
 NAME=$1
-START_TIME="$(date -u +%s)"
 ETC_PROFILE="/etc/profile"
+LOOP_FILE="/tmp/container_manager_loop"
 
 while : ; do
+    START_TIME="$(date -u +%s)"
     source $ETC_PROFILE &> /dev/null
     if [ "$DEBUG_MODE" == "True" ] ; then set -x ; else set +x ; fi
 
@@ -56,12 +57,20 @@ while : ; do
     echo "| [X] | Exit | [W] | Refresh Window            |"
     echo -e "------------------------------------------------\e[0m"
     
-    read  -d'' -s -n1 -t 5 -p "INFO: Press [KEY] to select option" OPTION || OPTION=""
-    [ ! -z "$OPTION" ] && echo "" && read -d'' -s -n1 -p "Press [ENTER] to confirm [${OPTION^^}] option or any other key to try again" ACCEPT
-    [ ! -z "$ACCEPT" ] && break
-    
+    echo "Input option then press [ENTER] or [SPACE]: " && rm -f $LOOP_FILE && touch $LOOP_FILE
+    while : ; do
+        OPTION=$(cat $LOOP_FILE)
+        [ -z "$OPTION" ] && [ $(($(date -u +%s)-$START_TIME)) -ge 8 ] && break
+        read -n 1 -t 3 KEY || continue
+        [ ! -z "$KEY" ] && echo "${OPTION}${KEY}" > $LOOP_FILE
+        [ -z "$KEY" ] && break
+    done
+    OPTION=$(cat $LOOP_FILE || echo "") && [ -z "$OPTION" ] && continue
+    ACCEPT="" && while [ "${ACCEPT,,}" != "y" ] && [ "${ACCEPT,,}" != "n" ] ; do echo -e "\e[36;1mPress [Y]es to confirm option (${OPTION^^}) or [N]o to cancel: \e[0m\c" && read  -d'' -s -n1 ACCEPT ; done
+    echo "" && [ "${ACCEPT,,}" == "n" ] && echo "WARINIG: Operation was cancelled" && continue
+
     if [ "${OPTION,,}" == "i" ] ; then
-        gnome-terminal -- docker exec -it $(docker ps -aqf "name=^${NAME}$") bash
+        gnome-terminal -- bash -c "docker exec -it $ID /bin/bash || docker exec -it $ID /bin/sh ; read -d'' -s -n1 -p 'Press any key to exit...' && exit"
         break
     elif [ "${OPTION,,}" == "l" ] ; then
         rm -rfv $CONTAINER_DUPM
@@ -71,9 +80,13 @@ while : ; do
         docker cp $NAME:/root/.sekaid $CONTAINER_DUPM/sekaid || echo "WARNING: Failed to dump .sekaid config"
         docker cp $NAME:/root/.sekaicli $CONTAINER_DUPM/sekaicli || echo "WARNING: Failed to dump .sekaicli config"
         docker cp $NAME:/etc/systemd/system $CONTAINER_DUPM/systemd || echo "WARNING: Failed to dump systemd services"
+        docker cp $NAME:/common $CONTAINER_DUPM/common || echo "WARNING: Failed to dump common directory"
         docker inspect $(docker ps --no-trunc -aqf name=$NAME) > $CONTAINER_DUPM/container-inspect.json || echo "WARNING: Failed to inspect container"
         docker inspect $(docker ps --no-trunc -aqf name=$NAME) > $CONTAINER_DUPM/printenv.txt || echo "WARNING: Failed to fetch printenv"
         docker exec -it $NAME printenv > $CONTAINER_DUPM/printenv.txt || echo "WARNING: Failed to fetch printenv"
+        docker logs --timestamps --details $(docker inspect --format="{{.Id}}" ${NAME} 2> /dev/null) > $CONTAINER_DUPM/docker-logs.txt || echo "WARNING: Failed to save docker logs"
+        docker container logs --details --timestamps $(docker inspect --format="{{.Id}}" ${NAME} 2> /dev/null) > $CONTAINER_DUPM/container-logs.txt || echo "WARNING: Failed to save container logs"
+        systemctl status docker > $CONTAINER_DUPM/docker-status.txt || echo "WARNING: Failed to save docker status info"
         chmod -R 777 $CONTAINER_DUPM
         echo "INFO: Starting code editor..."
         USER_DATA_DIR="/usr/code$CONTAINER_DUPM"
@@ -104,7 +117,7 @@ while : ; do
     elif [ "${OPTION,,}" == "w" ] ; then
         break
     elif [ "${OPTION,,}" == "x" ] ; then
-        exit
+        exit 0
     fi
 done
 

@@ -2,7 +2,8 @@
 
 exec 2>&1
 set -e
-set -x
+
+if [ "$DEBUG_MODE" == "True" ] ; then set -x ; else set +x ; fi
 
 EMAIL_SENT=$HOME/email_sent
 
@@ -65,13 +66,15 @@ if [ "${STATUS_SEKAI}" != "active" ] || [ "${STATUS_LCD}" != "active" ] || [ "${
     else
         echo "Sending Healthcheck Notification Email..."
         touch $EMAIL_SENT
-[ "$NOTIFICATIONS" == "True" ] && CDHelper email send \
- --to="$EMAIL_NOTIFY" \
- --subject="[$MONIKER] Healthcheck Raised" \
- --body="[$(date)] Sekai($STATUS_SEKAI), Faucet($STATUS_FAUCET) LCD($STATUS_LCD) or NGINX($STATUS_NGINX) Failed => Attached $(find $SELF_LOGS -type f | wc -l) Log Files. RPC Status => $RPC_STATUS" \
- --html="false" \
- --recursive="true" \
- --attachments="$SELF_LOGS,$JOURNAL_LOGS"
+        if [ "$NOTIFICATIONS" == "True" ] ; then
+        CDHelper email send \
+         --to="$EMAIL_NOTIFY" \
+         --subject="[$MONIKER] Healthcheck Raised" \
+         --body="[$(date)] Sekai($STATUS_SEKAI), Faucet($STATUS_FAUCET) LCD($STATUS_LCD) or NGINX($STATUS_NGINX) Failed => Attached $(find $SELF_LOGS -type f | wc -l) Log Files. RPC Status => $RPC_STATUS" \
+         --html="false" \
+         --recursive="true" \
+         --attachments="$SELF_LOGS,$JOURNAL_LOGS"
+        fi
         sleep 120 # allow user to grab log output
         rm -f ${SELF_LOGS}/healthcheck_script_output.txt # remove old log to save space
     fi
@@ -81,11 +84,13 @@ else
     if [ -f "$EMAIL_SENT" ] ; then
         echo "INFO: Sending confirmation email, that service recovered!"
         rm -f $EMAIL_SENT # if email was sent then remove and send new one
-[ "$NOTIFICATIONS" == "True" ] && CDHelper email send \
- --to="$EMAIL_NOTIFY" \
- --subject="[$MONIKER] Healthcheck Rerovered" \
- --body="[$(date)] Sekai($STATUS_SEKAI), Faucet($STATUS_FAUCET), LCD($STATUS_LCD) and NGINX($STATUS_NGINX) suceeded. RPC Status => $RPC_STATUS" \
- --html="false" || true
+        if [ "$NOTIFICATIONS" == "True" ] ; then 
+        CDHelper email send \
+         --to="$EMAIL_NOTIFY" \
+         --subject="[$MONIKER] Healthcheck Rerovered" \
+         --body="[$(date)] Sekai($STATUS_SEKAI), Faucet($STATUS_FAUCET), LCD($STATUS_LCD) and NGINX($STATUS_NGINX) suceeded. RPC Status => $RPC_STATUS" \
+         --html="false" || true
+        fi
     fi
     sleep 120 # allow user to grab log output
     rm -f $SELF_LOGS/healthcheck_script_output.txt # remove old log to save space

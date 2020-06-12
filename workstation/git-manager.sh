@@ -14,8 +14,10 @@ BRANCH_ENVAR=$5
 [ -z "$BRANCH_ENVAR" ] && echo "Git manager failure, BRANCH_ENVAR property was not defined" && exit 1
 
 ETC_PROFILE="/etc/profile"
+LOOP_FILE="/tmp/git_manager_loop"
 
 while : ; do
+    START_TIME="$(date -u +%s)"
     source $ETC_PROFILE &> /dev/null
     if [ "$DEBUG_MODE" == "True" ] ; then set -x ; else set +x ; fi
     mkdir -p $DIRECTORY
@@ -77,12 +79,20 @@ while : ; do
     echo "|----------------------------------------------|"
     echo "| [X] | Exit | [W] | Refresh Window            |"
     echo -e "------------------------------------------------\e[0m"
-    
-    read  -d'' -s -n1 -t 3 -p "INFO: Press [KEY] to select option" OPTION || OPTION=""
-    [ ! -z "$OPTION" ] && echo "" && read -d'' -s -n1 -p "Press [ENTER] to confirm [${OPTION^^}] option or any other key to try again" ACCEPT
-    [ ! -z "$ACCEPT" ] && break
+
+    echo "Input option then press [ENTER] or [SPACE]: " && rm -f $LOOP_FILE && touch $LOOP_FILE
+    while : ; do
+        OPTION=$(cat $LOOP_FILE)
+        [ -z "$OPTION" ] && [ $(($(date -u +%s)-$START_TIME)) -ge 8 ] && break
+        read -n 1 -t 3 KEY || continue
+        [ ! -z "$KEY" ] && echo "${OPTION}${KEY}" > $LOOP_FILE
+        [ -z "$KEY" ] && break
+    done
+    OPTION=$(cat $LOOP_FILE || echo "") && [ -z "$OPTION" ] && continue
+    ACCEPT="" && while [ "${ACCEPT,,}" != "y" ] && [ "${ACCEPT,,}" != "n" ] ; do echo -e "\e[36;1mPress [Y]es to confirm option (${OPTION^^}) or [N]o to cancel: \e[0m\c" && read  -d'' -s -n1 ACCEPT ; done
+    echo "" && [ "${ACCEPT,,}" == "n" ] && echo "WARINIG: Operation was cancelled" && continue
+
     FAILED="False"
-    
     if [ "${OPTION,,}" == "v" ] ; then
         echo "INFO: Starting code editor..."
         USER_DATA_DIR="/usr/code$DIRECTORY"
@@ -96,7 +106,7 @@ while : ; do
             echo "WARINIG: Commit message was not set"
             FORCE="" && while [ "${FORCE,,}" != "y" ] && [ "${FORCE,,}" != "n" ] ; do echo -e "\n\e[36;1mPress [Y]es to commit empty message or [N]o to cancel: \e[0m\c" && read  -d'' -s -n1 FORCE ; done
             [ "${FORCE,,}" == "y" ] && COMMIT="Forced commit or minor changes"
-            [ "${FORCE,,}" == "n" ] && "WARINIG: Commit was cancelled" && break
+            [ "${FORCE,,}" == "n" ] && echo "WARINIG: Commit was cancelled" && break
         fi
         echo "INFO: Commiting changes..."
         git add -A || FAILED="True"

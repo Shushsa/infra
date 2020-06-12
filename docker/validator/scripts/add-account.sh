@@ -2,7 +2,8 @@
 
 exec 2>&1
 set -e
-set -x
+
+if [ "$DEBUG_MODE" == "True" ] ; then set -x ; else set +x ; fi
 
 # (rm -fv $KIRA_INFRA/docker/validator/scripts/add-account.sh) && nano $KIRA_INFRA/docker/validator/scripts/add-account.sh
 
@@ -10,14 +11,29 @@ NAME=$1
 KEY=$2
 KEYRINGPASS=$3
 PASSPHRASE=$4
+NEW_KEY=""
 
-if [ ! -f "$KEY" ] && [ ! -z "$KEY" ] ; then # use key as key filename
-    KEY="$SELF_CONFIGS/${KEY}.key"
-fi
+echo -e "\e[33;1m------------------------------------------------"
+echo "|     STARTED: ADD OR IMPORT ACCOUNT v0.0.1    |"
+echo "|----------------------------------------------|"
+echo "| NAME: $NAME"
+echo "|  KEY: $KEY"
+echo -e "------------------------------------------------\e[0m"
 
-if [ ! -f "$KEY" ] ; then # use name as key filename
-    KEY="$SELF_CONFIGS/${NAME}.key"
-fi
+# check common folder if key does not exists
+[ ! -f "$KEY" ] && [ ! -f "$NEW_KEY" ] && NEW_KEY="$COMMON_DIR/${KEY}"
+[ ! -f "$KEY" ] && [ ! -f "$NEW_KEY" ] && NEW_KEY="$COMMON_DIR/${KEY}.key" # use key as key filename
+[ ! -f "$KEY" ] && [ ! -f "$NEW_KEY" ] && NEW_KEY="$COMMON_DIR/${NAME}"
+[ ! -f "$KEY" ] && [ ! -f "$NEW_KEY" ] && NEW_KEY="$COMMON_DIR/${NAME}.key" # use name as key filename
+
+# check configs directory  if key does not exists
+[ ! -f "$KEY" ] && [ ! -f "$NEW_KEY" ] && NEW_KEY="$SELF_CONFIGS/${KEY}"
+[ ! -f "$KEY" ] && [ ! -f "$NEW_KEY" ] && NEW_KEY="$SELF_CONFIGS/${KEY}.key" # use key as key filename
+[ ! -f "$KEY" ] && [ ! -f "$NEW_KEY" ] && NEW_KEY="$SELF_CONFIGS/${NAME}"
+[ ! -f "$KEY" ] && [ ! -f "$NEW_KEY" ] && NEW_KEY="$SELF_CONFIGS/${NAME}.key" # use name as key filename
+
+# replace kew with new key if substitute file was found
+[ ! -f "$KEY" ] && [ -f "$NEW_KEY" ] && KEY="$NEW_KEY"
 
 if [ -f "$KEY" ] ; then
    echo "INFO: Key $NAME ($KEY) was found and will be imported..."
@@ -37,3 +53,8 @@ $KEYRINGPASS
 $KEYRINGPASS
 EOF
 fi
+
+echo "------------------------------------------------"
+echo "|    FINISHED: ADD OR IMPORT ACCOUNT v0.0.1    |"
+echo "------------------------------------------------"
+
