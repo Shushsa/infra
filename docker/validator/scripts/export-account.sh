@@ -25,7 +25,6 @@ if [ "$ACC_ADDR" == "Error" ] ; then
     echo "ERROR: Export failed because account '$NAME' does NOT exists"
 fi
 
-OUTPUT=$(realpath $OUTPUT)
 DIRECTORY=$(dirname $OUTPUT)
 mkdir -p $DIRECTORY
 
