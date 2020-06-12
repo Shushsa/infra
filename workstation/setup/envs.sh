@@ -18,7 +18,7 @@ KIRA_VALIDATORS_SUBNET="101.0.0.0/8"
 KIRA_REGISTRY_IP="100.0.1.1"
 KIRA_REGISTRY_NAME="registry.local"
 KIRA_REGISTRY="$KIRA_REGISTRY_NAME:$KIRA_REGISTRY_PORT"
-MAX_VALIDATORS=254
+MAX_VALIDATORS=4
 
 KIRA_IMG="${KIRA_INFRA}/common/img"
 KIRA_DOCKER="${KIRA_INFRA}/docker"
@@ -41,7 +41,7 @@ mkdir -p "/home/$KIRA_USER/.cargo"
 mkdir -p "/home/$KIRA_USER/Desktop"
 mkdir -p $SOURCES_LIST
 
-KIRA_SETUP_KIRA_ENV="$KIRA_SETUP/kira-env-v0.0.36" 
+KIRA_SETUP_KIRA_ENV="$KIRA_SETUP/kira-env-v0.0.37" 
 if [ ! -f "$KIRA_SETUP_KIRA_ENV" ] ; then
     echo "INFO: Setting up kira environment variables"
     touch $CARGO_ENV

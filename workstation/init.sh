@@ -202,7 +202,7 @@ else
         fi
     fi
 
-    echo -e "\e[36;1mInput number of validators to deploy (min 1, max 254), [ENTER] if '$VALIDATORS_COUNT': \e[0m\c" && read NEW_VALIDATORS_COUNT
+    echo -e "\e[36;1mInput number of validators to deploy (min 1, max 4), [ENTER] if '$VALIDATORS_COUNT': \e[0m\c" && read NEW_VALIDATORS_COUNT
     [ ! -z "$NEW_VALIDATORS_COUNT" ] && [ ! -z "${NEW_VALIDATORS_COUNT##*[!0-9]*}" ] && [ $NEW_VALIDATORS_COUNT -ge 1 ] && [ $NEW_VALIDATORS_COUNT -le 254 ] && VALIDATORS_COUNT=$NEW_VALIDATORS_COUNT
 
     echo -e "\e[33;1m------------------------------------------------"
