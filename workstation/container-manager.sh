@@ -4,10 +4,11 @@ exec 2>&1
 set -e
 
 NAME=$1
-START_TIME="$(date -u +%s)"
 ETC_PROFILE="/etc/profile"
+LOOP_FILE="/tmp/container_manager_loop"
 
 while : ; do
+    START_TIME="$(date -u +%s)"
     source $ETC_PROFILE &> /dev/null
     if [ "$DEBUG_MODE" == "True" ] ; then set -x ; else set +x ; fi
 
@@ -56,19 +57,16 @@ while : ; do
     echo "| [X] | Exit | [W] | Refresh Window            |"
     echo -e "------------------------------------------------\e[0m"
     
-    OPTION="" && KEY="x" && TIMEOUT="False"
-    echo "Input option then press [ENTER] or [SPACE]: "
-    while [ ! -z "$KEY" ] ; do
-        read -n 1 -t 3 KEY || TIMEOUT="True"
-        [ "$TIMEOUT" == "True" ] && TIMEOUT="False" && KEY="x" && continue
-        [ ! -z "$KEY" ] && OPTION="${OPTION}${KEY}"
+    echo "Input option then press [ENTER] or [SPACE]: " && rm -f $LOOP_FILE && touch $LOOP_FILE
+    while : ; do
+        OPTION=$(cat $LOOP_FILE)
+        [ -z "$OPTION" ] && [ $(($(date -u +%s)-$START_TIME)) -ge 8 ] && break
+        read -n 1 -t 3 KEY || continue
+        [ ! -z "$KEY" ] && echo "${OPTION}${KEY}" > $LOOP_FILE
+        [ -z "$KEY" ] && break
     done
-    [ -z "$OPTION" ] && continue
+    OPTION=$(cat $LOOP_FILE || echo "") && [ -z "$OPTION" ] && continue
 
-    ACCEPT="" && while [ "${ACCEPT,,}" != "y" ] && [ "${ACCEPT,,}" != "n" ] ; do echo -e "\e[36;1mPress [Y]es to confirm option (${OPTION^^}) or [N]o to cancel: \e[0m\c" && read  -d'' -s -n1 ACCEPT ; done
-    [ "${ACCEPT,,}" == "n" ] && echo "\nWARINIG: Operation was cancelled" && continue
-    echo ""
-    
     if [ "${OPTION,,}" == "i" ] ; then
         gnome-terminal -- bash -c "docker exec -it $ID /bin/bash || docker exec -it $ID /bin/sh ; read -d'' -s -n1 -p 'Press any key to exit...' && exit"
         break
