@@ -19,14 +19,17 @@ INIT_END_FILE=$HOME/init_ended
 SEKAICLI_HOME=$HOME/.sekaicli
 SIGNING_KEY_PATH="$SEKAID_CONFIG/priv_validator_key.json"
 
-# key's can be passed from json in the config directory 
+
 [ -z "$VALIDATOR_INDEX" ] && VALIDATOR_INDEX=1
+
 [ ! -f "$NODE_KEY" ] && NODE_KEY="$SELF_CONFIGS/node-keys/node-key-${VALIDATOR_INDEX}.json"
 [ ! -f "$NODE_KEY" ] && NODE_KEY="$COMMON_DIR/node-keys/node-key-${VALIDATOR_INDEX}.json"
+[ ! -f "$NODE_KEY" ] && echo "ERROR: Node key was not found" && exit 1
+
 [ ! -f "$SIGNING_KEY" ] && SIGNING_KEY="$SELF_CONFIGS/signing-keys/signing-${VALIDATOR_INDEX}.key"
 [ ! -f "$SIGNING_KEY" ] && SIGNING_KEY="$COMMON_DIR/signing-keys/signing-${VALIDATOR_INDEX}.key"
+[ ! -f "$SIGNING_KEY" ] && echo "ERROR: Signing key was not found" && exit 1
 
-# external variables: P2P_PROXY_PORT, RPC_PROXY_PORT, LCD_PROXY_PORT, RLY_PROXY_PORT
 P2P_LOCAL_PORT=26656
 RPC_LOCAL_PORT=26657
 LCD_LOCAL_PORT=1317
@@ -64,22 +67,16 @@ else
     echo "{\"key\":\"$RLYKEY\",\"chain-id\":\"$CHAIN_ID\",\"rpc-addr\":\"$RPC_ADDR\",\"account-prefix\":\"$ACCOUNT_PREFIX\",\"gas\":$GAS,\"gas-prices\":\"$GAS_PRICES\",\"default-denom\":\"$DENOM\",\"trusting-period\":\"$RLYTRUSTING\"}" > $CHAIN_ID.json
 fi
 
+mkdir -p "$COMMON_DIR/node-keys"
+mkdir -p "$COMMON_DIR/signing-keys"
+mkdir -p "$COMMON_DIR/test-keys"
+mkdir -p "$COMMON_DIR/validator-keys"
+
 sekaid init --chain-id $CHAIN_ID "$MONIKER"
 
 # NOTE: can be supplied from parameter, in such case following instruction can be used: sed -i 's/\\\"/\"/g' $PATH_TO_FILE
 # NOTE: to VALIDATOR_KEY new key delete $SIGNING_KEY_PATH and run sekaid start 
 # NOTE: to create new key delete $NODE_KEY_PATH and run sekaid start
-
-if [ ! -f "$NODE_KEY" ] ; then
-    echo "ERROR: Node key was not found"
-    exit 1
-fi
-
-if [ ! -f "$SIGNING_KEY" ] ; then
-   echo "ERROR: Signing key was not found"
-   exit 1
-fi
-
 cat $NODE_KEY > $NODE_KEY_PATH
 echo "INFO: Node ID: $(sekaid tendermint show-node-id)"
 cat $SIGNING_KEY > $SIGNING_KEY_PATH
@@ -107,9 +104,6 @@ if [ ! -z "$PEERS" ] ; then # NOTE: In some cases '@' characters cause line spli
     CDHelper text lineswap --insert="$PEERS" --prefix="persistent_peers =" --path=$CONFIG_TOML_PATH
 fi
 
-mkdir -p "$COMMON_DIR/node-keys"
-mkdir -p "$COMMON_DIR/signing-keys"
-
 if [ $VALIDATOR_INDEX -eq 1 ] ; then # first validator always creates a genesis tx
     echo "INFO: Creating genesis file..."
     for ((i=1;i<=$VALIDATORS_COUNT;i++)); do
@@ -119,13 +113,15 @@ if [ $VALIDATOR_INDEX -eq 1 ] ; then # first validator always creates a genesis 
         COM_NODE_KEY="$COMMON_DIR/node-keys/node-key-$i.json"
         TMP_SIGNING_KEY="$SELF_CONFIGS/signing-keys/signing-$i.key"
         COM_SIGNING_KEY="$COMMON_DIR/signing-keys/signing-$i.key"
+        COM_TEST_KEY="$COMMON_DIR/test-keys/$TEST_ACC_NAME.key"
+        COM_VALIDATOR_KEY="$COMMON_DIR/validator-keys/$VALIDATOR_ACC_NAME.key"
 
         echo "INFO: Adding $TEST_ACC_NAME account..."
         echo "INFO: Adding $VALIDATOR_ACC_NAME account..."
         $SELF_SCRIPTS/add-account.sh $TEST_ACC_NAME "test-keys/$TEST_ACC_NAME" $KEYRINGPASS $PASSPHRASE
         $SELF_SCRIPTS/add-account.sh $VALIDATOR_ACC_NAME "validator-keys/$VALIDATOR_ACC_NAME" $KEYRINGPASS $PASSPHRASE
-        $SELF_SCRIPTS/export-account.sh $TEST_ACC_NAME "$COMMON_DIR/test-keys/$TEST_ACC_NAME.key" $KEYRINGPASS $PASSPHRASE
-        $SELF_SCRIPTS/export-account.sh $TEST_ACC_NAME "$COMMON_DIR/validator-keys/$VALIDATOR_ACC_NAME.key" $KEYRINGPASS $PASSPHRASE
+        $SELF_SCRIPTS/export-account.sh $TEST_ACC_NAME $COM_TEST_KEY $KEYRINGPASS $PASSPHRASE
+        $SELF_SCRIPTS/export-account.sh $VALIDATOR_ACC_NAME $COM_VALIDATOR_KEY $KEYRINGPASS $PASSPHRASE
         echo ${KEYRINGPASS} | sekaicli keys list
         TEST_ACC_ADDR=$(echo ${KEYRINGPASS} | sekaicli keys show "$TEST_ACC_NAME" -a)
         VALIDATOR_ACC_ADDR=$(echo ${KEYRINGPASS} | sekaicli keys show "$VALIDATOR_ACC_NAME" -a)
@@ -165,9 +161,15 @@ EOF
     done
     echo "INFO: Collecting gen tx'es..."
     sekaid collect-gentxs
+
+    # original signing key and node-id has to be recovered
+    echo "INFO: Key recovery and chain hard reset"
+    cat $NODE_KEY > $NODE_KEY_PATH
+    cat $SIGNING_KEY > $SIGNING_KEY_PATH
+
 elif [ -f "$COMMON_DIR/genesis.json" ] ; then # import genesis if shared file already exists
     echo "INFO: Adding test-$VALIDATOR_INDEX account..."
-    $SELF_SCRIPTS/add-account.sh test-$VALIDATOR_INDEX "test-keys/test-$VALIDATOR_INDEX" $KEYRINGPASS $PASSPHRASE
+    $SELF_SCRIPTS/add-account.sh "test-$VALIDATOR_INDEX" "test-keys/test-$VALIDATOR_INDEX" $KEYRINGPASS $PASSPHRASE
     echo "INFO: Adding validator-$VALIDATOR_INDEX account..."
     $SELF_SCRIPTS/add-account.sh "validator-$VALIDATOR_INDEX" "validator-keys/validator-$VALIDATOR_INDEX" $KEYRINGPASS $PASSPHRASE
     echo "INFO: Loading existing genesis file..."
@@ -177,10 +179,7 @@ else
     exit 1
 fi
 
-# original signing key and node-id has to be recovered
-echo "INFO: Key recovery and chain hard reset"
-cat $NODE_KEY > $NODE_KEY_PATH
-cat $SIGNING_KEY > $SIGNING_KEY_PATH
+echo "INFO: Chain restart..."
 sekaid unsafe-reset-all
 
 echo "INFO: Setting up services..."
