@@ -14,7 +14,7 @@ echo "------------------------------------------------"
 echo "|      STARTED: KIRA INFRA DELETE v0.0.1       |"
 echo "------------------------------------------------"
 
-for ((i=1;i<=$MAX_VALIDATORS_COUNT;i++)); do
+for ((i=1;i<=$MAX_VALIDATORS;i++)); do
     $KIRA_SCRIPTS/container-delete.sh "validator-$i"
 done
 

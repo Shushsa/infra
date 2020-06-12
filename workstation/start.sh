@@ -43,7 +43,7 @@ fi
 source $ETC_PROFILE &> /dev/null
 
 $KIRA_SCRIPTS/container-restart.sh "registry"
-for ((i=1;i<=$MAX_VALIDATORS_COUNT;i++)); do
+for ((i=1;i<=$MAX_VALIDATORS;i++)); do
     $KIRA_SCRIPTS/container-delete.sh "validator-$i"
 
     VALIDATOR_EXISTS=$($KIRA_SCRIPTS/container-exists.sh "validator-$i" || echo "error")

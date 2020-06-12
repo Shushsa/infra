@@ -18,8 +18,7 @@ KIRA_VALIDATORS_SUBNET="101.0.0.0/8"
 KIRA_REGISTRY_IP="100.0.1.1"
 KIRA_REGISTRY_NAME="registry.local"
 KIRA_REGISTRY="$KIRA_REGISTRY_NAME:$KIRA_REGISTRY_PORT"
-MAX_VALIDATORS_COUNT=4
-VALIDATORS_COUNT=2
+MAX_VALIDATORS=254
 
 KIRA_IMG="${KIRA_INFRA}/common/img"
 KIRA_DOCKER="${KIRA_INFRA}/docker"
@@ -42,7 +41,7 @@ mkdir -p "/home/$KIRA_USER/.cargo"
 mkdir -p "/home/$KIRA_USER/Desktop"
 mkdir -p $SOURCES_LIST
 
-KIRA_SETUP_KIRA_ENV="$KIRA_SETUP/kira-env-v0.0.35" 
+KIRA_SETUP_KIRA_ENV="$KIRA_SETUP/kira-env-v0.0.36" 
 if [ ! -f "$KIRA_SETUP_KIRA_ENV" ] ; then
     echo "INFO: Setting up kira environment variables"
     touch $CARGO_ENV
@@ -55,8 +54,7 @@ if [ ! -f "$KIRA_SETUP_KIRA_ENV" ] ; then
     CDHelper text lineswap --insert="KIRA_VALIDATORS_SUBNET=$KIRA_VALIDATORS_SUBNET" --prefix="KIRA_VALIDATORS_SUBNET=" --path=$ETC_PROFILE --append-if-found-not=True --silent=$SILENT_MODE
     CDHelper text lineswap --insert="HOSTS_PATH=$HOSTS_PATH" --prefix="HOSTS_PATH=" --path=$ETC_PROFILE --append-if-found-not=True --silent=$SILENT_MODE
     CDHelper text lineswap --insert="DOCKER_COMMON=$DOCKER_COMMON" --prefix="DOCKER_COMMON=" --path=$ETC_PROFILE --append-if-found-not=True --silent=$SILENT_MODE
-    CDHelper text lineswap --insert="VALIDATORS_COUNT=$VALIDATORS_COUNT" --prefix="VALIDATORS_COUNT=" --path=$ETC_PROFILE --append-if-found-not=True --silent=$SILENT_MODE
-    CDHelper text lineswap --insert="MAX_VALIDATORS_COUNT=$MAX_VALIDATORS_COUNT" --prefix="MAX_VALIDATORS_COUNT=" --path=$ETC_PROFILE --append-if-found-not=True --silent=$SILENT_MODE
+    CDHelper text lineswap --insert="MAX_VALIDATORS=$MAX_VALIDATORS" --prefix="MAX_VALIDATORS=" --path=$ETC_PROFILE --append-if-found-not=True --silent=$SILENT_MODE
     CDHelper text lineswap --insert="WORKSTATION_SCRIPTS=$WORKSTATION_SCRIPTS" --prefix="WORKSTATION_SCRIPTS=" --path=$ETC_PROFILE --append-if-found-not=True --silent=$SILENT_MODE
     CDHelper text lineswap --insert="SOURCES_LIST=$SOURCES_LIST" --prefix="SOURCES_LIST=" --path=$ETC_PROFILE --append-if-found-not=True --silent=$SILENT_MODE
     CDHelper text lineswap --insert="GO_VERSION=$GO_VERSION" --prefix="GO_VERSION=" --path=$ETC_PROFILE --append-if-found-not=True --silent=$SILENT_MODE

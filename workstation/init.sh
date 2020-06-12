@@ -28,7 +28,7 @@ fi
 
 if [ "$DEBUG_MODE" == "True" ] ; then set -x ; else set +x ; fi
 
-[ -z "$INFRA_BRANCH" ] && INFRA_BRANCH="v0.0.1"
+[ -z "$INFRA_BRANCH" ] && INFRA_BRANCH="v0.0.2"
 [ -z "$SEKAI_BRANCH" ] && SEKAI_BRANCH="master"
 [ -z "$EMAIL_NOTIFY" ] && EMAIL_NOTIFY="noreply.example.email@gmail.com"
 [ -z "$SMTP_LOGIN" ] && SMTP_LOGIN="noreply.example.email@gmail.com"
@@ -40,6 +40,7 @@ if [ "$DEBUG_MODE" == "True" ] ; then set -x ; else set +x ; fi
 [ ! -z "$SUDO_USER" ] && KIRA_USER=$SUDO_USER
 [ -z "$KIRA_USER" ] && KIRA_USER=$USER
 [ -z "$NOTIFICATIONS" ] && NOTIFICATIONS="False"
+[ -z "$VALIDATORS_COUNT" ] && VALIDATORS_COUNT=2
 
 if [ "$SKIP_UPDATE" == "False" ] ; then
     #########################################
@@ -193,6 +194,9 @@ else
         echo -e "\e[32;1m$(cat $SSH_KEY_PRIV_PATH)\e[0m"
     fi
 
+    echo -e "\e[36;1mInput number of validators to deploy (min 1, max 254), [ENTER] if '$VALIDATORS_COUNT': \e[0m\c" && read NEW_VALIDATORS_COUNT
+    [ ! -z "$NEW_VALIDATORS_COUNT" ] && [ ! -z "${NEW_VALIDATORS_COUNT##*[!0-9]*}" ] && [ $NEW_VALIDATORS_COUNT -ge 1 ] && [ $NEW_VALIDATORS_COUNT -le 254 ] && $VALIDATORS_COUNT=$NEW_VALIDATORS_COUNT
+
     echo -e "\e[33;1m------------------------------------------------"
     echo "|       STARTED: KIRA INFRA INIT v0.0.2        |"
     echo "|----------------------------------------------|"
@@ -206,6 +210,7 @@ else
     echo "|         SMTP LOGIN: $SMTP_LOGIN"
     echo "|      SMTP PASSWORD: $SMTP_PASSWORD"
     echo "|          KIRA USER: $KIRA_USER"
+    echo "|   VALIDATORS COUNT: $VALIDATORS_COUNT"
     echo "| PUBLIC GIT SSH KEY: $(echo $SSH_KEY_PUB | head -c 24)...$(echo $SSH_KEY_PUB | tail -c 24)"
     echo -e "------------------------------------------------\e[0m"
     
@@ -227,6 +232,8 @@ CDHelper text lineswap --insert="INFRA_REPO=$INFRA_REPO" --prefix="INFRA_REPO=" 
 CDHelper text lineswap --insert="SEKAI_REPO=$SEKAI_REPO" --prefix="SEKAI_REPO=" --path=$ETC_PROFILE --append-if-found-not=True --silent=$SILENT_MODE
 CDHelper text lineswap --insert="SEKAI_REPO_SSH=$SEKAI_REPO_SSH" --prefix="SEKAI_REPO_SSH=" --path=$ETC_PROFILE --append-if-found-not=True --silent=$SILENT_MODE
 CDHelper text lineswap --insert="INFRA_REPO_SSH=$INFRA_REPO_SSH" --prefix="INFRA_REPO_SSH=" --path=$ETC_PROFILE --append-if-found-not=True --silent=$SILENT_MODE
+CDHelper text lineswap --insert="VALIDATORS_COUNT=$VALIDATORS_COUNT" --prefix="VALIDATORS_COUNT=" --path=$ETC_PROFILE --append-if-found-not=True --silent=$SILENT_MODE
+
 chmod 777 $ETC_PROFILE
 
 cd /kira
