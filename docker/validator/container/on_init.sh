@@ -26,8 +26,8 @@ SIGNING_KEY_PATH="$SEKAID_CONFIG/priv_validator_key.json"
 [ ! -f "$NODE_KEY" ] && NODE_KEY="$COMMON_DIR/node-keys/node-key-${VALIDATOR_INDEX}.json"
 [ ! -f "$NODE_KEY" ] && echo "ERROR: Node key was not found" && exit 1
 
-[ ! -f "$SIGNING_KEY" ] && SIGNING_KEY="$SELF_CONFIGS/signing-keys/signing-${VALIDATOR_INDEX}.key"
-[ ! -f "$SIGNING_KEY" ] && SIGNING_KEY="$COMMON_DIR/signing-keys/signing-${VALIDATOR_INDEX}.key"
+[ ! -f "$SIGNING_KEY" ] && SIGNING_KEY="$SELF_CONFIGS/signing-keys/signing-${VALIDATOR_INDEX}.json"
+[ ! -f "$SIGNING_KEY" ] && SIGNING_KEY="$COMMON_DIR/signing-keys/signing-${VALIDATOR_INDEX}.json"
 [ ! -f "$SIGNING_KEY" ] && echo "ERROR: Signing key was not found" && exit 1
 
 P2P_LOCAL_PORT=26656
@@ -111,8 +111,8 @@ if [ $VALIDATOR_INDEX -eq 1 ] ; then # first validator always creates a genesis 
         VALIDATOR_ACC_NAME="validator-$i"
         TMP_NODE_KEY="$SELF_CONFIGS/node-keys/node-key-$i.json"
         COM_NODE_KEY="$COMMON_DIR/node-keys/node-key-$i.json"
-        TMP_SIGNING_KEY="$SELF_CONFIGS/signing-keys/signing-$i.key"
-        COM_SIGNING_KEY="$COMMON_DIR/signing-keys/signing-$i.key"
+        TMP_SIGNING_KEY="$SELF_CONFIGS/signing-keys/signing-$i.json"
+        COM_SIGNING_KEY="$COMMON_DIR/signing-keys/signing-$i.json"
         COM_TEST_KEY="$COMMON_DIR/test-keys/$TEST_ACC_NAME.key"
         COM_VALIDATOR_KEY="$COMMON_DIR/validator-keys/$VALIDATOR_ACC_NAME.key"
 
@@ -136,9 +136,9 @@ if [ $VALIDATOR_INDEX -eq 1 ] ; then # first validator always creates a genesis 
             echo "INFO: Generating new node & signing keys..."
             rm -f $NODE_KEY_PATH
             rm -f $SIGNING_KEY_PATH
-            timeout 2 sekaid start --home=$SEKAID_HOME || echo "INFO: Forced timeout"
+            timeout 2 sekaid start || echo "INFO: Forced timeout"
             cat $NODE_KEY_PATH > $TMP_NODE_KEY
-            cat $TMP_SIGNING_KEY > $TMP_SIGNING_KEY
+            cat $SIGNING_KEY_PATH > $TMP_SIGNING_KEY
         fi
 
         #signing key has to be rotated as it is used by default by the gentx
