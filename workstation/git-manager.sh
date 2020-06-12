@@ -89,6 +89,8 @@ while : ; do
         [ -z "$KEY" ] && break
     done
     OPTION=$(cat $LOOP_FILE || echo "") && [ -z "$OPTION" ] && continue
+    ACCEPT="" && while [ "${ACCEPT,,}" != "y" ] && [ "${ACCEPT,,}" != "n" ] ; do echo -e "\e[36;1mPress [Y]es to confirm option (${OPTION^^}) or [N]o to cancel: \e[0m\c" && read  -d'' -s -n1 ACCEPT ; done
+    echo "" && [ "${ACCEPT,,}" == "n" ] && echo "WARINIG: Operation was cancelled" && continue
 
     FAILED="False"
     if [ "${OPTION,,}" == "v" ] ; then
