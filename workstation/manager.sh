@@ -23,6 +23,13 @@ while : ; do
         declare "CONTAINER_ID_$i"="$CONTAINER_ID"
         [ -z "$CONTAINER_ID" ] && continue
         VALIDATOR_STATUS=$(docker inspect $CONTAINER_ID | jq -r '.[0].State.Status' || echo "error")
+
+        #Add block height info
+        if [ "$VALIDATOR_STATUS" == "running" ] ; then
+            HEIGHT=$(docker exec -it "validator-$VALIDATOR_INDEX" sekaicli status | jq -r '.sync_info.latest_block_height' || echo "Error")
+            [ "$HEIGHT" != "Error" ] && VALIDATOR_STATUS="$VALIDATOR_STATUS:$HEIGHT"
+        fi
+
         declare "VALIDATOR_STATUS_$i"="$VALIDATOR_STATUS"
     done
 
@@ -55,7 +62,7 @@ while : ; do
     while : ; do
         OPTION=$(cat $LOOP_FILE)
         [ -z "$OPTION" ] && [ $(($(date -u +%s)-$START_TIME)) -ge 8 ] && break
-        read -n 1 -t 3 KEY || continue
+        read -n 1 -t 5 KEY || continue
         [ ! -z "$KEY" ] && echo "${OPTION}${KEY}" > $LOOP_FILE
         [ -z "$KEY" ] && break
     done
