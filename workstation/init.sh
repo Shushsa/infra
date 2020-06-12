@@ -194,8 +194,16 @@ else
         echo -e "\e[32;1m$(cat $SSH_KEY_PRIV_PATH)\e[0m"
     fi
 
+    if [ ! -z "$NEW_SSH_KEY" ] ; then 
+        echo -e "\e[36;1mPress [Y]es/[N]o to display your public key: \e[0m\c" && read  -d'' -s -n1 SHOW_PUB_KEY
+        if [ "${SHOW_PUB_KEY,,}" == "y" ] ; then
+            echo "INFO: Your public SSH Key:"
+            echo -e "\e[32;1m$(cat $SSH_KEY_PUB_PATH)\e[0m"
+        fi
+    fi
+
     echo -e "\e[36;1mInput number of validators to deploy (min 1, max 254), [ENTER] if '$VALIDATORS_COUNT': \e[0m\c" && read NEW_VALIDATORS_COUNT
-    [ ! -z "$NEW_VALIDATORS_COUNT" ] && [ ! -z "${NEW_VALIDATORS_COUNT##*[!0-9]*}" ] && [ $NEW_VALIDATORS_COUNT -ge 1 ] && [ $NEW_VALIDATORS_COUNT -le 254 ] && $VALIDATORS_COUNT=$NEW_VALIDATORS_COUNT
+    [ ! -z "$NEW_VALIDATORS_COUNT" ] && [ ! -z "${NEW_VALIDATORS_COUNT##*[!0-9]*}" ] && [ $NEW_VALIDATORS_COUNT -ge 1 ] && [ $NEW_VALIDATORS_COUNT -le 254 ] && VALIDATORS_COUNT=$NEW_VALIDATORS_COUNT
 
     echo -e "\e[33;1m------------------------------------------------"
     echo "|       STARTED: KIRA INFRA INIT v0.0.2        |"
