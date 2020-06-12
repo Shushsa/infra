@@ -12,6 +12,13 @@ OUTPUT=$2
 KEYRINGPASS=$3
 PASSPHRASE=$4
 
+echo -e "\e[33;1m------------------------------------------------"
+echo "|       STARTED: EXPORT ACCOUNT v0.0.1         |"
+echo "|----------------------------------------------|"
+echo "|   NAME: $NAME"
+echo "| OUTPUT: $OUTPUT"
+echo -e "------------------------------------------------\e[0m"
+
 ACC_ADDR=$(echo ${KEYRINGPASS} | sekaicli keys show "$NAME" -a || echo "Error")
 
 if [ "$ACC_ADDR" == "Error" ] ; then
@@ -36,3 +43,8 @@ if [ -z "$result" ] ; then
 fi
 
 echo "SUCCESS: Account '$NAME' was exported into '$OUTPUT' file"
+
+
+echo "------------------------------------------------"
+echo "|       FINISHED: EXPORT ACCOUNT v0.0.1        |"
+echo "------------------------------------------------"

@@ -13,6 +13,13 @@ KEYRINGPASS=$3
 PASSPHRASE=$4
 NEW_KEY=""
 
+echo -e "\e[33;1m------------------------------------------------"
+echo "|     STARTED: ADD OR IMPORT ACCOUNT v0.0.1    |"
+echo "|----------------------------------------------|"
+echo "| NAME: $NAME"
+echo "|  KEY: $KEY"
+echo -e "------------------------------------------------\e[0m"
+
 # check common folder if key does not exists
 [ ! -f "$KEY" ] && [ ! -f "$NEW_KEY" ] && NEW_KEY="$COMMON_DIR/${KEY}"
 [ ! -f "$KEY" ] && [ ! -f "$NEW_KEY" ] && NEW_KEY="$COMMON_DIR/${KEY}.key" # use key as key filename
@@ -46,3 +53,8 @@ $KEYRINGPASS
 $KEYRINGPASS
 EOF
 fi
+
+echo "------------------------------------------------"
+echo "|    FINISHED: ADD OR IMPORT ACCOUNT v0.0.1    |"
+echo "------------------------------------------------"
+

@@ -48,7 +48,7 @@ while : ; do
     echo "| [R] | Hard RESET Repos & Infrastructure      |"
     echo "| [D] | DELETE Repos & Infrastructure          |"
     echo "|----------------------------------------------|"
-    echo "| [X] | Exit | [ENTER] | Refresh Window        |"
+    echo "| [X] | Exit | [W] | Refresh Window            |"
     echo -e "------------------------------------------------\e[0m"
     
     echo "Input option then press [ENTER] or [SPACE]: " && rm -f $LOOP_FILE && touch $LOOP_FILE
