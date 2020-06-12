@@ -26,7 +26,7 @@ while : ; do
 
         #Add block height info
         if [ "$VALIDATOR_STATUS" == "running" ] ; then
-            HEIGHT=$(docker exec -it "validator-$VALIDATOR_INDEX" sekaicli status | jq -r '.sync_info.latest_block_height' || echo "Error")
+            HEIGHT=$(docker exec -it "validator-$i" sekaicli status | jq -r '.sync_info.latest_block_height' || echo "Error")
             [ "$HEIGHT" != "Error" ] && VALIDATOR_STATUS="$VALIDATOR_STATUS:$HEIGHT"
         fi
 
@@ -100,7 +100,7 @@ while : ; do
     elif [ "${OPTION,,}" == "r" ] ; then
         echo "INFO: Wiping and Restarting infra..."
         echo -e "\e[33;1mWARNING: You have to wait for new process to finish\e[0m"
-        gnome-terminal --disable-factory -- bash -c "$KIRA_MANAGER/start.sh ; read -d'' -s -n1 -p 'Press any key to exit...' && exit"
+        gnome-terminal -- bash -c "$KIRA_MANAGER/start.sh ; read -d'' -s -n1 -p 'Press any key to exit...' && exit"
         break
     elif [ "${OPTION,,}" == "d" ] ; then
         echo "INFO: Wiping and removing infra..."
