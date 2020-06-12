@@ -247,7 +247,7 @@ CDHelper text lineswap --insert="MAX_VALIDATORS=$MAX_VALIDATORS" --prefix="MAX_V
 chmod 777 $ETC_PROFILE
 
 cd /kira
-source $KIRA_WORKSTATION/start.sh "True"
+source $KIRA_WORKSTATION/start.sh "False"
 
 echo "------------------------------------------------"
 echo "| FINISHED: KIRA INFRA INIT v0.0.2             |"
