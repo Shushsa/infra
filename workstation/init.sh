@@ -41,6 +41,7 @@ if [ "$DEBUG_MODE" == "True" ] ; then set -x ; else set +x ; fi
 [ -z "$KIRA_USER" ] && KIRA_USER=$USER
 [ -z "$NOTIFICATIONS" ] && NOTIFICATIONS="False"
 [ -z "$VALIDATORS_COUNT" ] && VALIDATORS_COUNT=2
+[ -z "$MAX_VALIDATORS" ] && MAX_VALIDATORS=254
 
 if [ "$SKIP_UPDATE" == "False" ] ; then
     #########################################
@@ -202,8 +203,8 @@ else
         fi
     fi
 
-    echo -e "\e[36;1mInput number of validators to deploy (min 1, max 4), [ENTER] if '$VALIDATORS_COUNT': \e[0m\c" && read NEW_VALIDATORS_COUNT
-    [ ! -z "$NEW_VALIDATORS_COUNT" ] && [ ! -z "${NEW_VALIDATORS_COUNT##*[!0-9]*}" ] && [ $NEW_VALIDATORS_COUNT -ge 1 ] && [ $NEW_VALIDATORS_COUNT -le 254 ] && VALIDATORS_COUNT=$NEW_VALIDATORS_COUNT
+    echo -e "\e[36;1mInput number of validators to deploy (min 1, max $MAX_VALIDATORS), [ENTER] if '$VALIDATORS_COUNT': \e[0m\c" && read NEW_VALIDATORS_COUNT
+    [ ! -z "$NEW_VALIDATORS_COUNT" ] && [ ! -z "${NEW_VALIDATORS_COUNT##*[!0-9]*}" ] && [ $NEW_VALIDATORS_COUNT -ge 1 ] && [ $NEW_VALIDATORS_COUNT -le $MAX_VALIDATORS ] && VALIDATORS_COUNT=$NEW_VALIDATORS_COUNT
 
     echo -e "\e[33;1m------------------------------------------------"
     echo "|       STARTED: KIRA INFRA INIT v0.0.2        |"
@@ -241,6 +242,7 @@ CDHelper text lineswap --insert="SEKAI_REPO=$SEKAI_REPO" --prefix="SEKAI_REPO=" 
 CDHelper text lineswap --insert="SEKAI_REPO_SSH=$SEKAI_REPO_SSH" --prefix="SEKAI_REPO_SSH=" --path=$ETC_PROFILE --append-if-found-not=True --silent=$SILENT_MODE
 CDHelper text lineswap --insert="INFRA_REPO_SSH=$INFRA_REPO_SSH" --prefix="INFRA_REPO_SSH=" --path=$ETC_PROFILE --append-if-found-not=True --silent=$SILENT_MODE
 CDHelper text lineswap --insert="VALIDATORS_COUNT=$VALIDATORS_COUNT" --prefix="VALIDATORS_COUNT=" --path=$ETC_PROFILE --append-if-found-not=True --silent=$SILENT_MODE
+CDHelper text lineswap --insert="MAX_VALIDATORS=$MAX_VALIDATORS" --prefix="MAX_VALIDATORS=" --path=$ETC_PROFILE --append-if-found-not=True --silent=$SILENT_MODE
 
 chmod 777 $ETC_PROFILE
 
