@@ -28,6 +28,7 @@ fi
 
 if [ "$DEBUG_MODE" == "True" ] ; then set -x ; else set +x ; fi
 
+MAX_VALIDATORS=254
 [ -z "$INFRA_BRANCH" ] && INFRA_BRANCH="v0.0.2"
 [ -z "$SEKAI_BRANCH" ] && SEKAI_BRANCH="master"
 [ -z "$EMAIL_NOTIFY" ] && EMAIL_NOTIFY="noreply.example.email@gmail.com"
@@ -41,7 +42,6 @@ if [ "$DEBUG_MODE" == "True" ] ; then set -x ; else set +x ; fi
 [ -z "$KIRA_USER" ] && KIRA_USER=$USER
 [ -z "$NOTIFICATIONS" ] && NOTIFICATIONS="False"
 [ -z "$VALIDATORS_COUNT" ] && VALIDATORS_COUNT=2
-[ -z "$MAX_VALIDATORS" ] && MAX_VALIDATORS=254
 
 if [ "$SKIP_UPDATE" == "False" ] ; then
     #########################################
