@@ -57,15 +57,15 @@ while : ; do
     echo -e "------------------------------------------------\e[0m"
     
     OPTION="" && KEY="x" && TIMEOUT="False"
-    echo "Input option then press [ENTER]: "
+    echo "Input option then press [ENTER] or [SPACE]: "
     while [ ! -z "$KEY" ] ; do
-        read -n1 -t3 KEY || TIMEOUT="True"
+        read -n 1 -t 3 KEY || TIMEOUT="True"
         [ "$TIMEOUT" == "True" ] && TIMEOUT="False" && KEY="x" && continue
         [ ! -z "$KEY" ] && OPTION="${OPTION}${KEY}"
     done
     [ -z "$OPTION" ] && continue
 
-    ACCEPT="" && while [ "${ACCEPT,,}" != "y" ] && [ "${ACCEPT,,}" != "n" ] ; do echo -e "\n\e[36;1mPress [Y]es to confirm option (${OPTION^^}) or [N]o to cancel: \e[0m\c" && read  -d'' -s -n1 ACCEPT ; done
+    ACCEPT="" && while [ "${ACCEPT,,}" != "y" ] && [ "${ACCEPT,,}" != "n" ] ; do echo -e "\e[36;1mPress [Y]es to confirm option (${OPTION^^}) or [N]o to cancel: \e[0m\c" && read  -d'' -s -n1 ACCEPT ; done
     [ "${ACCEPT,,}" == "n" ] && echo "\nWARINIG: Operation was cancelled" && continue
     echo ""
     
