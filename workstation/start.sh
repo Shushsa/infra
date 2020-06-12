@@ -65,6 +65,7 @@ docker network create --subnet=$KIRA_VALIDATORS_SUBNET kiranet
 
 GENESIS_SOUCE="/root/.sekaid/config/genesis.json"
 GENESIS_DESTINATION="$DOCKER_COMMON/genesis.json"
+rm -rfv $DOCKER_COMMON
 mkdir -p $DOCKER_COMMON
 rm -f $GENESIS_DESTINATION
 

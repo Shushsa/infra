@@ -115,6 +115,10 @@ if [ $VALIDATOR_INDEX -eq 1 ] ; then # first validator always creates a genesis 
     for ((i=1;i<=$VALIDATORS_COUNT;i++)); do
         TEST_ACC_NAME="test-$i"
         VALIDATOR_ACC_NAME="validator-$i"
+        TMP_NODE_KEY="$SELF_CONFIGS/node-keys/node-key-$i.json"
+        COM_NODE_KEY="$COMMON_DIR/node-keys/node-key-$i.json"
+        TMP_SIGNING_KEY="$SELF_CONFIGS/signing-keys/signing-$i.key"
+        COM_SIGNING_KEY="$COMMON_DIR/signing-keys/signing-$i.key"
 
         echo "INFO: Adding $TEST_ACC_NAME account..."
         echo "INFO: Adding $VALIDATOR_ACC_NAME account..."
@@ -132,11 +136,6 @@ if [ $VALIDATOR_INDEX -eq 1 ] ; then # first validator always creates a genesis 
         sekaid add-genesis-account $VALIDATOR_ACC_ADDR 200000000000000$DENOM,20000000samoleans
 
         echo "INFO: Creating $VALIDATOR_ACC_NAME genesis tx..."
-        TMP_NODE_KEY="$SELF_CONFIGS/node-keys/node-key-$i.json"
-        COM_NODE_KEY="$COMMON_DIR/node-keys/node-key-$i.json"
-        TMP_SIGNING_KEY="$SELF_CONFIGS/signing-keys/signing-$i.key"
-        COM_SIGNING_KEY="$COMMON_DIR/signing-keys/signing-$i.key"
-
         if [ ! -f "$TMP_NODE_KEY" ] || [ ! -f "$TMP_SIGNING_KEY" ] ; then
             echo "INFO: Generating new node & signing keys..."
             rm -f $NODE_KEY_PATH
