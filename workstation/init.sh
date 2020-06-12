@@ -38,10 +38,12 @@ MAX_VALIDATORS=254
 [ -z "$SEKAI_REPO" ] && SEKAI_REPO="https://github.com/KiraCore/sekai"
 [ -z "$SEKAI_REPO_SSH" ] && SEKAI_REPO_SSH="git@github.com:KiraCore/sekai.git"
 [ -z "$INFRA_REPO_SSH" ] && INFRA_REPO_SSH="git@github.com:KiraCore/infra.git"
-[ ! -z "$SUDO_USER" ] && KIRA_USER=$SUDO_USER
-[ -z "$KIRA_USER" ] && KIRA_USER=$USER
 [ -z "$NOTIFICATIONS" ] && NOTIFICATIONS="False"
 [ -z "$VALIDATORS_COUNT" ] && VALIDATORS_COUNT=2
+[ ! -z "$SUDO_USER" ] && KIRA_USER=$SUDO_USER
+[ -z "$KIRA_USER" ] && KIRA_USER=$USER
+[ "$KIRA_USER" == "root" ] && KIRA_USER=$(logname)
+[ "$KIRA_USER" == "root" ] && echo "You must login as non root user to your machine"
 
 if [ "$SKIP_UPDATE" == "False" ] ; then
     #########################################
