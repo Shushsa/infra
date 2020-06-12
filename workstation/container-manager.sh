@@ -56,9 +56,17 @@ while : ; do
     echo "| [X] | Exit | [W] | Refresh Window            |"
     echo -e "------------------------------------------------\e[0m"
     
-    read  -d'' -s -n1 -t 5 -p "INFO: Press [KEY] to select option: " OPTION || OPTION=""
-    [ ! -z "$OPTION" ] && echo "" && read -d'' -s -n1 -p "Press [ENTER] to confirm [${OPTION^^}] option or any other key to try again: " ACCEPT
-    [ ! -z "$ACCEPT" ] && continue
+    OPTION="" && KEY="x" && TIMEOUT="False"
+    echo "Input option then press [ENTER]: "
+    while [ ! -z "$KEY" ] ; do
+        read -n1 -t3 KEY || TIMEOUT="True"
+        [ "$TIMEOUT" == "True" ] && TIMEOUT="False" && KEY="x" && continue
+        [ ! -z "$KEY" ] && OPTION="${OPTION}${KEY}"
+    done
+    [ -z "$OPTION" ] && continue
+
+    ACCEPT="" && while [ "${ACCEPT,,}" != "y" ] && [ "${ACCEPT,,}" != "n" ] ; do echo -e "\n\e[36;1mPress [Y]es to confirm option (${OPTION^^}) or [N]o to cancel: \e[0m\c" && read  -d'' -s -n1 ACCEPT ; done
+    [ "${ACCEPT,,}" == "n" ] && echo "WARINIG: Operation was cancelled" && continue
     
     if [ "${OPTION,,}" == "i" ] ; then
         gnome-terminal -- bash -c "docker exec -it $ID /bin/bash || docker exec -it $ID /bin/sh ; read -d'' -s -n1 -p 'Press any key to exit...' && exit"
