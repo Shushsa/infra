@@ -8,15 +8,18 @@ ETC_PROFILE="/etc/profile"
 source $ETC_PROFILE &> /dev/null
 if [ "$DEBUG_MODE" == "True" ] ; then set -x ; else set +x ; fi
 
+CONTAINER_REACHABLE="True"
+curl --max-time 3 "$KIRA_REGISTRY/v2/_catalog" || CONTAINER_REACHABLE="False"
+
 # ensure docker registry exists
 KIRA_SETUP_REGISTRY="$KIRA_SETUP/registry-v0.0.11-$KIRA_REGISTRY_IP-$KIRA_REGISTRY_NAME"
-if [[ $(${KIRA_SCRIPTS}/container-exists.sh "registry") != "True" ]] || [ ! -f "$KIRA_SETUP_REGISTRY" ] ; then
+if [[ $(${KIRA_SCRIPTS}/container-exists.sh "registry") != "True" ]] || [ ! -f "$KIRA_SETUP_REGISTRY" ] || [ "$CONTAINER_REACHABLE" == "False"  ] ; then
     echo "Container 'registry' does NOT exist or update is required, creating..."
 
+    ${KIRA_SCRIPTS}/container-delete.sh "registry"
     docker network rm regnet || echo "Failed to remove registry network"
     docker network create --subnet=$KIRA_REGISTRY_SUBNET regnet
 
-    ${KIRA_SCRIPTS}/container-delete.sh "registry"
     docker run -d \
      --network regnet \
      --ip $KIRA_REGISTRY_IP \
