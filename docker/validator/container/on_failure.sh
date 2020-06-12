@@ -2,7 +2,8 @@
 
 exec 2>&1
 set -e
-set -x
+
+if [ "$DEBUG_MODE" == "True" ] ; then set -x ; else set +x ; fi
 
 touch $MAINTENANCE_FILE # notify entire environment to halt
 

@@ -99,6 +99,7 @@ for ((i=1;i<=$VALIDATORS_COUNT;i++)); do
      -e SILENT_MODE="$SILENT_MODE" \
      -e SEEDS="$SEEDS" \
      -e PEERS="$PEERS" \
+     -e DEBUG_MODE="True" \
      -v $DOCKER_COMMON:"/common" \
      validator:latest
 
