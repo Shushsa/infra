@@ -2,7 +2,8 @@
 
 exec 2>&1
 set -e
-set -x
+
+if [ "$DEBUG_MODE" == "True" ] ; then set -x ; else set +x ; fi
 
 # (rm -fv $KIRA_INFRA/docker/validator/scripts/export-account.sh) && nano $KIRA_INFRA/docker/validator/scripts/export-account.sh
 

@@ -2,7 +2,8 @@
 
 exec 2>&1
 set -e
-set -x
+
+if [ "$DEBUG_MODE" == "True" ] ; then set -x ; else set +x ; fi
 
 # (rm -fv $KIRA_INFRA/docker/validator/scripts/add-account.sh) && nano $KIRA_INFRA/docker/validator/scripts/add-account.sh
 
@@ -10,18 +11,22 @@ NAME=$1
 KEY=$2
 KEYRINGPASS=$3
 PASSPHRASE=$4
+NEW_KEY=""
 
-# check configs directory
-[ ! -f "$KEY" ] && KEY="$SELF_CONFIGS/${KEY}"
-[ ! -f "$KEY" ] && KEY="$SELF_CONFIGS/${KEY}.key" # use key as key filename
-[ ! -f "$KEY" ] && KEY="$SELF_CONFIGS/${NAME}"
-[ ! -f "$KEY" ] && KEY="$SELF_CONFIGS/${NAME}.key" # use name as key filename
+# check common folder if key does not exists
+[ ! -f "$KEY" ] && [ ! -f "$NEW_KEY" ] && NEW_KEY="$COMMON_DIR/${KEY}"
+[ ! -f "$KEY" ] && [ ! -f "$NEW_KEY" ] && NEW_KEY="$COMMON_DIR/${KEY}.key" # use key as key filename
+[ ! -f "$KEY" ] && [ ! -f "$NEW_KEY" ] && NEW_KEY="$COMMON_DIR/${NAME}"
+[ ! -f "$KEY" ] && [ ! -f "$NEW_KEY" ] && NEW_KEY="$COMMON_DIR/${NAME}.key" # use name as key filename
 
-# check common folder if still does not exists
-[ ! -f "$KEY" ] && KEY="$COMMON_DIR/${KEY}"
-[ ! -f "$KEY" ] && KEY="$COMMON_DIR/${KEY}.key" # use key as key filename
-[ ! -f "$KEY" ] && KEY="$COMMON_DIR/${NAME}"
-[ ! -f "$KEY" ] && KEY="$COMMON_DIR/${NAME}.key" # use name as key filename
+# check configs directory  if key does not exists
+[ ! -f "$KEY" ] && [ ! -f "$NEW_KEY" ] && NEW_KEY="$SELF_CONFIGS/${KEY}"
+[ ! -f "$KEY" ] && [ ! -f "$NEW_KEY" ] && NEW_KEY="$SELF_CONFIGS/${KEY}.key" # use key as key filename
+[ ! -f "$KEY" ] && [ ! -f "$NEW_KEY" ] && NEW_KEY="$SELF_CONFIGS/${NAME}"
+[ ! -f "$KEY" ] && [ ! -f "$NEW_KEY" ] && NEW_KEY="$SELF_CONFIGS/${NAME}.key" # use name as key filename
+
+# replace kew with new key if substitute file was found
+[ ! -f "$KEY" ] && [ -f "$NEW_KEY" ] && KEY="$NEW_KEY"
 
 if [ -f "$KEY" ] ; then
    echo "INFO: Key $NAME ($KEY) was found and will be imported..."
