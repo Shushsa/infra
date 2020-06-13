@@ -174,7 +174,7 @@ else
         
         echo -e "\e[36;1mPress [Y] and paste your PRIVATE git SSH key or press [ENTER] to skip: \e[0m\c" && read -n1 NEW_SSH_KEY
         if [ "${NEW_SSH_KEY,,}" == "y" ] ; then
-            echo "INFO: To save input press [Ctrl+D], or use [Ctrl+C] to exit without making changes"
+            echo "" && echo "INFO: To save input press [Ctrl+D], or use [Ctrl+C] to exit without making changes" && echo ""
             set +e
             NEW_SSH_KEY=$(</dev/stdin)
             set -e
@@ -186,8 +186,8 @@ else
             rm -rfv $SSH_KEY_PRIV_PATH
             rm -rfv $SSH_KEY_PUB_PATH
             echo $NEW_SSH_KEY > $SSH_KEY_PRIV_PATH
-            ssh-keygen -y -f $SSH_KEY_PRIV_PATH > $SSH_KEY_PUB_PATH
             chmod 600 $SSH_KEY_PRIV_PATH
+            ssh-keygen -y -f $SSH_KEY_PRIV_PATH > $SSH_KEY_PUB_PATH
             chmod 644 $SSH_KEY_PUB_PATH
             SSH_KEY_PUB=$(cat $SSH_KEY_PUB_PATH)
         
@@ -197,7 +197,7 @@ else
             echo "ERROR: Private key was not submitted"
         fi
 
-        echo -e "\e[36;1mPress [Y]es to confirm or [N]o to try again\e[0m\c" && read  -d'' -s -n1 OPTION
+        echo -e "\e[36;1mPress [Y]es to confirm or [N]o to try again\e[0m\c " && read  -d'' -s -n1 OPTION
         [ "${OPTION,,}" == "y" ] && break
         [ "${OPTION,,}" == "n" ] && continue
     done
