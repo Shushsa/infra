@@ -47,7 +47,7 @@ while : ; do
     echo "|         KIRA NETWORK MANAGER v0.0.3          |"
     echo "|             $(date '+%d/%m/%Y %H:%M:%S')              |"
     [ "$SUCCESS" == "True" ] && echo -e "|\e[0m\e[32;1m     SUCCESS, INFRASTRUCTURE IS HEALTHY       \e[33;1m|"
-    [ "$SUCCESS" != "True" ] && echo -e "|\e[0m\e[31;1m   ISSUES DETECTED, INFRASTRUCTURE FAILURE    \e[33;1m|"
+    [ "$SUCCESS" != "True" ] && echo -e "|\e[0m\e[31;1m ISSUES DETECTED, INFRASTRUCTURE IS UNHEALTHY \e[33;1m|"
     echo "|----------------------------------------------| [status:height]"
     [ ! -z "$REGISTRY_STATUS" ] && \
         echo "| [0] | Inspect registry container             : $REGISTRY_STATUS"
