@@ -197,9 +197,9 @@ else
             echo "ERROR: Private key was not submitted"
         fi
 
-        echo -e "\e[36;1mPress [Y]es to confirm or [N]o to try again\e[0m\c " && read  -d'' -s -n1 OPTION
-        [ "${OPTION,,}" == "y" ] && breakp
-        [ "${OPTION,,}" == "n" ] && continuep
+        echo -e "\e[36;1mPress [Y]es to confirm or [N]o to try again: \e[0m\c " && read  -d'' -s -n1 OPTION
+        [ "${OPTION,,}" == "y" ] && break
+        [ "${OPTION,,}" == "n" ] && continue
     done
 
     echo "INFO: Make sure you copied and saved your private key for recovery purpouses"

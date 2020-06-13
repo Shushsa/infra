@@ -112,7 +112,7 @@ for ((i=1;i<=$VALIDATORS_COUNT;i++)); do
      validator:latest
 
     # NOTE: Following actions destroy $i variable so VALIDATOR_INDEX is needed
-    echo "INFO: Witing for validator-$i to start..."
+    echo "INFO: Waiting for validator-$i to start..."
     VALIDATOR_INDEX=$i
     sleep 10
     source $WORKSTATION_SCRIPTS/await-container-init.sh "validator-$i" "300" "10"
