@@ -15,13 +15,15 @@ BRANCH_ENVAR=$5
 
 ETC_PROFILE="/etc/profile"
 LOOP_FILE="/tmp/git_manager_loop"
+source $ETC_PROFILE &> /dev/null
+if [ "$DEBUG_MODE" == "True" ] ; then set -x ; else set +x ; fi
 
 while : ; do
     START_TIME="$(date -u +%s)"
-    source $ETC_PROFILE &> /dev/null
-    if [ "$DEBUG_MODE" == "True" ] ; then set -x ; else set +x ; fi
+    
+    [ -f "/tmp/rs_git_manager" ] && break # restart signal
     mkdir -p $DIRECTORY
-    cd /tmp && cd $DIRECTORY
+    cd $DIRECTORY
      
     BRANCH_REF=$(git rev-parse --abbrev-ref HEAD || echo "$BRANCH")
     git remote set-url origin $REPO_HTTPS || echo "WARNING: Failed to set origin of the remote branch"
@@ -129,7 +131,7 @@ while : ; do
     elif [ "${OPTION,,}" == "r" ] ; then
         $KIRA_SCRIPTS/git-pull.sh "$REPO_SSH" "$BRANCH" "$DIRECTORY" || FAILED="True"
         [ "$FAILED" == "True" ] && echo "ERROR: Pull failed" && break
-      
+        
         echo "SUCCESS: Pull suceeded" && break
     elif [ "${OPTION,,}" == "b" ] ; then
         echo "INFO: Listing available branches..."
@@ -207,19 +209,6 @@ while : ; do
 done
 
 read -d'' -s -n1 -p 'Press any key to continue...'
-sleep 1
+touch /tmp/rs_manager
+touch /tmp/rs_container_manager
 source $KIRA_MANAGER/git-manager.sh "$REPO_SSH" "$REPO_HTTPS" "$BRANCH" "$DIRECTORY" "$BRANCH_ENVAR"
-
-# TODO: Check if below commands can be fully ommited 
-# git config --global user.name github-username
-# git config --global user.email github@email
-# ssh-agent -s 
-# eval `ssh-agent -s`
-# ssh-add $SSH_KEY_PRIV_PATH
-
-# BRANCH_REF=$(git rev-parse --abbrev-ref HEAD)
-# git for-each-ref --format='%(refname:short) %(upstream:short)' refs/heads
-# git rev-list develop..origin/develop --count
-
-# last_commit=$(git rev-parse HEAD)
-# git branch -r --contains $(git rev-parse HEAD)

@@ -8,10 +8,12 @@ set -e
 
 ETC_PROFILE="/etc/profile"
 LOOP_FILE="/tmp/manager_loop"
+source $ETC_PROFILE &> /dev/null
 
 while : ; do
     START_TIME="$(date -u +%s)"
-    source $ETC_PROFILE &> /dev/null
+    [ -f "/tmp/rs_manager" ] && break # restart signal
+    
     if [ "$DEBUG_MODE" == "True" ] ; then set -x ; else set +x ; fi
     SUCCESS="True"
 
@@ -125,5 +127,7 @@ while : ; do
 done
 
 sleep 1
+touch /tmp/rs_git_manager
+touch /tmp/rs_container_manager
 source $KIRA_MANAGER/manager.sh
 

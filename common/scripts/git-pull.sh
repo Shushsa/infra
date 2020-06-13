@@ -51,7 +51,6 @@ mkdir -p $TMP_OUTPUT
 
 if [[ "${REPO,,}" == *"git@"* ]] ; then
     echo "INFO: Detected https repo address"
-    #git remote set-url origin $REPO
 
     if [ ! -z "$BRANCH" ] ; then
         ssh-agent sh -c "ssh-add $SSHCRED ; git clone --branch $BRANCH $REPO $TMP_OUTPUT"
@@ -60,7 +59,7 @@ if [[ "${REPO,,}" == *"git@"* ]] ; then
     fi
 
     cd $TMP_OUTPUT
-    git remote set-url origin $REPO
+    git remote set-url origin $REPO || echo "WARNING: Failed to set origin of the remote branch"
 
     if [ ! -z "$CHECKOUT" ] ; then
         ssh-agent sh -c "ssh-add $SSHCRED ; git checkout $CHECKOUT"
@@ -74,6 +73,8 @@ elif [[ "${REPO,,}" == *"https://"*   ]] ; then
     fi
 
     cd $TMP_OUTPUT
+    git remote set-url origin $REPO || echo "WARNING: Failed to set origin of the remote branch"
+    
     if [ ! -z "$CHECKOUT" ] ; then
         git checkout $CHECKOUT
     fi
@@ -90,6 +91,18 @@ git describe --all --always
 rm -rf $OUTPUT
 mkdir -p $OUTPUT
 cp -rTfv "$TMP_OUTPUT" "$OUTPUT"
+
+cd $OUTPUT
+BRANCH_REF=$(git rev-parse --abbrev-ref HEAD || echo "$BRANCH")
+git remote set-url origin $REPO || echo "WARNING: Failed to set origin of the remote branch"
+
+if [[ "${REPO,,}" == *"git@"* ]] ; then
+    ssh-agent sh -c "ssh-add $SSHCRED ; git fetch --all"
+    ssh-agent sh -c "git reset --hard origin/$BRANCH_REF"
+else
+    git fetch --all
+    git reset --hard origin/$BRANCH_REF
+fi
 
 ls -as
 chmod -R $RWXMOD $OUTPUT

@@ -4,21 +4,31 @@ exec 2>&1
 set -e
 
 NAME=$1
+
 ETC_PROFILE="/etc/profile"
 LOOP_FILE="/tmp/container_manager_loop"
+source $ETC_PROFILE &> /dev/null
+CONTAINER_DUPM="/home/$KIRA_USER/Desktop/DUMP/${NAME^^}"
+if [ "$DEBUG_MODE" == "True" ] ; then set -x ; else set +x ; fi
 
 while : ; do
     START_TIME="$(date -u +%s)"
-    source $ETC_PROFILE &> /dev/null
-    if [ "$DEBUG_MODE" == "True" ] ; then set -x ; else set +x ; fi
+    [ -f "/tmp/rs_container_manager" ] && break # restart signal
 
-    CONTAINER_DUPM="/home/$KIRA_USER/Desktop/DUMP/${NAME^^}"
     EXISTS=$($KIRA_SCRIPTS/container-exists.sh "$NAME" || echo "Error")
+
+    if [ "$EXISTS" != "True" ] ; then
+        echo "WARNING: Container no longer exists, press [X] to exit or restart your infra"
+        read -n 1 -t 3 KEY || continue
+         [ "${OPTION,,}" == "x" ] && exit 1
+    fi
+
     STATUS=$(docker inspect $(docker ps --no-trunc -aqf name=$NAME) | jq -r '.[0].State.Status' || echo "Error")
     PAUSED=$(docker inspect $(docker ps --no-trunc -aqf name=$NAME) | jq -r '.[0].State.Paused' || echo "Error")
     HEALTH=$(docker inspect $(docker ps --no-trunc -aqf name=$NAME) | jq -r '.[0].State.Health.Status' || echo "Error")
     RESTARTING=$(docker inspect $(docker ps --no-trunc -aqf name=$NAME) | jq -r '.[0].State.Restarting' || echo "Error")
     STARTED_AT=$(docker inspect $(docker ps --no-trunc -aqf name=$NAME) | jq -r '.[0].State.StartedAt' || echo "Error")
+    IP=$(docker inspect $(docker ps --no-trunc -aqf name=$NAME) | jq -r '.[0].NetworkSettings.IPAddress' || echo "Error")
     ID=$(docker inspect --format="{{.Id}}" ${NAME} 2> /dev/null || echo "undefined")
     
     clear
@@ -122,4 +132,6 @@ while : ; do
 done
 
 sleep 1
+touch /tmp/rs_manager
+touch /tmp/rs_git_manager
 source $KIRA_MANAGER/container-manager.sh $NAME
