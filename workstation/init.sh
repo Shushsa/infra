@@ -174,7 +174,7 @@ else
         
         echo -e "\e[36;1mPress [Y] and paste your PRIVATE git SSH key or press [ENTER] to skip: \e[0m\c" && read -n1 NEW_SSH_KEY
         if [ "${NEW_SSH_KEY,,}" == "y" ] ; then
-            printf "\nINFO: To save input press [Ctrl+D], or use [Ctrl+C] to exit without making changes\n"
+            echo -e "\nINFO: Press [Ctrl+D] to save input, or use [Ctrl+C] to exit without changes\n"
             set +e
             NEW_SSH_KEY=$(</dev/stdin)
             set -e
@@ -185,7 +185,7 @@ else
         if [ ! -z "$NEW_SSH_KEY" ] ; then
             rm -rfv $SSH_KEY_PRIV_PATH
             rm -rfv $SSH_KEY_PUB_PATH
-            printf $NEW_SSH_KEY > $SSH_KEY_PRIV_PATH
+            echo -e "$NEW_SSH_KEY" > $SSH_KEY_PRIV_PATH
             chmod 600 $SSH_KEY_PRIV_PATH
             ssh-keygen -y -f $SSH_KEY_PRIV_PATH > $SSH_KEY_PUB_PATH
             chmod 644 $SSH_KEY_PUB_PATH
