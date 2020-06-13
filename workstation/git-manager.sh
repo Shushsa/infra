@@ -115,7 +115,7 @@ while : ; do
         git add -A || FAILED="True"
         [ "$FAILED" == "False" ] && git commit -a -m "[$(date '+%d/%m/%Y %H:%M:%S')] $COMMIT" || FAILED="True"
         [ "$FAILED" == "True" ] && echo "ERROR: Commit failed" && break
-        echo "SUCCESS: Commit suceeded" && break
+        echo "SUCCESS: Commit suceeded" && sleep 2 && continue
     elif [ "${OPTION,,}" == "p" ] ; then
         echo "INFO: Pushing changes..."
         git checkout $BRANCH || FAILED="True"
@@ -128,12 +128,12 @@ while : ; do
         [ "$FAILED" == "False" ] && ssh-agent sh -c "ssh-add $SSH_KEY_PRIV_PATH ; git push origin $BRANCH" || FAILED="True"
         [ "$FAILED" == "True" ] && echo "ERROR: Push failed" && break
         
-        echo "SUCCESS: Push suceeded" && break
+        echo "SUCCESS: Push suceeded" && sleep 2 && continue
     elif [ "${OPTION,,}" == "r" ] ; then
-        $KIRA_SCRIPTS/git-pull.sh "$REPO_SSH" "$BRANCH" "$DIRECTORY" || FAILED="True"
+        $KIRA_SCRIPTS/git-pull.sh "$REPO_SSH" "$BRANCH" "$DIRECTORY" "False" || FAILED="True"
         [ "$FAILED" == "True" ] && echo "ERROR: Pull failed" && break
         
-        echo "SUCCESS: Pull suceeded" && break
+        echo "SUCCESS: Pull suceeded" && sleep 2 && continue
     elif [ "${OPTION,,}" == "b" ] ; then
         echo "INFO: Listing available branches..."
         git branch -r || echo "ERROR: Failed to list remote branches"
@@ -141,13 +141,13 @@ while : ; do
         [ -z "$NEW_BRANCH" ] && echo "ERROR: Branch was not defined" && break
         [ "$NEW_BRANCH" == "$BRANCH" ] && echo "ERROR: Can't switch to branch with the same name" && break
 
-        $KIRA_SCRIPTS/git-pull.sh "$REPO_SSH" "$NEW_BRANCH" "$DIRECTORY" || FAILED="True"
+        $KIRA_SCRIPTS/git-pull.sh "$REPO_SSH" "$NEW_BRANCH" "$DIRECTORY" "False" || FAILED="True"
         [ "$FAILED" == "True" ] && echo "ERROR: Changing branch failed" && break
 
         BRANCH=$NEW_BRANCH
         CDHelper text lineswap --insert="$BRANCH_ENVAR=$BRANCH" --prefix="$BRANCH_ENVAR=" --path=$ETC_PROFILE --silent=$SILENT_MODE
         
-        echo "SUCCESS: Changing branch suceeded"
+        echo "SUCCESS: Changing branch suceeded" && sleep 2 && continue
     elif [ "${OPTION,,}" == "n" ] ; then
         echo "INFO: Listing available branches..."
         git branch -r || echo "ERROR: Failed to list remote branches"
@@ -168,7 +168,7 @@ while : ; do
         BRANCH=$NEW_BRANCH
         CDHelper text lineswap --insert="$BRANCH_ENVAR=$BRANCH" --prefix="$BRANCH_ENVAR=" --path=$ETC_PROFILE --silent=$SILENT_MODE
         
-        echo "SUCCESS: New branch was created" && break
+        echo "SUCCESS: New branch was created" && sleep 2 && continue
     elif [ "${OPTION,,}" == "l" ] ; then
         git pull --no-edit origin $BRANCH_REF || FAILED="True"
         [ "$FAILED" == "True" ] && echo "ERROR: Failed to pull chnages from origin to branch '$BRANCH_REF'" && break
