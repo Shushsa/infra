@@ -35,15 +35,15 @@ while [ $ELAPSED -le $TIMEOUT ] && [ "$SUCCESS" == "False" ] ; do
 
     SUCCESS="True"
     ERROR="True"
-    docker cp $NAME:$TARGET_PASS_FILE "$DESTINATION/tmp-pass.file" || SUCCESS="False"
-    docker cp $NAME:$TARGET_FAIL_FILE "$DESTINATION/tmp-fail.file" || ERROR="False"
+    docker cp $NAME:$TARGET_PASS_FILE "$DESTINATION/tmp-pass.file" &>/dev/null || SUCCESS="False"
+    docker cp $NAME:$TARGET_FAIL_FILE "$DESTINATION/tmp-fail.file" &>/dev/null || ERROR="False"
 
     if [ "$ERROR" == "True" ] ; then
         echo "ERROR: Fail report file was found wihtin container $NAME after $ELAPSED seconds"
         exit 1
     fi
 
-    echo "INFO: Waiting for trigger file..."
+    echo "INFO: Please wait, inspecting container..."
     sleep $DELAY
 done
 

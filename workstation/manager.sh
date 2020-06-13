@@ -13,21 +13,29 @@ while : ; do
     START_TIME="$(date -u +%s)"
     source $ETC_PROFILE &> /dev/null
     if [ "$DEBUG_MODE" == "True" ] ; then set -x ; else set +x ; fi
+    SUCCESS="True"
 
     REGISTRY_STATUS=""
     CONTAINER_ID=$(docker ps --no-trunc -aqf name=registry || echo "")
     [ ! -z "$CONTAINER_ID" ] && REGISTRY_STATUS=$(docker inspect $CONTAINER_ID | jq -r '.[0].State.Status' || echo "error")
+    [ "$REGISTRY_STATUS" != "running" ] && SUCCESS="False"
 
     for ((i=1;i<=$VALIDATORS_COUNT;i++)); do
-        CONTAINER_ID=$(docker ps --no-trunc -aqf name=validator-$i || echo "")
+        name="validator-$i "
+        CONTAINER_ID=$(docker ps --no-trunc -aqf name=$name || echo "")
         declare "CONTAINER_ID_$i"="$CONTAINER_ID"
-        [ -z "$CONTAINER_ID" ] && continue
+        [ -z "$CONTAINER_ID" ] && SUCCESS="False" && continue
         VALIDATOR_STATUS=$(docker inspect $CONTAINER_ID | jq -r '.[0].State.Status' || echo "error")
 
         #Add block height info
         if [ "$VALIDATOR_STATUS" == "running" ] ; then
-            HEIGHT=$(docker exec -it "validator-$i" sekaicli status | jq -r '.sync_info.latest_block_height' || echo "Error")
+            HEALTH=$(docker inspect $(docker ps --no-trunc -aqf name=$name ) | jq -r '.[0].State.Health.Status' || echo "Error")
+            [ ! -z "$HEALTH" ] && [ "$HEALTH" != "null" ] && [ "$HEALTH" != "Error" ] && VALIDATOR_STATUS=$HEALTH
+            [ "$HEALTH" != "healthy" ] && SUCCESS="False"
+            HEIGHT=$(docker exec -it $name sekaicli status | jq -r '.sync_info.latest_block_height' || echo "Error")
             [ "$HEIGHT" != "Error" ] && VALIDATOR_STATUS="$VALIDATOR_STATUS:$HEIGHT"
+        else
+            SUCCESS="False"
         fi
 
         declare "VALIDATOR_STATUS_$i"="$VALIDATOR_STATUS"
@@ -38,7 +46,9 @@ while : ; do
     echo -e "\e[33;1m------------------------------------------------"
     echo "|         KIRA NETWORK MANAGER v0.0.3          |"
     echo "|             $(date '+%d/%m/%Y %H:%M:%S')              |"
-    echo "|----------------------------------------------|"
+    [ "$SUCCESS" == "True" ] && echo -e "|\e[0m\e[32;1m     SUCCESS, INFRASTRUCTURE IS HEALTHY       \e[33;1m|"
+    [ "$SUCCESS" != "True" ] && echo -e "|\e[0m\e[31;1m ISSUES DETECTED, INFRASTRUCTURE IS UNHEALTHY \e[33;1m|"
+    echo "|----------------------------------------------| [status:height]"
     [ ! -z "$REGISTRY_STATUS" ] && \
         echo "| [0] | Inspect registry container             : $REGISTRY_STATUS"
     for ((i=1;i<=$VALIDATORS_COUNT;i++)); do
@@ -61,7 +71,7 @@ while : ; do
     echo "Input option then press [ENTER] or [SPACE]: " && rm -f $LOOP_FILE && touch $LOOP_FILE
     while : ; do
         OPTION=$(cat $LOOP_FILE)
-        [ -z "$OPTION" ] && [ $(($(date -u +%s)-$START_TIME)) -ge 8 ] && break
+        [ -z "$OPTION" ] && [ $(($(date -u +%s)-$START_TIME)) -ge 10 ] && break
         read -n 1 -t 5 KEY || continue
         [ ! -z "$KEY" ] && echo "${OPTION}${KEY}" > $LOOP_FILE
         [ -z "$KEY" ] && break

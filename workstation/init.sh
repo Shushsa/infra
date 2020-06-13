@@ -150,11 +150,8 @@ else
     [ ! -z "$NEW_SEKAI_BRANCH" ] && SEKAI_BRANCH=$NEW_SEKAI_BRANCH
     
     echo -e "\e[36;1mPress [Y]es/[N]o to receive notifications, [ENTER] if '$NOTIFICATIONS': \e[0m\c" && read  -d'' -s -n1 NEW_NOTIFICATIONS
-    if [ "${NEW_NOTIFICATIONS,,}" == "y" ] ; then
-        NOTIFICATIONS="True"
-    elif [ "${NEW_NOTIFICATIONS,,}" == "n" ] ; then
-        NOTIFICATIONS="False"
-    fi
+    [ "${NEW_NOTIFICATIONS,,}" == "y" ] && NOTIFICATIONS="True"
+    [ "${NEW_NOTIFICATIONS,,}" == "n" ] && NOTIFICATIONS="False"
     
     if [ "$NOTIFICATIONS" == "True" ] ; then
         echo -e "\e[36;1mType desired notification email, [ENTER] if '$EMAIL_NOTIFY': \e[0m\c" && read NEW_NOTIFY_EMAIL
@@ -171,26 +168,41 @@ else
     chmod 644 $SSH_KEY_PUB_PATH
     SSH_KEY_PUB=$(cat $SSH_KEY_PUB_PATH)
 
-    echo "INFO: Your current public SSH Key:"
-    echo -e "\e[33;1m$SSH_KEY_PUB\e[0m"
-    
-    echo -e "\e[36;1mPress [Y] and input your PRIVATE git SSH key or press [ENTER] to skip: \e[0m\c" && read NEW_SSH_KEY
-    if [ "${NEW_SSH_KEY,,}" == "y" ] ; then
-        echo "INFO: To save input press [Ctrl+D] or [Ctrl+C] to exit without making changes"
-        NEW_SSH_KEY=$(</dev/stdin) || echo "WARNING: Failed to save your private key" && NEW_SSH_KEY=""
-    fi
+    while : ; do
+        echo "INFO: Your current public SSH Key:"
+        echo -e "\e[33;1m$SSH_KEY_PUB\e[0m"
+        
+        echo -e "\e[36;1mPress [Y] and paste your PRIVATE git SSH key or press [ENTER] to skip: \e[0m\c" && read -n1 NEW_SSH_KEY
+        if [ "${NEW_SSH_KEY,,}" == "y" ] ; then
+            echo -e "\nINFO: Press [Ctrl+D] to save input, or use [Ctrl+C] to exit without changes\n"
+            set +e
+            NEW_SSH_KEY=$(</dev/stdin)
+            set -e
+        else
+            break
+        fi
 
-    if [ ! -z "$NEW_SSH_KEY" ] ; then
-        echo $NEW_SSH_KEY > $SSH_KEY_PRIV_PATH
-        ssh-keygen -y -f $SSH_KEY_PRIV_PATH > $SSH_KEY_PUB_PATH
-        chmod 600 $SSH_KEY_PRIV_PATH
-        chmod 644 $SSH_KEY_PUB_PATH
-        SSH_KEY_PUB=$(cat $SSH_KEY_PUB_PATH)
-    
-        echo "INFO: Your new public SSH Key:"
-        echo -e "\e[32;1m$SSH_KEY_PUB\e[0m"
-    fi
+        if [ ! -z "$NEW_SSH_KEY" ] ; then
+            rm -rfv $SSH_KEY_PRIV_PATH
+            rm -rfv $SSH_KEY_PUB_PATH
+            echo -e "$NEW_SSH_KEY" > $SSH_KEY_PRIV_PATH
+            chmod 600 $SSH_KEY_PRIV_PATH
+            ssh-keygen -y -f $SSH_KEY_PRIV_PATH > $SSH_KEY_PUB_PATH
+            chmod 644 $SSH_KEY_PUB_PATH
+            SSH_KEY_PUB=$(cat $SSH_KEY_PUB_PATH)
+        
+            echo "INFO: Your new public SSH Key:"
+            echo -e "\e[32;1m$SSH_KEY_PUB\e[0m"
+        else
+            echo "ERROR: Private key was not submitted"
+        fi
 
+        echo -e "\e[36;1mPress [Y]es to confirm or [N]o to try again: \e[0m\c " && read  -d'' -s -n1 OPTION
+        [ "${OPTION,,}" == "y" ] && break
+        [ "${OPTION,,}" == "n" ] && continue
+    done
+
+    echo "INFO: Make sure you copied and saved your private key for recovery purpouses"
     echo -e "\e[36;1mPress [Y]es/[N]o to display your private key: \e[0m\c" && read  -d'' -s -n1 SHOW_PRIV_KEY
     if [ "${SHOW_PRIV_KEY,,}" == "y" ] ; then
         echo "INFO: Your private SSH Key: (select, copy and save it for future recovery)"
