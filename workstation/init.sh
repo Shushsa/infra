@@ -174,7 +174,7 @@ else
         
         echo -e "\e[36;1mPress [Y] and paste your PRIVATE git SSH key or press [ENTER] to skip: \e[0m\c" && read -n1 NEW_SSH_KEY
         if [ "${NEW_SSH_KEY,,}" == "y" ] ; then
-            echo "" && echo "INFO: To save input press [Ctrl+D], or use [Ctrl+C] to exit without making changes" && echo ""
+            printf "\nINFO: To save input press [Ctrl+D], or use [Ctrl+C] to exit without making changes\n"
             set +e
             NEW_SSH_KEY=$(</dev/stdin)
             set -e
@@ -185,7 +185,7 @@ else
         if [ ! -z "$NEW_SSH_KEY" ] ; then
             rm -rfv $SSH_KEY_PRIV_PATH
             rm -rfv $SSH_KEY_PUB_PATH
-            echo $NEW_SSH_KEY > $SSH_KEY_PRIV_PATH
+            printf $NEW_SSH_KEY > $SSH_KEY_PRIV_PATH
             chmod 600 $SSH_KEY_PRIV_PATH
             ssh-keygen -y -f $SSH_KEY_PRIV_PATH > $SSH_KEY_PUB_PATH
             chmod 644 $SSH_KEY_PUB_PATH
@@ -198,8 +198,8 @@ else
         fi
 
         echo -e "\e[36;1mPress [Y]es to confirm or [N]o to try again\e[0m\c " && read  -d'' -s -n1 OPTION
-        [ "${OPTION,,}" == "y" ] && break
-        [ "${OPTION,,}" == "n" ] && continue
+        [ "${OPTION,,}" == "y" ] && breakp
+        [ "${OPTION,,}" == "n" ] && continuep
     done
 
     echo "INFO: Make sure you copied and saved your private key for recovery purpouses"
