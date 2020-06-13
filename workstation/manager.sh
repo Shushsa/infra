@@ -24,7 +24,7 @@ while : ; do
         name="validator-$i "
         CONTAINER_ID=$(docker ps --no-trunc -aqf name=$name || echo "")
         declare "CONTAINER_ID_$i"="$CONTAINER_ID"
-        [ -z "$CONTAINER_ID" ] && continue
+        [ -z "$CONTAINER_ID" ] && SUCCESS="False" && continue
         VALIDATOR_STATUS=$(docker inspect $CONTAINER_ID | jq -r '.[0].State.Status' || echo "error")
 
         #Add block height info
@@ -34,6 +34,8 @@ while : ; do
             [ "$HEALTH" != "healthy" ] && SUCCESS="False"
             HEIGHT=$(docker exec -it $name sekaicli status | jq -r '.sync_info.latest_block_height' || echo "Error")
             [ "$HEIGHT" != "Error" ] && VALIDATOR_STATUS="$VALIDATOR_STATUS:$HEIGHT"
+        else
+            SUCCESS="False"
         fi
 
         declare "VALIDATOR_STATUS_$i"="$VALIDATOR_STATUS"
@@ -44,9 +46,9 @@ while : ; do
     echo -e "\e[33;1m------------------------------------------------"
     echo "|         KIRA NETWORK MANAGER v0.0.3          |"
     echo "|             $(date '+%d/%m/%Y %H:%M:%S')              |"
-    [ "$SUCCESS" == "True" ] &&  echo -e "|\e[0m\e[32;1m     SUCCESS, INFRASTRUCTURE IS HEALTHY       \e[33;1m|"
-    [ "$SUCCESS" != "False" ] && echo -e "|\e[0m\e[32;1m   ISSUES DETECTED, INFRASTRUCTURE FAILURE    \e[33;1m|"
-    echo "|----------------------------------------------: status:height"
+    [ "$SUCCESS" == "True" ] && echo -e "|\e[0m\e[32;1m     SUCCESS, INFRASTRUCTURE IS HEALTHY       \e[33;1m|"
+    [ "$SUCCESS" != "True" ] && echo -e "|\e[0m\e[32;1m   ISSUES DETECTED, INFRASTRUCTURE FAILURE    \e[33;1m|"
+    echo "|----------------------------------------------: (status:height)"
     [ ! -z "$REGISTRY_STATUS" ] && \
         echo "| [0] | Inspect registry container             : $REGISTRY_STATUS"
     for ((i=1;i<=$VALIDATORS_COUNT;i++)); do
@@ -69,7 +71,7 @@ while : ; do
     echo "Input option then press [ENTER] or [SPACE]: " && rm -f $LOOP_FILE && touch $LOOP_FILE
     while : ; do
         OPTION=$(cat $LOOP_FILE)
-        [ -z "$OPTION" ] && [ $(($(date -u +%s)-$START_TIME)) -ge 8 ] && break
+        [ -z "$OPTION" ] && [ $(($(date -u +%s)-$START_TIME)) -ge 10 ] && break
         read -n 1 -t 5 KEY || continue
         [ ! -z "$KEY" ] && echo "${OPTION}${KEY}" > $LOOP_FILE
         [ -z "$KEY" ] && break
