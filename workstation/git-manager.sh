@@ -15,13 +15,14 @@ BRANCH_ENVAR=$5
 
 ETC_PROFILE="/etc/profile"
 LOOP_FILE="/tmp/git_manager_loop"
+RESTART_SIGNAL="/tmp/rs_git_manager"
 source $ETC_PROFILE &> /dev/null
 if [ "$DEBUG_MODE" == "True" ] ; then set -x ; else set +x ; fi
 
 while : ; do
     START_TIME="$(date -u +%s)"
     
-    [ -f "/tmp/rs_git_manager" ] && break # restart signal
+    [ -f $RESTART_SIGNAL ] && rm -f $RESTART_SIGNAL && break
     mkdir -p $DIRECTORY
     cd $DIRECTORY
      

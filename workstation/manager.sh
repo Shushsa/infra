@@ -8,11 +8,12 @@ set -e
 
 ETC_PROFILE="/etc/profile"
 LOOP_FILE="/tmp/manager_loop"
+RESTART_SIGNAL="/tmp/rs_manager"
 source $ETC_PROFILE &> /dev/null
 
 while : ; do
     START_TIME="$(date -u +%s)"
-    [ -f "/tmp/rs_manager" ] && break # restart signal
+    [ -f $RESTART_SIGNAL ] && rm -f $RESTART_SIGNAL && break
     
     if [ "$DEBUG_MODE" == "True" ] ; then set -x ; else set +x ; fi
     SUCCESS="True"
