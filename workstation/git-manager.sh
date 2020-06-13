@@ -21,8 +21,8 @@ if [ "$DEBUG_MODE" == "True" ] ; then set -x ; else set +x ; fi
 
 while : ; do
     START_TIME="$(date -u +%s)"
+    [ -f $RESTART_SIGNAL ] && break
     
-    [ -f $RESTART_SIGNAL ] && rm -f $RESTART_SIGNAL && break
     mkdir -p $DIRECTORY
     cd $DIRECTORY
      
@@ -209,7 +209,13 @@ while : ; do
     fi
 done
 
-read -d'' -s -n1 -p 'Press any key to continue...'
-touch /tmp/rs_manager
-touch /tmp/rs_container_manager
+if [ -f $RESTART_SIGNAL ] ; then
+   rm -f $RESTART_SIGNAL
+else
+    read -d'' -s -n1 -p 'Press any key to continue...'
+    touch /tmp/rs_manager
+    touch /tmp/rs_container_manager
+fi
+
+sleep 1
 source $KIRA_MANAGER/git-manager.sh "$REPO_SSH" "$REPO_HTTPS" "$BRANCH" "$DIRECTORY" "$BRANCH_ENVAR"

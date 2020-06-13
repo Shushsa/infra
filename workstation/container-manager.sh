@@ -14,7 +14,7 @@ if [ "$DEBUG_MODE" == "True" ] ; then set -x ; else set +x ; fi
 
 while : ; do
     START_TIME="$(date -u +%s)"
-    [ -f $RESTART_SIGNAL ] && rm -f $RESTART_SIGNAL && break
+    [ -f $RESTART_SIGNAL ] && break
 
     EXISTS=$($KIRA_SCRIPTS/container-exists.sh "$NAME" || echo "Error")
 
@@ -132,7 +132,12 @@ while : ; do
     fi
 done
 
+if [ -f $RESTART_SIGNAL ] ; then
+    rm -f $RESTART_SIGNAL
+else
+    touch /tmp/rs_manager
+    touch /tmp/rs_git_manager
+fi
+
 sleep 1
-touch /tmp/rs_manager
-touch /tmp/rs_git_manager
 source $KIRA_MANAGER/container-manager.sh $NAME

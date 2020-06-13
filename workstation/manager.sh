@@ -13,7 +13,7 @@ source $ETC_PROFILE &> /dev/null
 
 while : ; do
     START_TIME="$(date -u +%s)"
-    [ -f $RESTART_SIGNAL ] && rm -f $RESTART_SIGNAL && break
+    [ -f $RESTART_SIGNAL ] && break
     
     if [ "$DEBUG_MODE" == "True" ] ; then set -x ; else set +x ; fi
     SUCCESS="True"
@@ -127,8 +127,13 @@ while : ; do
     fi
 done
 
+if [ -f $RESTART_SIGNAL ] ; then
+   rm -f $RESTART_SIGNAL
+else
+    touch /tmp/rs_git_manager
+    touch /tmp/rs_container_manager
+fi
+
 sleep 1
-touch /tmp/rs_git_manager
-touch /tmp/rs_container_manager
 source $KIRA_MANAGER/manager.sh
 
