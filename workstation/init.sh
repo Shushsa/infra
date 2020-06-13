@@ -168,7 +168,6 @@ else
     chmod 644 $SSH_KEY_PUB_PATH
     SSH_KEY_PUB=$(cat $SSH_KEY_PUB_PATH)
 
-
     while : ; do
         echo "INFO: Your current public SSH Key:"
         echo -e "\e[33;1m$SSH_KEY_PUB\e[0m"
@@ -201,6 +200,7 @@ else
         [ "${OPTION,,}" == "n" ] && continue
     done
 
+    echo "INFO: Make sure you copied and saved your private key for recovery purpouses"
     echo -e "\e[36;1mPress [Y]es/[N]o to display your private key: \e[0m\c" && read  -d'' -s -n1 SHOW_PRIV_KEY
     if [ "${SHOW_PRIV_KEY,,}" == "y" ] ; then
         echo "INFO: Your private SSH Key: (select, copy and save it for future recovery)"
