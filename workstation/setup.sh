@@ -42,9 +42,8 @@ echo "|_______________________________________________"
 cd /kira
 if [ "$SKIP_UPDATE" == "False" ] ; then
     echo "INFO: Updating Infra..."
-    $KIRA_SCRIPTS/git-pull.sh "$INFRA_REPO" "$INFRA_BRANCH" "$KIRA_INFRA"
-    $KIRA_SCRIPTS/git-pull.sh "$SEKAI_REPO" "$SEKAI_BRANCH" "$KIRA_SEKAI"
-    chmod -R 777 $KIRA_INFRA
+    $KIRA_SCRIPTS/git-pull.sh "$INFRA_REPO" "$INFRA_BRANCH" "$KIRA_INFRA" 777
+    $KIRA_SCRIPTS/git-pull.sh "$SEKAI_REPO" "$SEKAI_BRANCH" "$KIRA_SEKAI" "False"
 
     # we must ensure that recovery files can't be destroyed in the update process and cause a deadlock
     rm -r -f $KIRA_MANAGER
