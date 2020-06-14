@@ -4,7 +4,7 @@ exec 2>&1
 set -e
 
 # Local Update Shortcut:
-# (rm -fv $KIRA_MANAGER/manager.sh) && nano $KIRA_MANAGER/manager.sh && chmod 777 $KIRA_MANAGER/manager.sh
+# (rm -fv $KIRA_MANAGER/manager.sh) && nano $KIRA_MANAGER/manager.sh && chmod 777 $KIRA_MANAGER/manager.sh && touch /tmp/rs_manager
 
 ETC_PROFILE="/etc/profile"
 LOOP_FILE="/tmp/manager_loop"
