@@ -19,6 +19,9 @@ for CONTAINER in $CONTAINERS ; do
     $KIRA_SCRIPTS/container-restart.sh $CONTAINER
 done
 
+echo "INFO: Restarting network manager"
+systemctl restart NetworkManager docker || echo "ERROR: Failed to restart docker Network Manager"
+
 echo "------------------------------------------------"
 echo "|      FINISHED: KIRA INFRA STOP v0.0.1        |"
 echo "------------------------------------------------"
