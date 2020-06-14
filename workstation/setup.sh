@@ -79,6 +79,10 @@ source $KIRA_WORKSTATION/setup/vscode.sh
 source $KIRA_WORKSTATION/setup/registry.sh
 source $KIRA_WORKSTATION/setup/shortcuts.sh
 
+touch /tmp/rs_manager
+touch /tmp/rs_git_manager
+touch /tmp/rs_container_manager
+
 echo "------------------------------------------------"
 echo "| FINISHED: KIRA INFRA SETUP v0.0.2            |"
 echo "|  ELAPSED: $(($(date -u +%s)-$START_TIME)) seconds"
