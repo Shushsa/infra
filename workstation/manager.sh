@@ -17,6 +17,7 @@ function checkContainerStatus() {
     i="$1" && name="$2" && output="$3"
     CONTAINER_ID=$(docker ps --no-trunc -aqf name=$name || echo "")
 
+    echo "CONTAINER_NAME_$i=$name" >> $output
     echo "CONTAINER_ID_$i=$CONTAINER_ID" >> $output
     [ -z "$CONTAINER_ID" ] && echo "SUCCESS=False" >> $output && exit 0
     CONTAINER_STATUS=$(docker inspect $CONTAINER_ID 2>/dev/null | jq -r '.[0].State.Status' 2>/dev/null || echo "error")
@@ -51,6 +52,7 @@ while : ; do
     done
 
     CONTAINERS_COUNT=$((i+1))
+    [ $CONTAINERS_COUNT -le $VALIDATORS_COUNT ] && SUCCESS="False"
 
     wait
     source $VARS_FILE
@@ -96,21 +98,15 @@ while : ; do
     ACCEPT="" && while [ "${ACCEPT,,}" != "y" ] && [ "${ACCEPT,,}" != "n" ] ; do echo -e "\e[36;1mPress [Y]es to confirm option (${OPTION^^}) or [N]o to cancel: \e[0m\c" && read  -d'' -s -n1 ACCEPT ; done
     echo "" && [ "${ACCEPT,,}" == "n" ] && echo "WARINIG: Operation was cancelled" && continue
 
-    BREAK="False"
-    for ((i=1;i<=$VALIDATORS_COUNT;i++)); do
+    i=-1 ; for name in $CONTAINERS ; do i=$((i+1))
         if [ "$OPTION" == "$i" ] ; then
-            gnome-terminal -- bash -c "$KIRA_MANAGER/container-manager.sh validator-$i ; read -d'' -s -n1 -p 'Press any key to exit...' && exit"
+            gnome-terminal -- bash -c "$KIRA_MANAGER/container-manager.sh $name ; read -d'' -s -n1 -p 'Press any key to exit...' && exit"
             BREAK="True"
             break
         fi 
     done
 
-    [ "$BREAK" == "True" ] && continue
-    
-    if [ "$OPTION" == "0" ] ; then
-        gnome-terminal -- bash -c "$KIRA_MANAGER/container-manager.sh 'registry' ; read -d'' -s -n1 -p 'Press any key to exit...' && exit"
-        break
-    elif [ "${OPTION,,}" == "a" ] ; then
+    if [ "${OPTION,,}" == "a" ] ; then
         echo "INFO: Starting git manager..."
         gnome-terminal -- bash -c "$KIRA_MANAGER/git-manager.sh \"$INFRA_REPO_SSH\" \"$INFRA_REPO\" \"$INFRA_BRANCH\" \"$KIRA_INFRA\" \"INFRA_BRANCH\" ; read -d'' -s -n1 -p 'Press any key to exit...' && exit"
         break
