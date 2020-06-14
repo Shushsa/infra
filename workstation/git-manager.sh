@@ -27,8 +27,8 @@ while : ; do
     cd $DIRECTORY
      
     BRANCH_REF=$(git rev-parse --abbrev-ref HEAD || echo "$BRANCH")
-    git remote set-url origin $REPO_HTTPS || echo "WARNING: Failed to set origin of the remote branch"
-    git fetch origin $BRANCH_REF || echo "WARNING: Failed to fetch remote changes"
+    $(git remote set-url origin $REPO_HTTPS 2>/dev/null) || echo "WARNING: Failed to set origin of the remote branch"
+    $(git fetch origin $BRANCH_REF 2>/dev/null) || echo "WARNING: Failed to fetch remote changes"
 
     # Following command detects if upstream is specified and sets it if not
     $(git cherry || git branch --set-upstream-to="origin/$BRANCH_REF") || echo "WARNING: Failed to set upstream origin"

@@ -39,7 +39,6 @@ function checkContainerStatus() {
         if [ ! -z "$HEALTH" ] && [ "$HEALTH" != "null" ] ; then
             CONTAINER_STATUS=$HEALTH
             HEIGHT=$(docker exec -i $name sekaicli status 2>/dev/null | jq -r '.sync_info.latest_block_height' 2>/dev/null | xargs || echo "")
-            echo "N: '$name H: '$HEIGHT"
             [ ! -z "$HEIGHT" ] && CONTAINER_STATUS="$CONTAINER_STATUS:$HEIGHT"
         fi
     else
