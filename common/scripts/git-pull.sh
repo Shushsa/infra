@@ -19,7 +19,7 @@ else
     CHECKOUT=""
 fi
 
-[ -z "$RWXMOD" ] && RWXMOD=777
+[ -z "$RWXMOD" ] && RWXMOD="default"
 [ -z "$SSHCRED" ] && SSHCRED="/home/root/.ssh/id_rsa"
 
 echo "------------------------------------------------"
@@ -105,7 +105,7 @@ else
 fi
 
 ls -as
-[ "$RWXMOD" != "False" ] && chmod -R $RWXMOD $OUTPUT
+[ "$RWXMOD" != "default" ] && chmod -R $RWXMOD $OUTPUT
 
 echo "------------------------------------------------"
 echo "|         FINISHED: GIT PULL v0.0.1            |"

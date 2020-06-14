@@ -130,7 +130,7 @@ while : ; do
         
         echo "SUCCESS: Push suceeded" && sleep 2 && continue
     elif [ "${OPTION,,}" == "r" ] ; then
-        $KIRA_SCRIPTS/git-pull.sh "$REPO_SSH" "$BRANCH" "$DIRECTORY" "False" || FAILED="True"
+        $KIRA_SCRIPTS/git-pull.sh "$REPO_SSH" "$BRANCH" "$DIRECTORY" || FAILED="True"
         [ "$FAILED" == "True" ] && echo "ERROR: Pull failed" && break
         
         echo "SUCCESS: Pull suceeded" && sleep 2 && continue
@@ -141,7 +141,7 @@ while : ; do
         [ -z "$NEW_BRANCH" ] && echo "ERROR: Branch was not defined" && break
         [ "$NEW_BRANCH" == "$BRANCH" ] && echo "ERROR: Can't switch to branch with the same name" && break
 
-        $KIRA_SCRIPTS/git-pull.sh "$REPO_SSH" "$NEW_BRANCH" "$DIRECTORY" "False" || FAILED="True"
+        $KIRA_SCRIPTS/git-pull.sh "$REPO_SSH" "$NEW_BRANCH" "$DIRECTORY" || FAILED="True"
         [ "$FAILED" == "True" ] && echo "ERROR: Changing branch failed" && break
 
         BRANCH=$NEW_BRANCH

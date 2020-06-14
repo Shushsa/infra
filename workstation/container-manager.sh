@@ -24,13 +24,15 @@ while : ; do
          [ "${OPTION,,}" == "x" ] && exit 1
     fi
 
-    STATUS=$(docker inspect $(docker ps --no-trunc -aqf name=$NAME) | jq -r '.[0].State.Status' || echo "Error")
-    PAUSED=$(docker inspect $(docker ps --no-trunc -aqf name=$NAME) | jq -r '.[0].State.Paused' || echo "Error")
-    HEALTH=$(docker inspect $(docker ps --no-trunc -aqf name=$NAME) | jq -r '.[0].State.Health.Status' || echo "Error")
-    RESTARTING=$(docker inspect $(docker ps --no-trunc -aqf name=$NAME) | jq -r '.[0].State.Restarting' || echo "Error")
-    STARTED_AT=$(docker inspect $(docker ps --no-trunc -aqf name=$NAME) | jq -r '.[0].State.StartedAt' || echo "Error")
-    IP=$(docker inspect $(docker ps --no-trunc -aqf name=$NAME) | jq -r '.[0].NetworkSettings.IPAddress' || echo "Error")
+    # (docker ps --no-trunc -aqf name=$NAME) 
     ID=$(docker inspect --format="{{.Id}}" ${NAME} 2> /dev/null || echo "undefined")
+    STATUS=$(docker inspect $ID | jq -r '.[0].State.Status' || echo "Error")
+    PAUSED=$(docker inspect $ID | jq -r '.[0].State.Paused' || echo "Error")
+    HEALTH=$(docker inspect $ID | jq -r '.[0].State.Health.Status' || echo "Error")
+    RESTARTING=$(docker inspect $ID | jq -r '.[0].State.Restarting' || echo "Error")
+    STARTED_AT=$(docker inspect $ID | jq -r '.[0].State.StartedAt' || echo "Error")
+    IP=$(docker inspect $ID | jq -r '.[0].NetworkSettings.Networks.kiranet.IPAddress' || echo "")
+    if [ -z "$IP" ] || [ "$IP" == "null" ] ; then IP=$(docker inspect $ID | jq -r '.[0].NetworkSettings.Networks.regnet.IPAddress' || echo "") ; fi
     
     clear
     
@@ -41,11 +43,11 @@ while : ; do
     echo "| Container Name: $NAME ($(echo $ID | head -c 8))"
     echo "|     Ip Address: $IP"
     echo "|----------------------------------------------|"
-    echo "| Container Status: $STATUS"
-    echo "| Container Paused: $PAUSED"
-    echo "| Container Health: $HEALTH"
-    echo "| Container Restarting: $RESTARTING"
-    echo "| Container Started At: $(echo $STARTED_AT | head -c 19)"
+    echo "|     Status: $STATUS"
+    echo "|     Paused: $PAUSED"
+    echo "|     Health: $HEALTH"
+    echo "| Restarting: $RESTARTING"
+    echo "| Started At: $(echo $STARTED_AT | head -c 19)"
     echo "|----------------------------------------------|"
     [ "$EXISTS" == "True" ] && 
     echo "| [I] | Try INSPECT container                  |"

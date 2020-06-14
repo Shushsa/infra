@@ -43,7 +43,7 @@ cd /kira
 if [ "$SKIP_UPDATE" == "False" ] ; then
     echo "INFO: Updating Infra..."
     $KIRA_SCRIPTS/git-pull.sh "$INFRA_REPO" "$INFRA_BRANCH" "$KIRA_INFRA" 777
-    $KIRA_SCRIPTS/git-pull.sh "$SEKAI_REPO" "$SEKAI_BRANCH" "$KIRA_SEKAI" "False"
+    $KIRA_SCRIPTS/git-pull.sh "$SEKAI_REPO" "$SEKAI_BRANCH" "$KIRA_SEKAI"
 
     # we must ensure that recovery files can't be destroyed in the update process and cause a deadlock
     rm -r -f $KIRA_MANAGER
@@ -65,6 +65,7 @@ ${KIRA_SCRIPTS}/awshelper-update.sh "v0.12.4"
 source $KIRA_WORKSTATION/setup/certs.sh
 source $KIRA_WORKSTATION/setup/envs.sh
 source $KIRA_WORKSTATION/setup/hosts.sh
+source $KIRA_WORKSTATION/setup/system.sh
 source $KIRA_WORKSTATION/setup/tools.sh
 source $KIRA_WORKSTATION/setup/npm.sh
 source $KIRA_WORKSTATION/setup/rust.sh
