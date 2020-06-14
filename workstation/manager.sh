@@ -8,42 +8,62 @@ set -e
 
 ETC_PROFILE="/etc/profile"
 LOOP_FILE="/tmp/manager_loop"
+VARS_FILE="/tmp/manager_vars"
 RESTART_SIGNAL="/tmp/rs_manager"
 source $ETC_PROFILE &> /dev/null
+if [ "$DEBUG_MODE" == "True" ] ; then set -x ; else set +x ; fi
+
+declare "CONTAINER_NAME_0"="registry"
+declare "CONTAINER_ID_0=" # reset if previously loaded
+for ((i=1;i<=$VALIDATORS_COUNT;i++)); do
+    declare "CONTAINER_NAME_$i"="validator-$i"
+    declare "CONTAINER_ID_$i=" # reset if previously loaded
+done
+CONTAINRERS_COUNT=$VALIDATORS_COUNT
+
+rm -f $VARS_FILE && touch $VARS_FILE
+
+function checkContainerStatus() {
+    i="$1" && name="$2" && output="$3"
+    CONTAINER_ID=$(docker ps --no-trunc -aqf name=$name || echo "")
+
+    echo "CONTAINER_ID_$i=$CONTAINER_ID" >> $output
+    [ -z "$CONTAINER_ID" ] && echo "SUCCESS=FALSE" >> $output && exit 0
+    CONTAINER_STATUS=$(docker inspect $CONTAINER_ID 2>/dev/null | jq -r '.[0].State.Status' 2>/dev/null || echo "error")
+        
+    #Add block height info
+    if [ "$CONTAINER_STATUS" == "running" ] ; then
+        HEALTH=$(docker inspect $(docker ps --no-trunc -aqf name=$name ) 2>/dev/null | jq -r '.[0].State.Health.Status' 2>/dev/null || echo "")
+        [ "$HEALTH" != "healthy" ] && [ "$HEALTH" != "null" ] && echo "SUCCESS=FALSE" >> $output
+        
+        if [ ! -z "$HEALTH" ] && [ "$HEALTH" != "null" ] ; then
+            CONTAINER_STATUS=$HEALTH
+            HEIGHT=$(docker exec -i $name sekaicli status 2>/dev/null | jq -r '.sync_info.latest_block_height' 2>/dev/null | xargs || echo "")
+            echo "N: '$name H: '$HEIGHT"
+            [ ! -z "$HEIGHT" ] && CONTAINER_STATUS="$CONTAINER_STATUS:$HEIGHT"
+        fi
+    else
+        [ -z "$CONTAINER_STATUS" ] && CONTAINER_STATUS="error"
+        echo "SUCCESS=FALSE" >> $output
+    fi
+
+    echo "CONTAINER_STATUS_$i=$CONTAINER_STATUS" >> $output
+}
 
 while : ; do
     START_TIME="$(date -u +%s)"
     [ -f $RESTART_SIGNAL ] && break
     
-    if [ "$DEBUG_MODE" == "True" ] ; then set -x ; else set +x ; fi
     SUCCESS="True"
 
-    REGISTRY_STATUS=""
-    CONTAINER_ID=$(docker ps --no-trunc -aqf name=registry || echo "")
-    [ ! -z "$CONTAINER_ID" ] && REGISTRY_STATUS=$(docker inspect $CONTAINER_ID | jq -r '.[0].State.Status' || echo "error")
-    [ "$REGISTRY_STATUS" != "running" ] && SUCCESS="False"
-
-    for ((i=1;i<=$VALIDATORS_COUNT;i++)); do
-        name="validator-$i "
-        CONTAINER_ID=$(docker ps --no-trunc -aqf name=$name || echo "")
-        declare "CONTAINER_ID_$i"="$CONTAINER_ID"
-        [ -z "$CONTAINER_ID" ] && SUCCESS="False" && continue
-        VALIDATOR_STATUS=$(docker inspect $CONTAINER_ID | jq -r '.[0].State.Status' || echo "error")
-
-        #Add block height info
-        if [ "$VALIDATOR_STATUS" == "running" ] ; then
-            HEALTH=$(docker inspect $(docker ps --no-trunc -aqf name=$name ) | jq -r '.[0].State.Health.Status' || echo "Error")
-            [ ! -z "$HEALTH" ] && [ "$HEALTH" != "null" ] && [ "$HEALTH" != "Error" ] && VALIDATOR_STATUS=$HEALTH
-            [ "$HEALTH" != "healthy" ] && SUCCESS="False"
-            HEIGHT=$(docker exec -it $name sekaicli status | jq -r '.sync_info.latest_block_height' || echo "Error")
-            [ "$HEIGHT" != "Error" ] && VALIDATOR_STATUS="$VALIDATOR_STATUS:$HEIGHT"
-        else
-            SUCCESS="False"
-        fi
-
-        declare "VALIDATOR_STATUS_$i"="$VALIDATOR_STATUS"
+    rm -f $VARS_FILE && touch $VARS_FILE
+    for ((i=0;i<=$CONTAINRERS_COUNT;i++)); do
+        CONTAINER_NAME="CONTAINER_NAME_$i" && name="${!CONTAINER_NAME}"
+        checkContainerStatus "$i" "$name" "$VARS_FILE" &
     done
 
+    wait
+    source $VARS_FILE
     clear
     
     echo -e "\e[33;1m------------------------------------------------"
@@ -52,13 +72,12 @@ while : ; do
     [ "$SUCCESS" == "True" ] && echo -e "|\e[0m\e[32;1m     SUCCESS, INFRASTRUCTURE IS HEALTHY       \e[33;1m|"
     [ "$SUCCESS" != "True" ] && echo -e "|\e[0m\e[31;1m ISSUES DETECTED, INFRASTRUCTURE IS UNHEALTHY \e[33;1m|"
     echo "|----------------------------------------------| [status:height]"
-    [ ! -z "$REGISTRY_STATUS" ] && \
-        echo "| [0] | Inspect registry container             : $REGISTRY_STATUS"
-    for ((i=1;i<=$VALIDATORS_COUNT;i++)); do
-        CONTAINER_ID="CONTAINER_ID_$i"
-        [ -z "${!CONTAINER_ID}" ] && continue
-        VALIDATOR_STATUS="VALIDATOR_STATUS_$i"
-        echo "| [$i] | Inspect validator-$i container          : ${!VALIDATOR_STATUS}"
+    for ((i=0;i<=$CONTAINRERS_COUNT;i++)); do
+        CONTAINER_NAME="CONTAINER_NAME_$i" && name="${!CONTAINER_NAME}"
+        CONTAINER_ID="CONTAINER_ID_$i" && [ -z "${!CONTAINER_ID}" ] && continue
+        CONTAINER_STATUS="CONTAINER_STATUS_$i" && status="${!CONTAINER_STATUS}"
+        LABEL="| [$i] | Inspect $name container                 "
+        echo "${LABEL:0:46} : $status"
     done
     echo "|----------------------------------------------|"
     echo "| [A] | Mange INFRA Repo ($INFRA_BRANCH)"
@@ -73,8 +92,9 @@ while : ; do
     
     echo "Input option then press [ENTER] or [SPACE]: " && rm -f $LOOP_FILE && touch $LOOP_FILE
     while : ; do
-        OPTION=$(cat $LOOP_FILE)
-        [ -z "$OPTION" ] && [ $(($(date -u +%s)-$START_TIME)) -ge 10 ] && break
+        [ -f $LOOP_FILE ] && OPTION=$(cat $LOOP_FILE)
+        [ -f $RESTART_SIGNAL ] && break
+        [ -z "$OPTION" ] && [ $(($(date -u +%s)-$START_TIME)) -ge 15 ] && break
         read -n 1 -t 5 KEY || continue
         [ ! -z "$KEY" ] && echo "${OPTION}${KEY}" > $LOOP_FILE
         [ -z "$KEY" ] && break
@@ -121,7 +141,7 @@ while : ; do
         gnome-terminal --disable-factory -- bash -c "$KIRA_MANAGER/delete.sh ; read -d'' -s -n1 -p 'Press any key to exit...' && exit"
         break
     elif [ "${OPTION,,}" == "w" ] ; then
-        break
+        echo "INFO: Please wait, refreshing user interface..." && break
     elif [ "${OPTION,,}" == "x" ] ; then
         exit 0
     fi

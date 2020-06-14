@@ -39,8 +39,8 @@ while : ; do
     echo "|             $(date '+%d/%m/%Y %H:%M:%S')              |"
     echo "|----------------------------------------------|"
     echo "| Container Name: $NAME ($(echo $ID | head -c 8))"
+    echo "|     Ip Address: $IP"
     echo "|----------------------------------------------|"
-    echo "| Container Exists: $EXISTS"
     echo "| Container Status: $STATUS"
     echo "| Container Paused: $PAUSED"
     echo "| Container Health: $HEALTH"
@@ -126,7 +126,7 @@ while : ; do
         $KIRA_SCRIPTS/container-unpause.sh $NAME
         break
     elif [ "${OPTION,,}" == "w" ] ; then
-        break
+        echo "INFO: Please wait, refreshing user interface..." && break
     elif [ "${OPTION,,}" == "x" ] ; then
         exit 0
     fi

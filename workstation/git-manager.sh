@@ -203,7 +203,7 @@ while : ; do
         [ "$FAILED" == "True" ] && echo "ERROR: Failed to list merge conflicts" && break
         break
     elif [ "${OPTION,,}" == "w" ] ; then
-        break
+        echo "INFO: Please wait, refreshing user interface..." && break
     elif [ "${OPTION,,}" == "x" ] ; then
         exit 0
     fi
