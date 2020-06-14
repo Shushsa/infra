@@ -8,7 +8,7 @@ if [ "$DEBUG_MODE" == "True" ] ; then set -x ; else set +x ; fi
 EMAIL_SENT=$HOME/email_sent
 
 echo "INFO: Healthcheck => START"
-sleep 60 # rate limit
+sleep 30 # rate limit
 
 if [ "${MAINTENANCE_MODE}" == "true"  ] || [ -f "$MAINTENANCE_FILE" ] ; then
      echo "INFO: Entering maitenance mode!"
@@ -32,6 +32,9 @@ STATUS_NGINX="$(systemctl2 is-active nginx.service)" || STATUS_RELAYER="unknown"
 STATUS_SEKAI="$(systemctl2 is-active sekaid.service)" || STATUS_SEKAI="unknown"
 STATUS_LCD="$(systemctl2 is-active lcd.service)" || STATUS_LCD="unknown"
 STATUS_FAUCET="$(systemctl2 is-active faucet.service)" || STATUS_FAUCET="unknown"
+HEIGHT=$(sekaicli status 2>/dev/null | jq -r '.sync_info.latest_block_height' 2>/dev/null | xargs || echo "")
+
+echo "INFO: Latest Block Height: $HEIGHT"
 
 # if [ "${STATUS_SEKAI}" != "active" ] || [ "${STATUS_LCD}" != "active" ] || [ "${STATUS_NGINX}" != "active" ] || [ "${STATUS_FAUCET}" != "active" ] ; then
 if [ "${STATUS_SEKAI}" != "active" ] || [ "${STATUS_LCD}" != "active" ] || [ "${STATUS_NGINX}" != "active" ] ; then

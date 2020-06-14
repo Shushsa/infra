@@ -19,7 +19,6 @@ INIT_END_FILE=$HOME/init_ended
 SEKAICLI_HOME=$HOME/.sekaicli
 SIGNING_KEY_PATH="$SEKAID_CONFIG/priv_validator_key.json"
 
-
 [ -z "$VALIDATOR_INDEX" ] && VALIDATOR_INDEX=1
 
 [ ! -f "$NODE_KEY" ] && NODE_KEY="$SELF_CONFIGS/node-keys/node-key-${VALIDATOR_INDEX}.json"
