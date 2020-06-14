@@ -64,19 +64,24 @@ if [ "$BLOCK_CHANGED" == "False" ] || [ "${STATUS_SEKAI}" != "active" ] || [ "${
     if [ "${STATUS_SEKAI}" != "active" ] ; then
         echo ">> Sekai log:"
         tail -n 100 /var/log/journal/sekaid.service.log || true
-        systemctl2 restart sekaid || systemctl2 status sekaid.service || echo "Failed to re-start sekaid service" || true
+        systemctl2 stop sekaid || echo "ERROR: Failed to stop sekaid service"
+        systemctl2 start sekaid || systemctl2 status sekaid.service || echo "ERROR: Failed to re-start sekaid service" || true
+    fi
+
+    if [ "${STATUS_NGINX}" != "active" ] || [ "${STATUS_LCD}" != "active" ] ; then
+        echo ">> NGINX log:"
+        tail -n 100 /var/log/journal/nginx.service.log || true
+        nginx -t || echo "ERROR: Failed to check nginx config"
+        systemctl2 stop nginx || echo "ERROR: Failed to stop nginx service"
+        kill $(ps aux | grep '[n]ginx' | awk '{print $2}') || echo "ERROR: Failed to kill nginx"
+        systemctl2 start nginx || systemctl2 status nginx.service || echo "ERROR: Failed to re-start nginx service" || true
     fi
 
     if [ "${STATUS_LCD}" != "active" ]  ; then
         echo ">> LCD log:"
         tail -n 100 /var/log/journal/lcd.service.log || true
-        systemctl2 restart lcd || systemctl2 status lcd.service || echo "Failed to re-start lcd service" || true
-    fi
-
-    if [ "${STATUS_NGINX}" != "active" ]  ; then
-        echo ">> NGINX log:"
-        tail -n 100 /var/log/journal/nginx.service.log || true
-        systemctl2 restart nginx || systemctl2 status nginx.service || echo "Failed to re-start nginx service" || true
+        systemctl2 stop lcd || echo "ERROR: Failed to stop lcd service"
+        systemctl2 start lcd || systemctl2 status lcd.service || echo "ERROR: Failed to re-start lcd service" || true
     fi
 
     #if [ "${STATUS_FAUCET}" != "active" ]  ; then
