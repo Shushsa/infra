@@ -105,7 +105,7 @@ else
 fi
 
 ls -as
-[ "$RWXMOD" != "default" ] && chmod -R $RWXMOD $OUTPUT
+[ ! -z "$RWXMOD" ] && [ ! -z "${RWXMOD##*[!0-9]*}" ] && chmod -R $RWXMOD $OUTPUT
 
 echo "------------------------------------------------"
 echo "|         FINISHED: GIT PULL v0.0.1            |"
