@@ -73,7 +73,7 @@ if [ "$SKIP_UPDATE" == "False" ] ; then
         ln -s /usr/bin/git /bin/git || echo "WARNING: Git symlink already exists"
         git config --add --global user.name dev || echo "WARNING: Failed to set global user name"
         git config --add --global user.email dev@local || echo "WARNING: Failed to set global user email"
-        git config --add --global core.autocrlf init || echo "WARNING: Failed to set global autocrlf"
+        git config --add --global core.autocrlf input || echo "WARNING: Failed to set global autocrlf"
         git config --unset --global core.filemode || echo "WARNING: Failed to unset global filemode"
         git config --add --global core.filemode false || echo "WARNING: Failed to set global filemode"
     
