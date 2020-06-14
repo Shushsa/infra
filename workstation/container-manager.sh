@@ -19,7 +19,8 @@ while : ; do
     EXISTS=$($KIRA_SCRIPTS/container-exists.sh "$NAME" || echo "Error")
 
     if [ "$EXISTS" != "True" ] ; then
-        echo "WARNING: Container no longer exists, press [X] to exit or restart your infra"
+        clear
+        echo "WARNING: Container $NAME no longer exists, press [X] to exit or restart your infra"
         read -n 1 -t 3 KEY || continue
          [ "${OPTION,,}" == "x" ] && exit 1
     fi

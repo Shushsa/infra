@@ -31,7 +31,6 @@ function checkContainerStatus() {
             HEIGHT=$(docker exec -i $name sekaicli status 2>/dev/null | jq -r '.sync_info.latest_block_height' 2>/dev/null | xargs || echo "")
             [ ! -z "$HEIGHT" ] && CONTAINER_STATUS="$CONTAINER_STATUS:$HEIGHT"
         fi
-        echo "RUNNING=True" >> $output
     else
         [ -z "$CONTAINER_STATUS" ] && CONTAINER_STATUS="error"
         echo "SUCCESS=False" >> $output
@@ -45,8 +44,6 @@ while : ; do
     [ -f $RESTART_SIGNAL ] && break
     
     SUCCESS="True"
-    RUNNING="False" # at leat one running container
-
     rm -f $VARS_FILE && touch $VARS_FILE
     CONTAINERS=$(docker ps -a | awk '{if(NR>1) print $NF}' | tac)
     i=-1 ; for name in $CONTAINERS ; do i=$((i+1))
@@ -78,7 +75,7 @@ while : ; do
     echo "| [I] | Re-INITALIZE Environment               |"
     [ "$CONTAINERS_COUNT" != "0" ] && \
     echo "| [S] | STOP All Containers                    |"
-    [ "$CONTAINERS_COUNT" != "0" ] && [ "$RUNNING" == "False" ] && \
+    [ "$CONTAINERS_COUNT" != "0" ] && \
     echo "| [R] | Re-START All Containers                |"
     echo "| [H] | HARD-Reset Repos & Infrastructure      |"
     echo "| [D] | DELETE Repos & Infrastructure          |"
