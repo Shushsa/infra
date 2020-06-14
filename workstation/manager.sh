@@ -18,22 +18,23 @@ function checkContainerStatus() {
     CONTAINER_ID=$(docker ps --no-trunc -aqf name=$name || echo "")
 
     echo "CONTAINER_ID_$i=$CONTAINER_ID" >> $output
-    [ -z "$CONTAINER_ID" ] && echo "SUCCESS=FALSE" >> $output && exit 0
+    [ -z "$CONTAINER_ID" ] && echo "SUCCESS=False" >> $output && exit 0
     CONTAINER_STATUS=$(docker inspect $CONTAINER_ID 2>/dev/null | jq -r '.[0].State.Status' 2>/dev/null || echo "error")
         
     #Add block height info
     if [ "$CONTAINER_STATUS" == "running" ] ; then
         HEALTH=$(docker inspect $(docker ps --no-trunc -aqf name=$name ) 2>/dev/null | jq -r '.[0].State.Health.Status' 2>/dev/null || echo "")
-        [ "$HEALTH" != "healthy" ] && [ "$HEALTH" != "null" ] && echo "SUCCESS=FALSE" >> $output
+        [ "$HEALTH" != "healthy" ] && [ "$HEALTH" != "null" ] && echo "SUCCESS=False" >> $output
         
         if [ ! -z "$HEALTH" ] && [ "$HEALTH" != "null" ] ; then
             CONTAINER_STATUS=$HEALTH
             HEIGHT=$(docker exec -i $name sekaicli status 2>/dev/null | jq -r '.sync_info.latest_block_height' 2>/dev/null | xargs || echo "")
             [ ! -z "$HEIGHT" ] && CONTAINER_STATUS="$CONTAINER_STATUS:$HEIGHT"
         fi
+        echo "RUNNING=True" >> $output
     else
         [ -z "$CONTAINER_STATUS" ] && CONTAINER_STATUS="error"
-        echo "SUCCESS=FALSE" >> $output
+        echo "SUCCESS=False" >> $output
     fi
 
     echo "CONTAINER_STATUS_$i=$CONTAINER_STATUS" >> $output
@@ -44,6 +45,7 @@ while : ; do
     [ -f $RESTART_SIGNAL ] && break
     
     SUCCESS="True"
+    RUNNING="False" # at leat one running container
 
     rm -f $VARS_FILE && touch $VARS_FILE
     CONTAINERS=$(docker ps -a | awk '{if(NR>1) print $NF}' | tac)
@@ -74,9 +76,11 @@ while : ; do
     echo "| [B] | Mange SEKAI Repo ($SEKAI_BRANCH)"
     echo "|----------------------------------------------|"
     echo "| [I] | Re-INITALIZE Environment               |"
-    [ "$CONTAINERS_COUNT" != "0" ] && \
-    echo "| [S] | STOP Infrastructure                    |"
-    echo "| [R] | Hard RESET Repos & Infrastructure      |"
+    [ "$CONTAINERS_COUNT" != "0" ] \
+    echo "| [S] | STOP All Containers                    |"
+    [ "$CONTAINERS_COUNT" != "0" ] && [ "$RUNNING" == "False" ] && \
+    echo "| [R] | Re-START All Containers                |"
+    echo "| [H] | HARD-Reset Repos & Infrastructure      |"
     echo "| [D] | DELETE Repos & Infrastructure          |"
     echo "|----------------------------------------------|"
     echo "| [X] | Exit | [W] | Refresh Window            |"
@@ -128,6 +132,11 @@ while : ; do
         gnome-terminal -- bash -c "$KIRA_MANAGER/stop.sh ; read -d'' -s -n1 -p 'Press any key to exit...' && exit"
         break
     elif [ "${OPTION,,}" == "r" ] ; then
+        echo "INFO: Re-starting infrastructure..."
+        echo -e "\e[33;1mWARNING: You have to wait for new process to finish\e[0m"
+        gnome-terminal -- bash -c "$KIRA_MANAGER/restart.sh ; read -d'' -s -n1 -p 'Press any key to exit...' && exit"
+        break
+    elif [ "${OPTION,,}" == "h" ] ; then
         echo "INFO: Wiping and Restarting infra..."
         echo -e "\e[33;1mWARNING: You have to wait for new process to finish\e[0m"
         gnome-terminal -- bash -c "$KIRA_MANAGER/start.sh ; read -d'' -s -n1 -p 'Press any key to exit...' && exit"

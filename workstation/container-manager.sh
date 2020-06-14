@@ -31,8 +31,8 @@ while : ; do
     HEALTH=$(docker inspect $ID | jq -r '.[0].State.Health.Status' || echo "Error")
     RESTARTING=$(docker inspect $ID | jq -r '.[0].State.Restarting' || echo "Error")
     STARTED_AT=$(docker inspect $ID | jq -r '.[0].State.StartedAt' || echo "Error")
-    IP=$(docker inspect $ID | jq -r '.[0].NetworkSettings.Networks.kiranet.IPAddress' || echo "")
-    if [ -z "$IP" ] || [ "$IP" == "null" ] ; then IP=$(docker inspect $ID | jq -r '.[0].NetworkSettings.Networks.regnet.IPAddress' || echo "") ; fi
+    IP=$(docker inspect $ID | jq -r '.[0].NetworkSettings.Networks.kiranet.IPAMConfig.IPv4Address' || echo "")
+    if [ -z "$IP" ] || [ "$IP" == "null" ] ; then IP=$(docker inspect $ID | jq -r '.[0].NetworkSettings.Networks.regnet.IPAMConfig.IPv4Address' || echo "") ; fi
     
     clear
     
