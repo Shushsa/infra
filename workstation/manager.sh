@@ -76,7 +76,7 @@ while : ; do
     echo "| [B] | Mange SEKAI Repo ($SEKAI_BRANCH)"
     echo "|----------------------------------------------|"
     echo "| [I] | Re-INITALIZE Environment               |"
-    [ "$CONTAINERS_COUNT" != "0" ] \
+    [ "$CONTAINERS_COUNT" != "0" ] && \
     echo "| [S] | STOP All Containers                    |"
     [ "$CONTAINERS_COUNT" != "0" ] && [ "$RUNNING" == "False" ] && \
     echo "| [R] | Re-START All Containers                |"
