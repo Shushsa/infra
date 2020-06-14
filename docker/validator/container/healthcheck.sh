@@ -32,12 +32,33 @@ STATUS_NGINX="$(systemctl2 is-active nginx.service)" || STATUS_RELAYER="unknown"
 STATUS_SEKAI="$(systemctl2 is-active sekaid.service)" || STATUS_SEKAI="unknown"
 STATUS_LCD="$(systemctl2 is-active lcd.service)" || STATUS_LCD="unknown"
 STATUS_FAUCET="$(systemctl2 is-active faucet.service)" || STATUS_FAUCET="unknown"
+
+BLOCK_HEIGHT_FILE="$SELF_LOGS/latest_block_height.txt" && touch $BLOCK_HEIGHT_FILE
 HEIGHT=$(sekaicli status 2>/dev/null | jq -r '.sync_info.latest_block_height' 2>/dev/null | xargs || echo "")
+PREVIOUS_HEIGHT=$(cat $BLOCK_HEIGHT_FILE)
+
+if [ -z "$HEIGHT" ] || [ -z "${HEIGHT##*[!0-9]*}" ] ; then # not a number
+    HEIGHT=0
+fi
+
+echo "$HEIGHT" > $BLOCK_HEIGHT_FILE
+
+if [ -z "$PREVIOUS_HEIGHT" ] || [ -z "${PREVIOUS_HEIGHT##*[!0-9]*}" ] ; then # not a number
+    PREVIOUS_HEIGHT=0
+fi
+
+BLOCK_CHANGED="True"
+if [ $PREVIOUS_HEIGHT -ge $HEIGHT  ] ; then
+    echo "WARNING: Blocks are not beeing produced or synced, current height: $HEIGHT, previous height: $PREVIOUS_HEIGHT"
+    BLOCK_CHANGED="False"
+else
+    echo "SUCCESS: New blocks were created or synced: $HEIGHT"
+fi
 
 echo "INFO: Latest Block Height: $HEIGHT"
 
-# if [ "${STATUS_SEKAI}" != "active" ] || [ "${STATUS_LCD}" != "active" ] || [ "${STATUS_NGINX}" != "active" ] || [ "${STATUS_FAUCET}" != "active" ] ; then
-if [ "${STATUS_SEKAI}" != "active" ] || [ "${STATUS_LCD}" != "active" ] || [ "${STATUS_NGINX}" != "active" ] ; then
+#  [ "${STATUS_FAUCET}" != "active" ]
+if [ "$BLOCK_CHANGED" == "False" ] || [ "${STATUS_SEKAI}" != "active" ] || [ "${STATUS_LCD}" != "active" ] || [ "${STATUS_NGINX}" != "active" ] ; then
     echo "ERROR: One of the services is NOT active: Sekai($STATUS_SEKAI), LCD($STATUS_LCD), Faucet($STATUS_FAUCET) or NGINX($STATUS_NGINX)"
 
     if [ "${STATUS_SEKAI}" != "active" ] ; then
@@ -67,13 +88,23 @@ if [ "${STATUS_SEKAI}" != "active" ] || [ "${STATUS_LCD}" != "active" ] || [ "${
     if [ -f "$EMAIL_SENT" ] ; then
         echo "Notification Email was already sent."
     else
+        BODY="Issue Raport [$(date)]
+   Sekai Status: $STATUS_SEKAI
+  Faucet Status: $STATUS_FAUCET
+     LCD Status: $STATUS_LCD
+   NGINX Status: $STATUS_NGINX
+  LATEST HEIGHT: $HEIGHT
+PREVIOUS HEIGHT: $PREVIOUS_HEIGHT
+
+Attached $(find $SELF_LOGS -type f | wc -l) Log Files
+   RPC Status: $RPC_STATUS"
         echo "Sending Healthcheck Notification Email..."
         touch $EMAIL_SENT
         if [ "$NOTIFICATIONS" == "True" ] ; then
         CDHelper email send \
          --to="$EMAIL_NOTIFY" \
          --subject="[$MONIKER] Healthcheck Raised" \
-         --body="[$(date)] Sekai($STATUS_SEKAI), Faucet($STATUS_FAUCET) LCD($STATUS_LCD) or NGINX($STATUS_NGINX) Failed => Attached $(find $SELF_LOGS -type f | wc -l) Log Files. RPC Status => $RPC_STATUS" \
+         --body="$BODY" \
          --html="false" \
          --recursive="true" \
          --attachments="$SELF_LOGS,$JOURNAL_LOGS"

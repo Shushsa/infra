@@ -88,6 +88,8 @@ ls -as
 git describe --tags || echo "No tags were found"
 git describe --all --always
 
+[ -z "$OUTPUT" ] && echo "ERROR: Output location must be defined" && exit 1
+
 rm -rf $OUTPUT
 mkdir -p $OUTPUT
 cp -rTfv "$TMP_OUTPUT" "$OUTPUT"
