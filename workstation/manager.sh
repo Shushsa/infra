@@ -13,16 +13,6 @@ RESTART_SIGNAL="/tmp/rs_manager"
 source $ETC_PROFILE &> /dev/null
 if [ "$DEBUG_MODE" == "True" ] ; then set -x ; else set +x ; fi
 
-declare "CONTAINER_NAME_0"="registry"
-declare "CONTAINER_ID_0=" # reset if previously loaded
-for ((i=1;i<=$VALIDATORS_COUNT;i++)); do
-    declare "CONTAINER_NAME_$i"="validator-$i"
-    declare "CONTAINER_ID_$i=" # reset if previously loaded
-done
-CONTAINRERS_COUNT=$VALIDATORS_COUNT
-
-rm -f $VARS_FILE && touch $VARS_FILE
-
 function checkContainerStatus() {
     i="$1" && name="$2" && output="$3"
     CONTAINER_ID=$(docker ps --no-trunc -aqf name=$name || echo "")
@@ -56,10 +46,12 @@ while : ; do
     SUCCESS="True"
 
     rm -f $VARS_FILE && touch $VARS_FILE
-    for ((i=0;i<=$CONTAINRERS_COUNT;i++)); do
-        CONTAINER_NAME="CONTAINER_NAME_$i" && name="${!CONTAINER_NAME}"
+    CONTAINERS=$(docker ps -a | awk '{if(NR>1) print $NF}' | tac)
+    i=-1 ; for name in $CONTAINERS ; do i=$((i+1))
         checkContainerStatus "$i" "$name" "$VARS_FILE" &
     done
+
+    CONTAINERS_COUNT=$((i+1))
 
     wait
     source $VARS_FILE
@@ -71,8 +63,7 @@ while : ; do
     [ "$SUCCESS" == "True" ] && echo -e "|\e[0m\e[32;1m     SUCCESS, INFRASTRUCTURE IS HEALTHY       \e[33;1m|"
     [ "$SUCCESS" != "True" ] && echo -e "|\e[0m\e[31;1m ISSUES DETECTED, INFRASTRUCTURE IS UNHEALTHY \e[33;1m|"
     echo "|----------------------------------------------| [status:height]"
-    for ((i=0;i<=$CONTAINRERS_COUNT;i++)); do
-        CONTAINER_NAME="CONTAINER_NAME_$i" && name="${!CONTAINER_NAME}"
+    i=-1 ; for name in $CONTAINERS ; do i=$((i+1))
         CONTAINER_ID="CONTAINER_ID_$i" && [ -z "${!CONTAINER_ID}" ] && continue
         CONTAINER_STATUS="CONTAINER_STATUS_$i" && status="${!CONTAINER_STATUS}"
         LABEL="| [$i] | Inspect $name container                 "
@@ -83,6 +74,8 @@ while : ; do
     echo "| [B] | Mange SEKAI Repo ($SEKAI_BRANCH)"
     echo "|----------------------------------------------|"
     echo "| [I] | Re-INITALIZE Environment               |"
+    [ "$CONTAINERS_COUNT" != "0" ] && \
+    echo "| [S] | STOP Infrastructure                    |"
     echo "| [R] | Hard RESET Repos & Infrastructure      |"
     echo "| [D] | DELETE Repos & Infrastructure          |"
     echo "|----------------------------------------------|"
@@ -128,6 +121,11 @@ while : ; do
         echo "INFO: Wiping and re-initializing..."
         echo -e "\e[33;1mWARNING: You have to wait for new process to finish\e[0m"
         gnome-terminal --disable-factory -- bash -c "$KIRA_MANAGER/init.sh False ; read -d'' -s -n1 -p 'Press any key to exit...' && exit"
+        break
+    elif [ "${OPTION,,}" == "s" ] ; then
+        echo "INFO: Stopping infrastructure..."
+        echo -e "\e[33;1mWARNING: You have to wait for new process to finish\e[0m"
+        gnome-terminal -- bash -c "$KIRA_MANAGER/stop.sh ; read -d'' -s -n1 -p 'Press any key to exit...' && exit"
         break
     elif [ "${OPTION,,}" == "r" ] ; then
         echo "INFO: Wiping and Restarting infra..."
