@@ -4,22 +4,36 @@ exec 2>&1
 set -e
 
 NAME=$1
+
 ETC_PROFILE="/etc/profile"
 LOOP_FILE="/tmp/container_manager_loop"
+RESTART_SIGNAL="/tmp/rs_container_manager"
+source $ETC_PROFILE &> /dev/null
+CONTAINER_DUPM="/home/$KIRA_USER/Desktop/DUMP/${NAME^^}"
+if [ "$DEBUG_MODE" == "True" ] ; then set -x ; else set +x ; fi
 
 while : ; do
     START_TIME="$(date -u +%s)"
-    source $ETC_PROFILE &> /dev/null
-    if [ "$DEBUG_MODE" == "True" ] ; then set -x ; else set +x ; fi
+    [ -f $RESTART_SIGNAL ] && break
 
-    CONTAINER_DUPM="/home/$KIRA_USER/Desktop/DUMP/${NAME^^}"
     EXISTS=$($KIRA_SCRIPTS/container-exists.sh "$NAME" || echo "Error")
-    STATUS=$(docker inspect $(docker ps --no-trunc -aqf name=$NAME) | jq -r '.[0].State.Status' || echo "Error")
-    PAUSED=$(docker inspect $(docker ps --no-trunc -aqf name=$NAME) | jq -r '.[0].State.Paused' || echo "Error")
-    HEALTH=$(docker inspect $(docker ps --no-trunc -aqf name=$NAME) | jq -r '.[0].State.Health.Status' || echo "Error")
-    RESTARTING=$(docker inspect $(docker ps --no-trunc -aqf name=$NAME) | jq -r '.[0].State.Restarting' || echo "Error")
-    STARTED_AT=$(docker inspect $(docker ps --no-trunc -aqf name=$NAME) | jq -r '.[0].State.StartedAt' || echo "Error")
+
+    if [ "$EXISTS" != "True" ] ; then
+        clear
+        echo "WARNING: Container $NAME no longer exists, press [X] to exit or restart your infra"
+        read -n 1 -t 3 KEY || continue
+         [ "${OPTION,,}" == "x" ] && exit 1
+    fi
+
+    # (docker ps --no-trunc -aqf name=$NAME) 
     ID=$(docker inspect --format="{{.Id}}" ${NAME} 2> /dev/null || echo "undefined")
+    STATUS=$(docker inspect $ID | jq -r '.[0].State.Status' || echo "Error")
+    PAUSED=$(docker inspect $ID | jq -r '.[0].State.Paused' || echo "Error")
+    HEALTH=$(docker inspect $ID | jq -r '.[0].State.Health.Status' || echo "Error")
+    RESTARTING=$(docker inspect $ID | jq -r '.[0].State.Restarting' || echo "Error")
+    STARTED_AT=$(docker inspect $ID | jq -r '.[0].State.StartedAt' || echo "Error")
+    IP=$(docker inspect $ID | jq -r '.[0].NetworkSettings.Networks.kiranet.IPAMConfig.IPv4Address' || echo "")
+    if [ -z "$IP" ] || [ "$IP" == "null" ] ; then IP=$(docker inspect $ID | jq -r '.[0].NetworkSettings.Networks.regnet.IPAMConfig.IPv4Address' || echo "") ; fi
     
     clear
     
@@ -28,13 +42,13 @@ while : ; do
     echo "|             $(date '+%d/%m/%Y %H:%M:%S')              |"
     echo "|----------------------------------------------|"
     echo "| Container Name: $NAME ($(echo $ID | head -c 8))"
+    echo "|     Ip Address: $IP"
     echo "|----------------------------------------------|"
-    echo "| Container Exists: $EXISTS"
-    echo "| Container Status: $STATUS"
-    echo "| Container Paused: $PAUSED"
-    echo "| Container Health: $HEALTH"
-    echo "| Container Restarting: $RESTARTING"
-    echo "| Container Started At: $(echo $STARTED_AT | head -c 19)"
+    echo "|     Status: $STATUS"
+    echo "|     Paused: $PAUSED"
+    echo "|     Health: $HEALTH"
+    echo "| Restarting: $RESTARTING"
+    echo "| Started At: $(echo $STARTED_AT | head -c 19)"
     echo "|----------------------------------------------|"
     [ "$EXISTS" == "True" ] && 
     echo "| [I] | Try INSPECT container                  |"
@@ -115,11 +129,18 @@ while : ; do
         $KIRA_SCRIPTS/container-unpause.sh $NAME
         break
     elif [ "${OPTION,,}" == "w" ] ; then
-        break
+        echo "INFO: Please wait, refreshing user interface..." && break
     elif [ "${OPTION,,}" == "x" ] ; then
         exit 0
     fi
 done
+
+if [ -f $RESTART_SIGNAL ] ; then
+    rm -f $RESTART_SIGNAL
+else
+    touch /tmp/rs_manager
+    touch /tmp/rs_git_manager
+fi
 
 sleep 1
 source $KIRA_MANAGER/container-manager.sh $NAME

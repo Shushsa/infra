@@ -95,5 +95,9 @@ CDHelper version
 ${SELF_SCRIPTS}/awshelper-update.sh "v0.12.4"
 AWSHelper version
 
+echo "INFO: Allow many open files..."
+CDHelper text lineswap --insert="* hard nofile 999999" --prefix="* hard nofile" --path="/etc/security/limits.conf" --append-if-found-not=True
+CDHelper text lineswap --insert="* soft nofile 999999" --prefix="* soft nofile" --path="/etc/security/limits.conf" --append-if-found-not=True
+
 printenv
 

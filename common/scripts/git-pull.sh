@@ -19,7 +19,7 @@ else
     CHECKOUT=""
 fi
 
-[ -z "$RWXMOD" ] && RWXMOD=777
+[ -z "$RWXMOD" ] && RWXMOD="default"
 [ -z "$SSHCRED" ] && SSHCRED="/home/root/.ssh/id_rsa"
 
 echo "------------------------------------------------"
@@ -51,7 +51,6 @@ mkdir -p $TMP_OUTPUT
 
 if [[ "${REPO,,}" == *"git@"* ]] ; then
     echo "INFO: Detected https repo address"
-    #git remote set-url origin $REPO
 
     if [ ! -z "$BRANCH" ] ; then
         ssh-agent sh -c "ssh-add $SSHCRED ; git clone --branch $BRANCH $REPO $TMP_OUTPUT"
@@ -60,7 +59,7 @@ if [[ "${REPO,,}" == *"git@"* ]] ; then
     fi
 
     cd $TMP_OUTPUT
-    git remote set-url origin $REPO
+    git remote set-url origin $REPO || echo "WARNING: Failed to set origin of the remote branch"
 
     if [ ! -z "$CHECKOUT" ] ; then
         ssh-agent sh -c "ssh-add $SSHCRED ; git checkout $CHECKOUT"
@@ -74,6 +73,8 @@ elif [[ "${REPO,,}" == *"https://"*   ]] ; then
     fi
 
     cd $TMP_OUTPUT
+    git remote set-url origin $REPO || echo "WARNING: Failed to set origin of the remote branch"
+    
     if [ ! -z "$CHECKOUT" ] ; then
         git checkout $CHECKOUT
     fi
@@ -87,12 +88,26 @@ ls -as
 git describe --tags || echo "No tags were found"
 git describe --all --always
 
+[ -z "$OUTPUT" ] && echo "ERROR: Output location must be defined" && exit 1
+
 rm -rf $OUTPUT
 mkdir -p $OUTPUT
 cp -rTfv "$TMP_OUTPUT" "$OUTPUT"
 
+cd $OUTPUT
+BRANCH_REF=$(git rev-parse --abbrev-ref HEAD || echo "$BRANCH")
+git remote set-url origin $REPO || echo "WARNING: Failed to set origin of the remote branch"
+
+if [[ "${REPO,,}" == *"git@"* ]] ; then
+    ssh-agent sh -c "ssh-add $SSHCRED ; git fetch --all"
+    ssh-agent sh -c "ssh-add $SSHCRED ; git reset --hard '@{u}'"
+else
+    git fetch --all
+    git reset --hard '@{u}'
+fi
+
 ls -as
-chmod -R $RWXMOD $OUTPUT
+[ ! -z "$RWXMOD" ] && [ ! -z "${RWXMOD##*[!0-9]*}" ] && chmod -R $RWXMOD $OUTPUT
 
 echo "------------------------------------------------"
 echo "|         FINISHED: GIT PULL v0.0.1            |"

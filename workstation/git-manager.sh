@@ -15,17 +15,20 @@ BRANCH_ENVAR=$5
 
 ETC_PROFILE="/etc/profile"
 LOOP_FILE="/tmp/git_manager_loop"
+RESTART_SIGNAL="/tmp/rs_git_manager"
+source $ETC_PROFILE &> /dev/null
+if [ "$DEBUG_MODE" == "True" ] ; then set -x ; else set +x ; fi
 
 while : ; do
     START_TIME="$(date -u +%s)"
-    source $ETC_PROFILE &> /dev/null
-    if [ "$DEBUG_MODE" == "True" ] ; then set -x ; else set +x ; fi
+    [ -f $RESTART_SIGNAL ] && break
+    
     mkdir -p $DIRECTORY
-    cd /tmp && cd $DIRECTORY
+    cd $DIRECTORY
      
     BRANCH_REF=$(git rev-parse --abbrev-ref HEAD || echo "$BRANCH")
-    git remote set-url origin $REPO_HTTPS || echo "WARNING: Failed to set origin of the remote branch"
-    git fetch origin $BRANCH_REF || echo "WARNING: Failed to fetch remote changes"
+    $(git remote set-url origin $REPO_HTTPS 2>/dev/null) || echo "WARNING: Failed to set origin of the remote branch"
+    $(git fetch origin $BRANCH_REF 2>/dev/null) || echo "WARNING: Failed to fetch remote changes"
 
     # Following command detects if upstream is specified and sets it if not
     $(git cherry || git branch --set-upstream-to="origin/$BRANCH_REF") || echo "WARNING: Failed to set upstream origin"
@@ -112,7 +115,7 @@ while : ; do
         git add -A || FAILED="True"
         [ "$FAILED" == "False" ] && git commit -a -m "[$(date '+%d/%m/%Y %H:%M:%S')] $COMMIT" || FAILED="True"
         [ "$FAILED" == "True" ] && echo "ERROR: Commit failed" && break
-        echo "SUCCESS: Commit suceeded" && break
+        echo "SUCCESS: Commit suceeded" && sleep 2 && continue
     elif [ "${OPTION,,}" == "p" ] ; then
         echo "INFO: Pushing changes..."
         git checkout $BRANCH || FAILED="True"
@@ -125,12 +128,12 @@ while : ; do
         [ "$FAILED" == "False" ] && ssh-agent sh -c "ssh-add $SSH_KEY_PRIV_PATH ; git push origin $BRANCH" || FAILED="True"
         [ "$FAILED" == "True" ] && echo "ERROR: Push failed" && break
         
-        echo "SUCCESS: Push suceeded" && break
+        echo "SUCCESS: Push suceeded" && sleep 2 && continue
     elif [ "${OPTION,,}" == "r" ] ; then
         $KIRA_SCRIPTS/git-pull.sh "$REPO_SSH" "$BRANCH" "$DIRECTORY" || FAILED="True"
         [ "$FAILED" == "True" ] && echo "ERROR: Pull failed" && break
-      
-        echo "SUCCESS: Pull suceeded" && break
+        
+        echo "SUCCESS: Pull suceeded" && sleep 2 && continue
     elif [ "${OPTION,,}" == "b" ] ; then
         echo "INFO: Listing available branches..."
         git branch -r || echo "ERROR: Failed to list remote branches"
@@ -144,7 +147,7 @@ while : ; do
         BRANCH=$NEW_BRANCH
         CDHelper text lineswap --insert="$BRANCH_ENVAR=$BRANCH" --prefix="$BRANCH_ENVAR=" --path=$ETC_PROFILE --silent=$SILENT_MODE
         
-        echo "SUCCESS: Changing branch suceeded"
+        echo "SUCCESS: Changing branch suceeded" && sleep 2 && continue
     elif [ "${OPTION,,}" == "n" ] ; then
         echo "INFO: Listing available branches..."
         git branch -r || echo "ERROR: Failed to list remote branches"
@@ -165,7 +168,7 @@ while : ; do
         BRANCH=$NEW_BRANCH
         CDHelper text lineswap --insert="$BRANCH_ENVAR=$BRANCH" --prefix="$BRANCH_ENVAR=" --path=$ETC_PROFILE --silent=$SILENT_MODE
         
-        echo "SUCCESS: New branch was created" && break
+        echo "SUCCESS: New branch was created" && sleep 2 && continue
     elif [ "${OPTION,,}" == "l" ] ; then
         git pull --no-edit origin $BRANCH_REF || FAILED="True"
         [ "$FAILED" == "True" ] && echo "ERROR: Failed to pull chnages from origin to branch '$BRANCH_REF'" && break
@@ -200,26 +203,19 @@ while : ; do
         [ "$FAILED" == "True" ] && echo "ERROR: Failed to list merge conflicts" && break
         break
     elif [ "${OPTION,,}" == "w" ] ; then
-        break
+        echo "INFO: Please wait, refreshing user interface..." && break
     elif [ "${OPTION,,}" == "x" ] ; then
         exit 0
     fi
 done
 
-read -d'' -s -n1 -p 'Press any key to continue...'
+if [ -f $RESTART_SIGNAL ] ; then
+   rm -f $RESTART_SIGNAL
+else
+    read -d'' -s -n1 -p 'Press any key to continue...'
+    touch /tmp/rs_manager
+    touch /tmp/rs_container_manager
+fi
+
 sleep 1
 source $KIRA_MANAGER/git-manager.sh "$REPO_SSH" "$REPO_HTTPS" "$BRANCH" "$DIRECTORY" "$BRANCH_ENVAR"
-
-# TODO: Check if below commands can be fully ommited 
-# git config --global user.name github-username
-# git config --global user.email github@email
-# ssh-agent -s 
-# eval `ssh-agent -s`
-# ssh-add $SSH_KEY_PRIV_PATH
-
-# BRANCH_REF=$(git rev-parse --abbrev-ref HEAD)
-# git for-each-ref --format='%(refname:short) %(upstream:short)' refs/heads
-# git rev-list develop..origin/develop --count
-
-# last_commit=$(git rev-parse HEAD)
-# git branch -r --contains $(git rev-parse HEAD)
