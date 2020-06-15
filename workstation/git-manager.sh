@@ -147,7 +147,7 @@ while : ; do
         BRANCH=$NEW_BRANCH
         CDHelper text lineswap --insert="$BRANCH_ENVAR=$BRANCH" --prefix="$BRANCH_ENVAR=" --path=$ETC_PROFILE --silent=$SILENT_MODE
         
-        echo "SUCCESS: Changing branch suceeded" && break
+        echo "SUCCESS: Changing branch suceeded" && sleep 2 && continue
     elif [ "${OPTION,,}" == "n" ] ; then
         echo "INFO: Listing available branches..."
         git branch -r || echo "ERROR: Failed to list remote branches"
@@ -168,7 +168,7 @@ while : ; do
         BRANCH=$NEW_BRANCH
         CDHelper text lineswap --insert="$BRANCH_ENVAR=$BRANCH" --prefix="$BRANCH_ENVAR=" --path=$ETC_PROFILE --silent=$SILENT_MODE
         
-        echo "SUCCESS: New branch was created" && break
+        echo "SUCCESS: New branch was created" && sleep 2 && continue
     elif [ "${OPTION,,}" == "l" ] ; then
         git pull --no-edit origin $BRANCH_REF || FAILED="True"
         [ "$FAILED" == "True" ] && echo "ERROR: Failed to pull chnages from origin to branch '$BRANCH_REF'" && break
@@ -185,7 +185,7 @@ while : ; do
         git checkout $NEW_BRANCH || FAILED="True"
         [ "$FAILED" == "True" ] && echo "ERROR: Failed to checkout '$NEW_BRANCH'" && break
         
-        git pull --no-edit origin $BRANCH_REF || FAILED="True"
+        git pull || FAILED="True"
         [ "$FAILED" == "True" ] && echo "ERROR: Failed to pull chnages from origin to branch '$BRANCH_REF'" && break
 
         git checkout $BRANCH_REF || FAILED="True"
