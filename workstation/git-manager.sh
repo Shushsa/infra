@@ -3,7 +3,7 @@
 exec 2>&1
 set -e
 
-# rm -r -f $KIRA_MANAGER && cp -r $KIRA_WORKSTATION $KIRA_MANAGER && chmod -R 777 $KIRA_MANAGER
+# (rm -fv $KIRA_MANAGER/git-manager.sh) && nano $KIRA_MANAGER/git-manager.sh && chmod 777 $KIRA_MANAGER/git-manager.sh && touch /tmp/rs_git_manager
 
 REPO_SSH=$1
 REPO_HTTPS=$2
@@ -185,7 +185,7 @@ while : ; do
         git checkout $NEW_BRANCH || FAILED="True"
         [ "$FAILED" == "True" ] && echo "ERROR: Failed to checkout '$NEW_BRANCH'" && break
         
-        git pull || FAILED="True"
+        git pull --no-edit origin $NEW_BRANCH || FAILED="True"
         [ "$FAILED" == "True" ] && echo "ERROR: Failed to pull chnages from origin to branch '$BRANCH_REF'" && break
 
         git checkout $BRANCH_REF || FAILED="True"
