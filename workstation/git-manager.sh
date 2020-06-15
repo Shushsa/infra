@@ -147,7 +147,7 @@ while : ; do
         BRANCH=$NEW_BRANCH
         CDHelper text lineswap --insert="$BRANCH_ENVAR=$BRANCH" --prefix="$BRANCH_ENVAR=" --path=$ETC_PROFILE --silent=$SILENT_MODE
         
-        echo "SUCCESS: Changing branch suceeded" && sleep 2 && continue
+        echo "SUCCESS: Changing branch suceeded" && break
     elif [ "${OPTION,,}" == "n" ] ; then
         echo "INFO: Listing available branches..."
         git branch -r || echo "ERROR: Failed to list remote branches"
@@ -168,7 +168,7 @@ while : ; do
         BRANCH=$NEW_BRANCH
         CDHelper text lineswap --insert="$BRANCH_ENVAR=$BRANCH" --prefix="$BRANCH_ENVAR=" --path=$ETC_PROFILE --silent=$SILENT_MODE
         
-        echo "SUCCESS: New branch was created" && sleep 2 && continue
+        echo "SUCCESS: New branch was created" && break
     elif [ "${OPTION,,}" == "l" ] ; then
         git pull --no-edit origin $BRANCH_REF || FAILED="True"
         [ "$FAILED" == "True" ] && echo "ERROR: Failed to pull chnages from origin to branch '$BRANCH_REF'" && break
