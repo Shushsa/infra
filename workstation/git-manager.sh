@@ -173,7 +173,7 @@ while : ; do
         git pull --no-edit origin $BRANCH_REF || FAILED="True"
         [ "$FAILED" == "True" ] && echo "ERROR: Failed to pull chnages from origin to branch '$BRANCH_REF'" && break
         git merge origin $BRANCH_REF || FAILED="True"
-        [ "$FAILED" == "True" ] && echo "ERROR: Failed to merge chnages from origin to local branch '$BRANCH_REF'" && break
+        [ "$FAILED" == "True" ] && echo "ERROR: Failed to merge chnages from origin to local branch '$BRANCH_REF'"
         break
     elif [ "${OPTION,,}" == "a" ] ; then
         echo "INFO: Listing available branches..."
