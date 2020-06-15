@@ -173,7 +173,7 @@ while : ; do
         git pull --no-edit origin $BRANCH_REF || FAILED="True"
         [ "$FAILED" == "True" ] && echo "ERROR: Failed to pull chnages from origin to branch '$BRANCH_REF'" && break
         git merge origin $BRANCH_REF || FAILED="True"
-        [ "$FAILED" == "True" ] && echo "ERROR: Failed to merge chnages from origin to local branch '$BRANCH_REF'" && break
+        [ "$FAILED" == "True" ] && echo "ERROR: Failed to merge chnages from origin to local branch '$BRANCH_REF'"
         break
     elif [ "${OPTION,,}" == "a" ] ; then
         echo "INFO: Listing available branches..."
@@ -185,7 +185,7 @@ while : ; do
         git checkout $NEW_BRANCH || FAILED="True"
         [ "$FAILED" == "True" ] && echo "ERROR: Failed to checkout '$NEW_BRANCH'" && break
         
-        git pull --no-edit origin $BRANCH_REF || FAILED="True"
+        git pull --no-edit origin $NEW_BRANCH || FAILED="True"
         [ "$FAILED" == "True" ] && echo "ERROR: Failed to pull chnages from origin to branch '$BRANCH_REF'" && break
 
         git checkout $BRANCH_REF || FAILED="True"
