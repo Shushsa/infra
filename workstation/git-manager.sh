@@ -102,7 +102,7 @@ while : ; do
         rm -rf $USER_DATA_DIR
         mkdir -p $USER_DATA_DIR
         code --user-data-dir $USER_DATA_DIR $DIRECTORY
-        break
+        sleep 2 && continue
     elif [ "${OPTION,,}" == "c" ] ; then
         echo -e "\e[36;1mType desired commit message: \e[0m\c" && read COMMIT
         if [ -z "$COMMIT" ] ; then
