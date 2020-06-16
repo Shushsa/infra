@@ -127,8 +127,8 @@ if [ $VALIDATOR_INDEX -eq 1 ] ; then # first validator always creates a genesis 
         echo "SUCCESS: Accounts $TEST_ACC_ADDR and $VALIDATOR_ACC_ADDR were created"
 
         echo "INFO: Adding genesis accounts..."
-        sekaid add-genesis-account $TEST_ACC_ADDR 100000000000000$DENOM,10000000samoleans
-        sekaid add-genesis-account $VALIDATOR_ACC_ADDR 200000000000000$DENOM,20000000samoleans
+        sekaid add-genesis-account $TEST_ACC_ADDR 100000000000000$DENOM,10000000samoleans,100000000uatom,1000000usent,100000000ubtc
+        sekaid add-genesis-account $VALIDATOR_ACC_ADDR 200000000000000$DENOM
 
         echo "INFO: Creating $VALIDATOR_ACC_NAME genesis tx..."
         if [ ! -f "$TMP_NODE_KEY" ] || [ ! -f "$TMP_SIGNING_KEY" ] ; then
