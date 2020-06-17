@@ -8,6 +8,7 @@ set -e
 
 SKIP_UPDATE=$1
 START_TIME=$2
+INIT_HASH=$3
 
 [ -z "$START_TIME" ] && START_TIME="$(date -u +%s)"
 [ -z "$SKIP_UPDATE" ] && SKIP_UPDATE="False"
@@ -17,8 +18,8 @@ ETC_PROFILE="/etc/profile"
 
 source $ETC_PROFILE &> /dev/null
 
-[ "$DEBUG_MODE" == "True" ] && set -x
-[ "$DEBUG_MODE" == "False" ] && set +x
+if [ "$DEBUG_MODE" == "True" ] ; then set -x ; else set +x ; fi
+[ -z "$INIT_HASH" ] && INIT_HASH=$(hashdeep -r -l $KIRA_WORKSTATION/init.sh | sort | md5sum | awk '{print $1}')
 
 echo "------------------------------------------------"
 echo "|       STARTED: KIRA INFRA SETUP v0.0.2       |"
@@ -52,13 +53,22 @@ if [ "$SKIP_UPDATE" == "False" ] ; then
     cp -r $KIRA_WORKSTATION $KIRA_MANAGER
     chmod -R 777 $KIRA_MANAGER
 
-    source $KIRA_WORKSTATION/setup.sh "True" "$START_TIME"
+    source $KIRA_WORKSTATION/setup.sh "True" "$START_TIME" "$INIT_HASH" 
     exit 0
 elif [ "$SKIP_UPDATE" == "True" ] ; then
     echo "INFO: Skipping Infra Update..."
 else
     echo "ERROR: SKIP_UPDATE propoerty is invalid or undefined"
     exit 1
+fi
+
+NEW_INIT_HASH=$(hashdeep -r -l $KIRA_WORKSTATION/init.sh | sort | md5sum | awk '{print $1}')
+
+if [ "$NEW_INIT_HASH" != "$INIT_HASH" ] ; then
+   echo "WARNING: Hash of the init file changed, full reset is required, starting INIT process..."
+   gnome-terminal --disable-factory -- bash -c "$KIRA_MANAGER/init.sh False ; read -d'' -s -n1 -p 'Press any key to exit...' && exit"
+   sleep 3
+   exit 0
 fi
 
 $KIRA_SCRIPTS/cdhelper-update.sh "v0.6.12" && $KIRA_SCRIPTS/progress-touch.sh "+1" #4
