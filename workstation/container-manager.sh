@@ -87,12 +87,12 @@ while : ; do
         gnome-terminal -- bash -c "docker exec -it $ID /bin/bash || docker exec -it $ID /bin/sh ; read -d'' -s -n1 -p 'Press any key to exit...' && exit"
         sleep 2 && continue
     elif [ "${OPTION,,}" == "l" ] ; then
-        $WORKSTATION_SCRIPTS/dump-logs.sh $name
+        $WORKSTATION_SCRIPTS/dump-logs.sh $NAME
         echo "INFO: Starting code editor..."
-        USER_DATA_DIR="/usr/code$CONTAINER_DUPM"
+        USER_DATA_DIR="/usr/code/container_dump_$NAME"
         rm -rf $USER_DATA_DIR
         mkdir -p $USER_DATA_DIR
-        code --user-data-dir $USER_DATA_DIR $CONTAINER_DUPM
+        code --user-data-dir $USER_DATA_DIR "$KIRA_DUMP/${NAME^^}"
         break
     elif [ "${OPTION,,}" == "r" ] ; then
         echo "INFO: Restarting container..."

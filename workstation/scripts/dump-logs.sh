@@ -12,7 +12,7 @@ source "/etc/profile" &> /dev/null
 if [ "$DEBUG_MODE" == "True" ] ; then set -x ; else set +x ; fi
 
 NAME=$1
-CONTAINER_DUMP="$CONTAINER_DUPM/${NAME^^}"
+CONTAINER_DUMP="$KIRA_DUMP/${NAME^^}"
 
 echo "------------------------------------------------"
 echo "|          STARTED: DUMP LOGS v0.0.1           |"
