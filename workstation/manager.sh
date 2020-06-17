@@ -110,7 +110,7 @@ while : ; do
         echo "INFO: Dumping all logs..."
         $KIRA_SCRIPTS/progress-touch.sh "*0"
         for name in $CONTAINERS ; do
-            $WORKSTATION_SCRIPTS/dump-logs.sh $name &>> "$KIRA_DUMP/infra/dump_${name}.log" & ; PID=$!
+            $WORKSTATION_SCRIPTS/dump-logs.sh $name &>> "$KIRA_DUMP/infra/dump_${name}.log" &
             PID=$! && $KIRA_SCRIPTS/progress-touch.sh "+1" "$CONTAINERS_COUNT" 48 $PID
             wait $PID
         done
