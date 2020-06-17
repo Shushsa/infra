@@ -267,11 +267,11 @@ CDHelper text lineswap --insert="MAX_VALIDATORS=$MAX_VALIDATORS" --prefix="MAX_V
 
 chmod 777 $ETC_PROFILE
 
-let "START_MAX=42+(2*$VALIDATORS_COUNT)"
-echo "$START_MAX" > "$KIRA_PROGRESS/start_max"
-
 cd /kira
-$KIRA_WORKSTATION/start.sh "False" &>> "$KIRA_DUMP/infra/start.log" || echo "ERROR: Start script failed, logs are available in the '$KIRA_DUMP' directory" 
+$KIRA_SCRIPTS/progress-touch.sh "*0" 
+$KIRA_WORKSTATION/start.sh "False" &>> "$KIRA_DUMP/infra/start.log" &
+PID=$! && $KIRA_SCRIPTS/progress-touch.sh "+0" "$((42+(2*$VALIDATORS_COUNT)))" 48 $PID
+wait $PID || echo "ERROR: Start script failed, logs are available in the '$KIRA_DUMP' directory" && exit 1
 
 echo "------------------------------------------------"
 echo "| FINISHED: KIRA INFRA INIT v0.0.2             |"

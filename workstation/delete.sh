@@ -19,6 +19,7 @@ $KIRA_SCRIPTS/progress-touch.sh "+1" #1
 CONTAINERS=$(docker ps -a | awk '{if(NR>1) print $NF}')
 for CONTAINER in $CONTAINERS ; do
     $KIRA_SCRIPTS/container-delete.sh $CONTAINER
+    $KIRA_SCRIPTS/progress-touch.sh "+1" #+CONTAINER_COUNT
 done
 
 $KIRA_SCRIPTS/progress-touch.sh "+1" #2
@@ -38,7 +39,7 @@ docker network rm kiranet || echo "WARNING: Failed to remove kira network"
 docker network rm regnet || echo "WARNING: Failed to remove registry network"
 docker network prune -f || echo "WARNING: Failed to prune all networks"
 
-$KIRA_SCRIPTS/progress-touch.sh "+1" #7
+$KIRA_SCRIPTS/progress-touch.sh "+1" #7+CONTAINER_COUNT
 
 echo "------------------------------------------------"
 echo "|      FINISHED: KIRA INFRA DELETE v0.0.1      |"

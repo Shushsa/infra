@@ -19,11 +19,12 @@ echo "------------------------------------------------"
 CONTAINERS=$(docker ps -a | awk '{if(NR>1) print $NF}' | tac)
 for CONTAINER in $CONTAINERS ; do
     $KIRA_SCRIPTS/container-restart.sh $CONTAINER
-    $KIRA_SCRIPTS/progress-touch.sh "+1"
+    $KIRA_SCRIPTS/progress-touch.sh "+1" #+CONTAINER_COUNT
 done
 
 echo "INFO: Restarting network manager"
 systemctl restart NetworkManager docker || echo "ERROR: Failed to restart docker Network Manager"
+$KIRA_SCRIPTS/progress-touch.sh "+1" #2+CONTAINER_COUNT
 
 echo "------------------------------------------------"
 echo "|      FINISHED: KIRA INFRA STOP v0.0.1        |"

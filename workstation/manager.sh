@@ -108,8 +108,11 @@ while : ; do
     done
     if [ "${OPTION,,}" == "l" ] ; then
         echo "INFO: Dumping all logs..."
+        $KIRA_SCRIPTS/progress-touch.sh "*0"
         for name in $CONTAINERS ; do
-            $WORKSTATION_SCRIPTS/dump-logs.sh $name &>> "$KIRA_DUMP/infra/dump_${name}.log"
+            $WORKSTATION_SCRIPTS/dump-logs.sh $name &>> "$KIRA_DUMP/infra/dump_${name}.log" & ; PID=$!
+            PID=$! && $KIRA_SCRIPTS/progress-touch.sh "+1" "$CONTAINERS_COUNT" 48 $PID
+            wait $PID
         done
         echo "INFO: Starting code editor..."
         USER_DATA_DIR="/usr/code$KIRA_DUMP"
@@ -127,29 +130,40 @@ while : ; do
         break
     elif [ "${OPTION,,}" == "i" ] ; then
         echo "INFO: Wiping and re-initializing..."
-        echo -e "\e[33;1mWARNING: You have to wait for new process to finish\e[0m"
         gnome-terminal --disable-factory -- bash -c "$KIRA_MANAGER/init.sh False ; read -d'' -s -n1 -p 'Press any key to exit...' && exit"
+        echo -e "\e[33;1mWARNING: You have to wait for new process to finish\e[0m"
         break
     elif [ "${OPTION,,}" == "s" ] ; then
         echo "INFO: Stopping infrastructure..."
         echo -e "\e[33;1mWARNING: You have to wait for new process to finish\e[0m"
-        gnome-terminal -- bash -c "$KIRA_MANAGER/stop.sh ; read -d'' -s -n1 -p 'Press any key to exit...' && exit"
+        $KIRA_SCRIPTS/progress-touch.sh "*0" 
+        $KIRA_MANAGER/stop.sh &>> "$KIRA_DUMP/infra/stop.log" &
+        PID=$! && $KIRA_SCRIPTS/progress-touch.sh "+0" $((1+$CONTAINERS_COUNT)) 48 $PID
+        wait $PID || echo "ERROR: Stop script failed, logs are available in the '$KIRA_DUMP' directory" && read -d'' -s -n1 -p 'Press any key to continue...'
         break
     elif [ "${OPTION,,}" == "r" ] ; then
         echo "INFO: Re-starting infrastructure..."
         echo -e "\e[33;1mWARNING: You have to wait for new process to finish\e[0m"
-        gnome-terminal -- bash -c "$KIRA_MANAGER/restart.sh ; read -d'' -s -n1 -p 'Press any key to exit...' && exit"
+        $KIRA_SCRIPTS/progress-touch.sh "*0" 
+        $KIRA_MANAGER/restart.sh &>> "$KIRA_DUMP/infra/restart.log" &
+        PID=$! && $KIRA_SCRIPTS/progress-touch.sh "+0" $((2+$CONTAINERS_COUNT)) 48 $PID
+        wait $PID || echo "ERROR: Restart script failed, logs are available in the '$KIRA_DUMP' directory" && read -d'' -s -n1 -p 'Press any key to continue...'
         break
     elif [ "${OPTION,,}" == "h" ] ; then
         echo "INFO: Wiping and Restarting infra..."
-        $KIRA_SCRIPTS/progress-touch.sh "*0" 
         echo -e "\e[33;1mWARNING: You have to wait for new process to finish\e[0m"
-        gnome-terminal -- bash -c "$KIRA_MANAGER/start.sh ; read -d'' -s -n1 -p 'Press any key to exit...' && exit"
+        $KIRA_SCRIPTS/progress-touch.sh "*0" 
+        $KIRA_MANAGER/start.sh &>> "$KIRA_DUMP/infra/start.log" &
+        PID=$! && $KIRA_SCRIPTS/progress-touch.sh "+0" $((42+(2*$VALIDATORS_COUNT))) 48 $PID
+        wait $PID || echo "ERROR: Start script failed, logs are available in the '$KIRA_DUMP' directory" && read -d'' -s -n1 -p 'Press any key to continue...'
         break
     elif [ "${OPTION,,}" == "d" ] ; then
         echo "INFO: Wiping and removing infra..."
         echo -e "\e[33;1mWARNING: You have to wait for new process to finish\e[0m"
-        gnome-terminal --disable-factory -- bash -c "$KIRA_MANAGER/delete.sh ; read -d'' -s -n1 -p 'Press any key to exit...' && exit"
+        $KIRA_SCRIPTS/progress-touch.sh "*0" 
+        $KIRA_MANAGER/delete.sh &>> "$KIRA_DUMP/infra/delete.log" &
+        PID=$! && $KIRA_SCRIPTS/progress-touch.sh "+0" $((7+$CONTAINERS_COUNT)) 48 $PID
+        wait $PID || echo "ERROR: Delete script failed, logs are available in the '$KIRA_DUMP' directory" && read -d'' -s -n1 -p 'Press any key to continue...'
         break
     elif [ "${OPTION,,}" == "w" ] ; then
         echo "INFO: Please wait, refreshing user interface..." && break
