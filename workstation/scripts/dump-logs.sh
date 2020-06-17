@@ -31,7 +31,7 @@ docker cp $NAME:/etc/systemd/system $CONTAINER_DUMP/systemd || echo "WARNING: Fa
 docker cp $NAME:/common $CONTAINER_DUMP/common || echo "WARNING: Failed to dump common directory"
 docker inspect $(docker ps --no-trunc -aqf name=$NAME) > $CONTAINER_DUMP/container-inspect.json || echo "WARNING: Failed to inspect container"
 docker inspect $(docker ps --no-trunc -aqf name=$NAME) > $CONTAINER_DUMP/printenv.txt || echo "WARNING: Failed to fetch printenv"
-docker exec -it $NAME printenv > $CONTAINER_DUMP/printenv.txt || echo "WARNING: Failed to fetch printenv"
+docker exec -i $NAME printenv > $CONTAINER_DUMP/printenv.txt || echo "WARNING: Failed to fetch printenv"
 docker logs --timestamps --details $(docker inspect --format="{{.Id}}" ${NAME} 2> /dev/null) > $CONTAINER_DUMP/docker-logs.txt || echo "WARNING: Failed to save docker logs"
 docker container logs --details --timestamps $(docker inspect --format="{{.Id}}" ${NAME} 2> /dev/null) > $CONTAINER_DUMP/container-logs.txt || echo "WARNING: Failed to save container logs"
 systemctl status docker > $CONTAINER_DUMP/docker-status.txt || echo "WARNING: Failed to save docker status info"

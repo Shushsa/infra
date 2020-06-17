@@ -41,7 +41,7 @@ EOL
     touch $KIRA_SETUP_REGISTRY
 else
     echo "Container 'registry' already exists."
-    docker exec -it registry bin/registry --version
+    docker exec -i registry bin/registry --version
 fi
 
 docker ps # list containers

@@ -40,9 +40,9 @@ docker images | grep "<none>" | awk '{print $3}' | xargs docker rmi -f || echo "
 [ "$REGISTRY_IMAGE" != "none" ] && docker rmi -f $REGISTRY_IMAGE || echo "Image not found"
 
 # ensure registry cleanup
-docker exec -it registry sh -c "rm -rfv /var/lib/registry/docker/registry/v2/repositories/${IMAGE_NAME}" || echo "Imgae was not present in the registry"
-docker exec -it registry bin/registry garbage-collect /etc/docker/registry/config.yml -m  || echo "Failed to collect registry garbage"
-docker exec -it registry sh -c "reboot" || echo "Docker Registry Reboot" && sleep 1
+docker exec -i registry sh -c "rm -rfv /var/lib/registry/docker/registry/v2/repositories/${IMAGE_NAME}" || echo "Imgae was not present in the registry"
+docker exec -i registry bin/registry garbage-collect /etc/docker/registry/config.yml -m  || echo "Failed to collect registry garbage"
+docker exec -i registry sh -c "reboot" || echo "Docker Registry Reboot" && sleep 1
 
 docker images
 

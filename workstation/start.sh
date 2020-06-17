@@ -126,7 +126,7 @@ for ((i=1;i<=$VALIDATORS_COUNT;i++)); do
     $KIRA_SCRIPTS/progress-touch.sh "+1"
 
     echo "INFO: Inspecting if validator-$VALIDATOR_INDEX is running..."
-    SEKAID_VERSION=$(docker exec -it "validator-$VALIDATOR_INDEX" sekaid version || echo "error")
+    SEKAID_VERSION=$(docker exec -i "validator-$VALIDATOR_INDEX" sekaid version || echo "error")
     if [ "$SEKAID_VERSION" == "error" ] ; then 
         echo "ERROR: sekaid was NOT found" 
         exit 1
@@ -144,7 +144,7 @@ for ((i=1;i<=$VALIDATORS_COUNT;i++)); do
         fi
     fi
 
-    NODE_ID=$(docker exec -it "validator-$VALIDATOR_INDEX" sekaid tendermint show-node-id || echo "error")
+    NODE_ID=$(docker exec -i "validator-$VALIDATOR_INDEX" sekaid tendermint show-node-id || echo "error")
     # NOTE: New lines have to be removed
     SEEDS=$(echo "${NODE_ID}@101.1.0.$VALIDATOR_INDEX:$P2P_LOCAL_PORT" | xargs | tr -d '\n' | tr -d '\r')
     PEERS=$SEEDS
