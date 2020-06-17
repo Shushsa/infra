@@ -18,3 +18,5 @@ if [ ! -f "$KIRA_SETUP_HOSTS" ] ; then
 else
     echo "INFO: Default host names were already defined"
 fi
+
+$KIRA_SCRIPTS/progress-touch.sh "+1"

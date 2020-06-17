@@ -75,6 +75,7 @@ while : ; do
     echo "| [B] | Mange SEKAI Repo ($SEKAI_BRANCH)"
     echo "|----------------------------------------------|"
     echo "| [I] | Re-INITALIZE Environment               |"
+    echo "| [L] | Show All LOGS                          |"
     [ "$CONTAINERS_COUNT" != "0" ] && \
     echo "| [S] | STOP All Containers                    |"
     [ "$CONTAINERS_COUNT" != "0" ] && \
@@ -105,8 +106,18 @@ while : ; do
             break
         fi 
     done
-
-    if [ "${OPTION,,}" == "a" ] ; then
+    if [ "${OPTION,,}" == "l" ] ; then
+        echo "INFO: Dumping all logs..."
+        for name in $CONTAINERS ; do
+            $WORKSTATION_SCRIPTS/dump-logs.sh $name &>> "$KIRA_DUMP/infra/dump_${name}.log"
+        done
+        echo "INFO: Starting code editor..."
+        USER_DATA_DIR="/usr/code$KIRA_DUMP"
+        rm -rf $USER_DATA_DIR
+        mkdir -p $USER_DATA_DIR
+        code --user-data-dir $USER_DATA_DIR $KIRA_DUMP
+        break
+    elif [ "${OPTION,,}" == "a" ] ; then
         echo "INFO: Starting git manager..."
         gnome-terminal -- bash -c "$KIRA_MANAGER/git-manager.sh \"$INFRA_REPO_SSH\" \"$INFRA_REPO\" \"$INFRA_BRANCH\" \"$KIRA_INFRA\" \"INFRA_BRANCH\" ; read -d'' -s -n1 -p 'Press any key to exit...' && exit"
         break
@@ -131,6 +142,7 @@ while : ; do
         break
     elif [ "${OPTION,,}" == "h" ] ; then
         echo "INFO: Wiping and Restarting infra..."
+        $KIRA_SCRIPTS/progress-touch.sh "*0" 
         echo -e "\e[33;1mWARNING: You have to wait for new process to finish\e[0m"
         gnome-terminal -- bash -c "$KIRA_MANAGER/start.sh ; read -d'' -s -n1 -p 'Press any key to exit...' && exit"
         break

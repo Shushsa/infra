@@ -46,6 +46,9 @@ docker exec -it registry sh -c "reboot" || echo "Docker Registry Reboot" && slee
 
 docker images
 
+$KIRA_SCRIPTS/progress-touch.sh "+1" #1
+
 echo "------------------------------------------------"
 echo "|        FINISHED: IMAGE DELETE v0.0.1         |"
 echo "------------------------------------------------"
+

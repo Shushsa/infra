@@ -46,3 +46,5 @@ fi
 
 docker ps # list containers
 docker images
+
+$KIRA_SCRIPTS/progress-touch.sh "+1"

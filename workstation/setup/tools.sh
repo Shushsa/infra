@@ -85,3 +85,5 @@ if [ ! -f "$KIRA_SETUP_BASE_TOOLS" ] ; then
 else
     echo "INFO: Base tools were already installed."
 fi
+
+$KIRA_SCRIPTS/progress-touch.sh "+1"

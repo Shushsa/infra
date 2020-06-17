@@ -19,3 +19,5 @@ if [ ! -f "$KIRA_SETUP_NPM" ] ; then
 else
     echo "INFO: NPM $(npm --version) was already installed."
 fi
+
+$KIRA_SCRIPTS/progress-touch.sh "+1"

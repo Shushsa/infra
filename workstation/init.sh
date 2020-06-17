@@ -54,6 +54,8 @@ if [ "$SKIP_UPDATE" == "False" ] ; then
     KIRA_SEKAI=/kira/sekai
     KIRA_SETUP=/kira/setup
     KIRA_MANAGER="/kira/manager"
+    KIRA_PROGRESS="/kira/progress"
+    KIRA_DUMP="/home/$KIRA_USER/Desktop/DUMP"
     KIRA_SCRIPTS="${KIRA_INFRA}/common/scripts"
     KIRA_WORKSTATION="${KIRA_INFRA}/workstation"
     
@@ -62,6 +64,9 @@ if [ "$SKIP_UPDATE" == "False" ] ; then
     mkdir -p $KIRA_SEKAI
     mkdir -p $KIRA_SETUP
     mkdir -p $KIRA_MANAGER
+    mkdir -p $KIRA_PROGRESS
+    rm -rfv $KIRA_DUMP
+    mkdir -p "$KIRA_DUMP/infra"
 
     KIRA_SETUP_ESSSENTIALS="$KIRA_SETUP/essentials-v0.0.2" 
     if [ ! -f "$KIRA_SETUP_ESSSENTIALS" ] ; then
@@ -246,6 +251,8 @@ CDHelper text lineswap --insert="SMTP_LOGIN=$SMTP_LOGIN" --prefix="SMTP_LOGIN=" 
 CDHelper text lineswap --insert="SMTP_PASSWORD=$SMTP_PASSWORD" --prefix="SMTP_PASSWORD=" --path=$ETC_PROFILE --append-if-found-not=True --silent=$SILENT_MODE
 CDHelper text lineswap --insert="SMTP_SECRET={\\\"host\\\":\\\"smtp.gmail.com\\\",\\\"port\\\":\\\"587\\\",\\\"ssl\\\":true,\\\"login\\\":\\\"$SMTP_LOGIN\\\",\\\"password\\\":\\\"$SMTP_PASSWORD\\\"}" --prefix="SMTP_SECRET=" --path=$ETC_PROFILE --append-if-found-not=True --silent=$SILENT_MODE
 
+CDHelper text lineswap --insert="KIRA_DUMP=$KIRA_DUMP" --prefix="KIRA_DUMP=" --path=$ETC_PROFILE --append-if-found-not=True --silent=$SILENT_MODE
+CDHelper text lineswap --insert="KIRA_PROGRESS=$KIRA_PROGRESS" --prefix="KIRA_PROGRESS=" --path=$ETC_PROFILE --append-if-found-not=True --silent=$SILENT_MODE
 CDHelper text lineswap --insert="KIRA_USER=$KIRA_USER" --prefix="KIRA_USER=" --path=$ETC_PROFILE --append-if-found-not=True --silent=$SILENT_MODE
 CDHelper text lineswap --insert="USER_SHORTCUTS=/home/$KIRA_USER/.local/share/applications" --prefix="USER_SHORTCUTS=" --path=$ETC_PROFILE --append-if-found-not=True --silent=$SILENT_MODE
 CDHelper text lineswap --insert="EMAIL_NOTIFY=$EMAIL_NOTIFY" --prefix="EMAIL_NOTIFY=" --path=$ETC_PROFILE --append-if-found-not=True --silent=$SILENT_MODE
@@ -260,8 +267,11 @@ CDHelper text lineswap --insert="MAX_VALIDATORS=$MAX_VALIDATORS" --prefix="MAX_V
 
 chmod 777 $ETC_PROFILE
 
+let "START_MAX=42+(2*$VALIDATORS_COUNT)"
+echo "$START_MAX" > "$KIRA_PROGRESS/start_max"
+
 cd /kira
-source $KIRA_WORKSTATION/start.sh "False"
+$KIRA_WORKSTATION/start.sh "False" &>> "$KIRA_DUMP/infra/start.log" || echo "ERROR: Start script failed, logs are available in the '$KIRA_DUMP' directory" 
 
 echo "------------------------------------------------"
 echo "| FINISHED: KIRA INFRA INIT v0.0.2             |"

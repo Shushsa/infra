@@ -39,11 +39,13 @@ echo "|_______________________________________________"
 [ -z "$EMAIL_NOTIFY" ] && echo "ERROR: EMAIL_NOTIFY env was not defined" && exit 1
 [ -z "$KIRA_USER" ] && echo "ERROR: KIRA_USER env was not defined" && exit 1
 
+$KIRA_SCRIPTS/progress-touch.sh "+1" #1
+
 cd /kira
 if [ "$SKIP_UPDATE" == "False" ] ; then
     echo "INFO: Updating Infra..."
-    $KIRA_SCRIPTS/git-pull.sh "$INFRA_REPO" "$INFRA_BRANCH" "$KIRA_INFRA" 777
-    $KIRA_SCRIPTS/git-pull.sh "$SEKAI_REPO" "$SEKAI_BRANCH" "$KIRA_SEKAI"
+    $KIRA_SCRIPTS/git-pull.sh "$INFRA_REPO" "$INFRA_BRANCH" "$KIRA_INFRA" 777 && $KIRA_SCRIPTS/progress-touch.sh "+1" #2
+    $KIRA_SCRIPTS/git-pull.sh "$SEKAI_REPO" "$SEKAI_BRANCH" "$KIRA_SEKAI" && $KIRA_SCRIPTS/progress-touch.sh "+1" #3
 
     # we must ensure that recovery files can't be destroyed in the update process and cause a deadlock
     rm -r -f $KIRA_MANAGER
@@ -59,25 +61,25 @@ else
     exit 1
 fi
 
-${KIRA_SCRIPTS}/cdhelper-update.sh "v0.6.12"
-${KIRA_SCRIPTS}/awshelper-update.sh "v0.12.4"
+$KIRA_SCRIPTS/cdhelper-update.sh "v0.6.12" && $KIRA_SCRIPTS/progress-touch.sh "+1" #4
+$KIRA_SCRIPTS/awshelper-update.sh "v0.12.4" && $KIRA_SCRIPTS/progress-touch.sh "+1" #5
 
-source $KIRA_WORKSTATION/setup/certs.sh
-source $KIRA_WORKSTATION/setup/envs.sh
-source $KIRA_WORKSTATION/setup/hosts.sh
-source $KIRA_WORKSTATION/setup/system.sh
-source $KIRA_WORKSTATION/setup/tools.sh
-source $KIRA_WORKSTATION/setup/npm.sh
-source $KIRA_WORKSTATION/setup/rust.sh
-source $KIRA_WORKSTATION/setup/dotnet.sh
-source $KIRA_WORKSTATION/setup/systemctl2.sh
-source $KIRA_WORKSTATION/setup/docker.sh
-source $KIRA_WORKSTATION/setup/golang.sh
-source $KIRA_WORKSTATION/setup/nginx.sh
-source $KIRA_WORKSTATION/setup/chrome.sh
-source $KIRA_WORKSTATION/setup/vscode.sh
-source $KIRA_WORKSTATION/setup/registry.sh
-source $KIRA_WORKSTATION/setup/shortcuts.sh
+source $KIRA_WORKSTATION/setup/certs.sh #6
+source $KIRA_WORKSTATION/setup/envs.sh #7
+source $KIRA_WORKSTATION/setup/hosts.sh #8
+source $KIRA_WORKSTATION/setup/system.sh #9
+source $KIRA_WORKSTATION/setup/tools.sh #10
+source $KIRA_WORKSTATION/setup/npm.sh #11
+source $KIRA_WORKSTATION/setup/rust.sh #12
+source $KIRA_WORKSTATION/setup/dotnet.sh #13
+source $KIRA_WORKSTATION/setup/systemctl2.sh #14
+source $KIRA_WORKSTATION/setup/docker.sh #15
+source $KIRA_WORKSTATION/setup/golang.sh #16
+source $KIRA_WORKSTATION/setup/nginx.sh #17
+source $KIRA_WORKSTATION/setup/chrome.sh #18
+source $KIRA_WORKSTATION/setup/vscode.sh #19
+source $KIRA_WORKSTATION/setup/registry.sh #20
+source $KIRA_WORKSTATION/setup/shortcuts.sh #21
 
 touch /tmp/rs_manager
 touch /tmp/rs_git_manager

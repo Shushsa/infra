@@ -43,3 +43,5 @@ if [ ! -f "$KIRA_SETUP_RUST_TOOLS" ] ; then
 else
     echo "INFO: Rust tools were already installed"
 fi
+
+$KIRA_SCRIPTS/progress-touch.sh "+1"

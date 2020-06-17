@@ -33,16 +33,18 @@ echo "|_______________________________________________"
 [ -z "$SEKAI_REPO" ] && echo "ERROR: SEKAI_REPO env was not defined" && exit 1
 [ -z "$EMAIL_NOTIFY" ] && echo "ERROR: EMAIL_NOTIFY env was not defined" && exit 1
 
+$KIRA_SCRIPTS/progress-touch.sh "+1" #1
+
 echo "INFO: Updating infra repository and fetching changes..."
 if [ "$SKIP_UPDATE" == "False" ] ; then
-    $KIRA_MANAGER/setup.sh "$SKIP_UPDATE"
-    source $KIRA_WORKSTATION/start.sh "True"
+    $KIRA_MANAGER/setup.sh "$SKIP_UPDATE" #22(+21)
+    source $KIRA_WORKSTATION/start.sh "True" #23(+1)
     exit 0
 fi
 
 source $ETC_PROFILE &> /dev/null
 
-$KIRA_SCRIPTS/container-restart.sh "registry"
+$KIRA_SCRIPTS/container-restart.sh "registry" && $KIRA_SCRIPTS/progress-touch.sh "+1" #24
 for ((i=1;i<=$MAX_VALIDATORS;i++)); do
 
     VALIDATORS_EXIST=$($KIRA_SCRIPTS/containers-exist.sh "validator" || echo "error")
@@ -61,14 +63,16 @@ for ((i=1;i<=$MAX_VALIDATORS;i++)); do
     fi
 done
 
-source $WORKSTATION_SCRIPTS/update-base-image.sh 
-source $WORKSTATION_SCRIPTS/update-tools-image.sh 
-source $WORKSTATION_SCRIPTS/update-validator-image.sh 
+$KIRA_SCRIPTS/progress-touch.sh "+1" #25
+source $WORKSTATION_SCRIPTS/update-base-image.sh #31(+6)
+source $WORKSTATION_SCRIPTS/update-tools-image.sh #36(+5)
+source $WORKSTATION_SCRIPTS/update-validator-image.sh #40(+4)
 
 cd $KIRA_WORKSTATION
 
 docker network rm kiranet || echo "Failed to remove kira network"
 docker network create --subnet=$KIRA_VALIDATORS_SUBNET kiranet
+$KIRA_SCRIPTS/progress-touch.sh "+1" #41
 
 GENESIS_SOUCE="/root/.sekaid/config/genesis.json"
 GENESIS_DESTINATION="$DOCKER_COMMON/genesis.json"
@@ -111,11 +115,15 @@ for ((i=1;i<=$VALIDATORS_COUNT;i++)); do
      -v $DOCKER_COMMON:"/common" \
      validator:latest
 
+    $KIRA_SCRIPTS/progress-touch.sh "+1"
+
     # NOTE: Following actions destroy $i variable so VALIDATOR_INDEX is needed
     echo "INFO: Waiting for validator-$i to start..."
     VALIDATOR_INDEX=$i
     sleep 10
     source $WORKSTATION_SCRIPTS/await-container-init.sh "validator-$i" "300" "10"
+
+    $KIRA_SCRIPTS/progress-touch.sh "+1"
 
     echo "INFO: Inspecting if validator-$VALIDATOR_INDEX is running..."
     SEKAID_VERSION=$(docker exec -it "validator-$VALIDATOR_INDEX" sekaid version || echo "error")
@@ -144,6 +152,8 @@ for ((i=1;i<=$VALIDATORS_COUNT;i++)); do
     i=$VALIDATOR_INDEX
     echo "SUCCESS: validator-$i is up and running, seed: $SEEDS"
 done
+
+$KIRA_SCRIPTS/progress-touch.sh "+1" #42+(2*$VALIDATORS_COUNT)
 
 # success_end file is created when docker startup suceeds
 echo "------------------------------------------------"

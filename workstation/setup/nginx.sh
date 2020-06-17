@@ -28,3 +28,5 @@ EOL
 else
     echo "INFO: NGINX was already installed"
 fi
+
+$KIRA_SCRIPTS/progress-touch.sh "+1"

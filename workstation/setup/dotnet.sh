@@ -24,3 +24,5 @@ else
     dotnet --list-runtimes
     dotnet --list-sdks
 fi
+
+$KIRA_SCRIPTS/progress-touch.sh "+1"

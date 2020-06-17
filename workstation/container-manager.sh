@@ -87,21 +87,7 @@ while : ; do
         gnome-terminal -- bash -c "docker exec -it $ID /bin/bash || docker exec -it $ID /bin/sh ; read -d'' -s -n1 -p 'Press any key to exit...' && exit"
         sleep 2 && continue
     elif [ "${OPTION,,}" == "l" ] ; then
-        rm -rfv $CONTAINER_DUPM
-        mkdir -p $CONTAINER_DUPM
-        docker cp $NAME:/var/log/journal $CONTAINER_DUPM/journal || echo "WARNING: Failed to dump journal logs"
-        docker cp $NAME:/self/logs $CONTAINER_DUPM/logs || echo "WARNING: Failed to dump self logs"
-        docker cp $NAME:/root/.sekaid $CONTAINER_DUPM/sekaid || echo "WARNING: Failed to dump .sekaid config"
-        docker cp $NAME:/root/.sekaicli $CONTAINER_DUPM/sekaicli || echo "WARNING: Failed to dump .sekaicli config"
-        docker cp $NAME:/etc/systemd/system $CONTAINER_DUPM/systemd || echo "WARNING: Failed to dump systemd services"
-        docker cp $NAME:/common $CONTAINER_DUPM/common || echo "WARNING: Failed to dump common directory"
-        docker inspect $(docker ps --no-trunc -aqf name=$NAME) > $CONTAINER_DUPM/container-inspect.json || echo "WARNING: Failed to inspect container"
-        docker inspect $(docker ps --no-trunc -aqf name=$NAME) > $CONTAINER_DUPM/printenv.txt || echo "WARNING: Failed to fetch printenv"
-        docker exec -it $NAME printenv > $CONTAINER_DUPM/printenv.txt || echo "WARNING: Failed to fetch printenv"
-        docker logs --timestamps --details $(docker inspect --format="{{.Id}}" ${NAME} 2> /dev/null) > $CONTAINER_DUPM/docker-logs.txt || echo "WARNING: Failed to save docker logs"
-        docker container logs --details --timestamps $(docker inspect --format="{{.Id}}" ${NAME} 2> /dev/null) > $CONTAINER_DUPM/container-logs.txt || echo "WARNING: Failed to save container logs"
-        systemctl status docker > $CONTAINER_DUPM/docker-status.txt || echo "WARNING: Failed to save docker status info"
-        chmod -R 777 $CONTAINER_DUPM
+        $WORKSTATION_SCRIPTS/dump-logs.sh $name
         echo "INFO: Starting code editor..."
         USER_DATA_DIR="/usr/code$CONTAINER_DUPM"
         rm -rf $USER_DATA_DIR

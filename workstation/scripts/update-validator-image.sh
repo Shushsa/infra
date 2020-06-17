@@ -16,9 +16,10 @@ echo "------------------------------------------------"
 VALIDATOR_IMAGE_EXISTS=$($WORKSTATION_SCRIPTS/image-updated.sh "$KIRA_DOCKER/validator" "validator" "latest" "$SEKAI_INTEGRITY" || echo "error")
 if [ "$VALIDATOR_IMAGE_EXISTS" == "False" ] ; then
     echo "All imags were updated, starting validator image..."
-    $WORKSTATION_SCRIPTS/update-image.sh "$KIRA_DOCKER/validator" "validator" "latest" "$SEKAI_INTEGRITY" "REPO=$SEKAI_REPO" "BRANCH=$SEKAI_BRANCH"
+    $WORKSTATION_SCRIPTS/update-image.sh "$KIRA_DOCKER/validator" "validator" "latest" "$SEKAI_INTEGRITY" "REPO=$SEKAI_REPO" "BRANCH=$SEKAI_BRANCH" #4
 elif [ "$VALIDATOR_IMAGE_EXISTS" == "True" ] ; then
     echo "INFO: validator-image is up to date"
+    $KIRA_SCRIPTS/progress-touch.sh "+4" #4
 else
     echo "ERROR: Failed to test if validator image exists"
     exit 1

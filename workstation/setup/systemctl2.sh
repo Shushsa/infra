@@ -19,3 +19,5 @@ if [ ! -f "$KIRA_SETUP_SYSCTL" ] ; then
 else
     echo "systemctl2 was already installed."
 fi
+
+$KIRA_SCRIPTS/progress-touch.sh "+1"
