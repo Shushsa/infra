@@ -20,7 +20,7 @@ else
 fi
 
 KIRA_MANAGER_SCRIPT=$KIRA_MANAGER/start-manager.sh
-echo "gnome-terminal --working-directory=/kira -- bash -c '$KIRA_MANAGER/manager.sh True ; $SHELL'" > $KIRA_MANAGER_SCRIPT
+echo "gnome-terminal --working-directory=/kira -- script -e $KIRA_DUMP/infra/manager.log -c '$KIRA_MANAGER/manager.sh ; $SHELL'" > $KIRA_MANAGER_SCRIPT
 chmod 777 $KIRA_MANAGER_SCRIPT
 
 KIRA_MANAGER_ENTRY="[Desktop Entry]
