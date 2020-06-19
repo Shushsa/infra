@@ -59,7 +59,7 @@ while : ; do
     clear
     
     echo -e "\e[33;1m------------------------------------------------"
-    echo "|         KIRA NETWORK MANAGER v0.0.3          |"
+    echo "|         KIRA NETWORK MANAGER v0.0.4          |"
     echo "|             $(date '+%d/%m/%Y %H:%M:%S')              |"
     [ "$SUCCESS" == "True" ] && echo -e "|\e[0m\e[32;1m     SUCCESS, INFRASTRUCTURE IS HEALTHY       \e[33;1m|"
     [ "$SUCCESS" != "True" ] && echo -e "|\e[0m\e[31;1m ISSUES DETECTED, INFRASTRUCTURE IS UNHEALTHY \e[33;1m|"
@@ -137,43 +137,40 @@ while : ; do
         break
     elif [ "${OPTION,,}" == "s" ] ; then
         echo "INFO: Stopping infrastructure..."
-        echo -e "\e[33;1mWARNING: You have to wait for new process to finish\e[0m"
         $KIRA_SCRIPTS/progress-touch.sh "*0" 
         $KIRA_MANAGER/stop.sh &>> "$KIRA_DUMP/infra/stop.log" &
-        PID=$! 
+        PID=$! && echo -e "\e[33;1mWARNING: You have to wait for new process $PID to finish\e[0m"
         source $KIRA_SCRIPTS/progress-touch.sh "+0" $((1+$CONTAINERS_COUNT)) 48 $PID
         FAILURE="False" && wait $PID || FAILURE="True"
         [ "$FAILURE" == "True" ] && echo -e "\nERROR: Stop script failed, logs are available in the '$KIRA_DUMP' directory" && read -d'' -s -n1 -p 'Press any key to continue...'
-        break
+        echo -e "\nSUCCESS: Infra was stopped" && break
     elif [ "${OPTION,,}" == "r" ] ; then
         echo "INFO: Re-starting infrastructure..."
-        echo -e "\e[33;1mWARNING: You have to wait for new process to finish\e[0m"
         $KIRA_SCRIPTS/progress-touch.sh "*0" 
         $KIRA_MANAGER/restart.sh &>> "$KIRA_DUMP/infra/restart.log" &
-        PID=$! 
+        PID=$! && echo -e "\e[33;1mWARNING: You have to wait for new process $PID to finish\e[0m"
         source $KIRA_SCRIPTS/progress-touch.sh "+0" $((2+$CONTAINERS_COUNT)) 48 $PID
         FAILURE="False" && wait $PID || FAILURE="True"
         [ "$FAILURE" == "True" ] && echo -e "\nERROR: Restart script failed, logs are available in the '$KIRA_DUMP' directory" && read -d'' -s -n1 -p 'Press any key to continue...'
-        break
+        echo -e "\nSUCCESS: Infra was restarted" && break
     elif [ "${OPTION,,}" == "h" ] ; then
         echo "INFO: Wiping and Restarting infra..."
-        echo -e "\e[33;1mWARNING: You have to wait for new process to finish\e[0m"
         $KIRA_SCRIPTS/progress-touch.sh "*0" 
         $KIRA_MANAGER/start.sh &>> "$KIRA_DUMP/infra/start.log" &
-        PID=$!
+        PID=$! && echo -e "\e[33;1mWARNING: You have to wait for new process $PID to finish\e[0m"
         source $KIRA_SCRIPTS/progress-touch.sh "+0" $((42+(2*$VALIDATORS_COUNT))) 48 $PID
         FAILURE="False" && wait $PID || FAILURE="True"
         [ "$FAILURE" == "True" ] && echo -e "\nERROR: Start script failed, logs are available in the '$KIRA_DUMP' directory" && read -d'' -s -n1 -p 'Press any key to continue...'
-        break
+        echo -e "\nSUCCESS: Infra was wiped and restarted" && break
     elif [ "${OPTION,,}" == "d" ] ; then
         echo "INFO: Wiping and removing infra..."
-        echo -e "\e[33;1mWARNING: You have to wait for new process to finish\e[0m"
         $KIRA_SCRIPTS/progress-touch.sh "*0" 
         $KIRA_MANAGER/delete.sh &>> "$KIRA_DUMP/infra/delete.log" &
-        PID=$! && source $KIRA_SCRIPTS/progress-touch.sh "+0" $((7+$CONTAINERS_COUNT)) 48 $PID
+        PID=$! && echo -e "\e[33;1mWARNING: You have to wait for new process $PID to finish\e[0m"
+        source $KIRA_SCRIPTS/progress-touch.sh "+0" $((7+$CONTAINERS_COUNT)) 48 $PID
         FAILURE="False" && wait $PID || FAILURE="True"
         [ "$FAILURE" == "True" ] && echo "ERROR: Delete script failed, logs are available in the '$KIRA_DUMP' directory" && read -d'' -s -n1 -p 'Press any key to continue...'
-        break
+        echo -e "\nSUCCESS: Infra was wiped" && break
     elif [ "${OPTION,,}" == "w" ] ; then
         echo "INFO: Please wait, refreshing user interface..." && break
     elif [ "${OPTION,,}" == "x" ] ; then
