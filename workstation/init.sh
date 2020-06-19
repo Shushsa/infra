@@ -271,7 +271,8 @@ cd /kira
 $KIRA_SCRIPTS/progress-touch.sh "*0" 
 $KIRA_WORKSTATION/start.sh "False" &>> "$KIRA_DUMP/infra/start.log" &
 PID=$! && source $KIRA_SCRIPTS/progress-touch.sh "+0" "$((42+(2*$VALIDATORS_COUNT)))" 48 $PID
-wait $PID || echo "ERROR: Start script failed, logs are available in the '$KIRA_DUMP' directory" && exit 1
+FAILURE="False" && wait $PID || FAILURE="True"
+[ "$FAILURE" == "True" ] && echo "ERROR: Start script failed, logs are available in the '$KIRA_DUMP' directory" && exit 1
 
 echo "------------------------------------------------"
 echo "| FINISHED: KIRA INFRA INIT v0.0.2             |"
