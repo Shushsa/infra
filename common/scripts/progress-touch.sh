@@ -16,17 +16,20 @@ FILE=$5
 [ -z "${LEN##*[!0-9]*}" ] && LEN=0
 [ -z "${PID##*[!0-9]*}" ] && PID=0
 
+VALUE=$(cat $FILE)
+[ -z "${VALUE##*[!0-9]*}" ] && VALUE=0
+let "RESULT=${VALUE}${OPERATION}" || :
+[ "$VALUE" != "$RESULT" ] && echo "$RESULT" > $FILE
+[ $RESULT -eq 0 ] && echo "$(date -u +%s)" > "${FILE}_time" && TIME=0
+
 while : ; do
-    VALUE=$(cat $FILE)
-    [ -z "${VALUE##*[!0-9]*}" ] && VALUE=0
-    
-    let "RESULT=${VALUE}${OPERATION}" || :
-    [ "$VALUE" != "$RESULT" ] && echo "$RESULT" > $FILE
-    [ $RESULT -eq 0 ] && echo "$(date -u +%s)" > "${FILE}_time" && TIME=0
+    RESULT=$(cat $FILE)
     [ $RESULT -ge 1 ] && TIME=$(($(date -u +%s)-$(cat "${FILE}_time")))
 
     if [ $MAX -ge 1 ] ; then
         let "PERCENTAGE=(100*$RESULT)/$MAX"
+        [ $PERCENTAGE -ge 100 ] && PERCENTAGE=100
+        [ $PERCENTAGE -le 0 ] && PERCENTAGE=0
     
         if [ $LEN -le 0 ] ; then
             printf "%s%%" "${PERCENTAGE}"

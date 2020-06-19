@@ -107,13 +107,12 @@ while : ; do
         fi 
     done
     if [ "${OPTION,,}" == "l" ] ; then
-        echo "INFO: Dumping all logs..."
+        echo "INFO: Please wait, dumping logs form all $CONTAINERS_COUNT containers..."
         $KIRA_SCRIPTS/progress-touch.sh "*0"
         for name in $CONTAINERS ; do
             $WORKSTATION_SCRIPTS/dump-logs.sh $name &>> "$KIRA_DUMP/infra/dump_${name}.log" &
-            PID=$!
-            source $KIRA_SCRIPTS/progress-touch.sh "+1" "$CONTAINERS_COUNT" 48 $PID
-            wait $PID
+            PID=$! && source $KIRA_SCRIPTS/progress-touch.sh "+1" "$CONTAINERS_COUNT" 48 $PID
+            wait $PID || echo "ERROR: Failed to dump $name container logs" && read -d'' -s -n1 -p 'Press any key to continue...'
         done
         echo "INFO: Starting code editor..."
         USER_DATA_DIR="/usr/code$KIRA_DUMP"
