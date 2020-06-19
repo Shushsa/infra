@@ -5,14 +5,11 @@ set -e
 
 # (rm -fv $KIRA_MANAGER/git-manager.sh) && nano $KIRA_MANAGER/git-manager.sh && chmod 777 $KIRA_MANAGER/git-manager.sh && touch /tmp/rs_git_manager
 
-FIRST_RUN=$1
-[ "$FIRST_RUN" == "True" ] && script -e "$KIRA_DUMP/infra/git-manager.log"
-
-REPO_SSH=$2
-REPO_HTTPS=$3
-BRANCH=$4
-DIRECTORY=$5
-BRANCH_ENVAR=$6
+REPO_SSH=$1
+REPO_HTTPS=$2
+BRANCH=$3
+DIRECTORY=$4
+BRANCH_ENVAR=$5
 
 [ -z "$BRANCH_ENVAR" ] && echo "Git manager failure, BRANCH_ENVAR property was not defined" && exit 1
 
@@ -221,4 +218,4 @@ else
 fi
 
 sleep 1
-source $KIRA_MANAGER/git-manager.sh "False" "$REPO_SSH" "$REPO_HTTPS" "$BRANCH" "$DIRECTORY" "$BRANCH_ENVAR"
+source $KIRA_MANAGER/git-manager.sh "$REPO_SSH" "$REPO_HTTPS" "$BRANCH" "$DIRECTORY" "$BRANCH_ENVAR"
