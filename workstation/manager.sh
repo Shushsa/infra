@@ -101,7 +101,7 @@ while : ; do
 
     i=-1 ; for name in $CONTAINERS ; do i=$((i+1))
         if [ "$OPTION" == "$i" ] ; then
-            gnome-terminal -- script -e "$KIRA_DUMP/infra/container-manager-$name.log" -c "$KIRA_MANAGER/container-manager.sh $name ; read -d'' -s -n1 -p 'Press any key to exit...' && exit"
+            gnome-terminal -- script -e "$KIRA_DUMP/INFRA/container-manager-$name.log" -c "$KIRA_MANAGER/container-manager.sh $name ; read -d'' -s -n1 -p 'Press any key to exit...' && exit"
             BREAK="True"
             break
         fi 
@@ -110,7 +110,7 @@ while : ; do
         echo "INFO: Please wait, dumping logs form all $CONTAINERS_COUNT containers..."
         $KIRA_SCRIPTS/progress-touch.sh "*0"
         for name in $CONTAINERS ; do
-            $WORKSTATION_SCRIPTS/dump-logs.sh $name &>> "$KIRA_DUMP/infra/dump_${name}.log" &
+            $WORKSTATION_SCRIPTS/dump-logs.sh $name > "$KIRA_DUMP/INFRA/dump_${name}.log" 2>&1 &
             PID=$!
             $KIRA_SCRIPTS/progress-touch.sh "+1" "$CONTAINERS_COUNT" "48" "$PID" || echo "WARNING: Progrss tool failed"
             FAILURE="False" && wait $PID || FAILURE="True"
@@ -124,21 +124,21 @@ while : ; do
         break
     elif [ "${OPTION,,}" == "a" ] ; then
         echo "INFO: Starting git manager..."
-        gnome-terminal -- script -e $KIRA_DUMP/infra/git-manager-infra.log -c "$KIRA_MANAGER/git-manager.sh \"$INFRA_REPO_SSH\" \"$INFRA_REPO\" \"$INFRA_BRANCH\" \"$KIRA_INFRA\" \"INFRA_BRANCH\" ; read -d'' -s -n1 -p 'Press any key to exit...' && exit"
+        gnome-terminal -- script -e $KIRA_DUMP/INFRA/git-manager-infra.log -c "$KIRA_MANAGER/git-manager.sh \"$INFRA_REPO_SSH\" \"$INFRA_REPO\" \"$INFRA_BRANCH\" \"$KIRA_INFRA\" \"INFRA_BRANCH\" ; read -d'' -s -n1 -p 'Press any key to exit...' && exit"
         break
     elif [ "${OPTION,,}" == "b" ] ; then
         echo "INFO: Starting git manager..."
-        gnome-terminal -- script -e $KIRA_DUMP/infra/git-manager-sekai.log -c "$KIRA_MANAGER/git-manager.sh \"$SEKAI_REPO_SSH\" \"$SEKAI_REPO\" \"$SEKAI_BRANCH\" \"$KIRA_SEKAI\" \"SEKAI_BRANCH\" ; read -d'' -s -n1 -p 'Press any key to exit...' && exit"
+        gnome-terminal -- script -e $KIRA_DUMP/INFRA/git-manager-sekai.log -c "$KIRA_MANAGER/git-manager.sh \"$SEKAI_REPO_SSH\" \"$SEKAI_REPO\" \"$SEKAI_BRANCH\" \"$KIRA_SEKAI\" \"SEKAI_BRANCH\" ; read -d'' -s -n1 -p 'Press any key to exit...' && exit"
         break
     elif [ "${OPTION,,}" == "i" ] ; then
         echo "INFO: Wiping and re-initializing..."
-        gnome-terminal --disable-factory -- script -e $KIRA_DUMP/infra/init.log -c "$KIRA_MANAGER/init.sh False ; read -d'' -s -n1 -p 'Press any key to exit...' && exit"
+        gnome-terminal --disable-factory -- script -e $KIRA_DUMP/INFRA/init.log -c "$KIRA_MANAGER/init.sh False ; read -d'' -s -n1 -p 'Press any key to exit...' && exit"
         echo -e "\e[33;1mWARNING: You have to wait for new process to finish\e[0m"
         break
     elif [ "${OPTION,,}" == "s" ] ; then
         echo "INFO: Stopping infrastructure..."
         $KIRA_SCRIPTS/progress-touch.sh "*0" 
-        $KIRA_MANAGER/stop.sh &>> "$KIRA_DUMP/infra/stop.log" &
+        $KIRA_MANAGER/stop.sh > "$KIRA_DUMP/INFRA/stop.log" 2>&1 &
         PID=$! && echo -e "\e[33;1mWARNING: You have to wait for new process $PID to finish\e[0m"
         $KIRA_SCRIPTS/progress-touch.sh "+0" "$((1+$CONTAINERS_COUNT))" "48" "$PID" || echo "WARNING: Progrss tool failed"
         FAILURE="False" && wait $PID || FAILURE="True"
@@ -147,7 +147,7 @@ while : ; do
     elif [ "${OPTION,,}" == "r" ] ; then
         echo "INFO: Re-starting infrastructure..."
         $KIRA_SCRIPTS/progress-touch.sh "*0" 
-        $KIRA_MANAGER/restart.sh &>> "$KIRA_DUMP/infra/restart.log" &
+        $KIRA_MANAGER/restart.sh > "$KIRA_DUMP/INFRA/restart.log" 2>&1 &
         PID=$! && echo -e "\e[33;1mWARNING: You have to wait for new process $PID to finish\e[0m"
         $KIRA_SCRIPTS/progress-touch.sh "+0" "$((2+$CONTAINERS_COUNT))" "48" "$PID" || echo "WARNING: Progrss tool failed"
         FAILURE="False" && wait $PID || FAILURE="True"
@@ -156,7 +156,7 @@ while : ; do
     elif [ "${OPTION,,}" == "h" ] ; then
         echo "INFO: Wiping and Restarting infra..."
         $KIRA_SCRIPTS/progress-touch.sh "*0" 
-        $KIRA_MANAGER/start.sh &>> "$KIRA_DUMP/infra/start.log" &
+        $KIRA_MANAGER/start.sh > "$KIRA_DUMP/INFRA/start.log" 2>&1 &
         PID=$! && echo -e "\e[33;1mWARNING: You have to wait for new process $PID to finish\e[0m"
         $KIRA_SCRIPTS/progress-touch.sh "+0" "$((42+(2*$VALIDATORS_COUNT)))" "48" "$PID" || echo "WARNING: Progrss tool failed"
         FAILURE="False" && wait $PID || FAILURE="True"
@@ -165,7 +165,7 @@ while : ; do
     elif [ "${OPTION,,}" == "d" ] ; then
         echo "INFO: Wiping and removing infra..."
         $KIRA_SCRIPTS/progress-touch.sh "*0" 
-        $KIRA_MANAGER/delete.sh &>> "$KIRA_DUMP/infra/delete.log" &
+        $KIRA_MANAGER/delete.sh > "$KIRA_DUMP/INFRA/delete.log" 2>&1 &
         PID=$! && echo -e "\e[33;1mWARNING: You have to wait for new process $PID to finish\e[0m"
         $KIRA_SCRIPTS/progress-touch.sh "+0" "$((7+$CONTAINERS_COUNT))" "48" "$PID" || echo "WARNING: Progrss tool failed"
         FAILURE="False" && wait $PID || FAILURE="True"
