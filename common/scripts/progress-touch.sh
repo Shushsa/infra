@@ -34,10 +34,11 @@ while : ; do
         if [ $LEN -le 0 ] ; then
             printf "%s%%" "${PERCENTAGE}"
         else
-            BLACK="" && let "COUNT_BLACK=($LEN*$RESULT)/$MAX" || :
-            WHITE="" && let "COUNT_WHITE=$LEN-$COUNT_BLACK-1" || :
+            BLACK="" && let "COUNT_BLACK=(($LEN*$RESULT)/$MAX)-1" || :
+            WHITE="" && let "COUNT_WHITE=$LEN-$COUNT_BLACK" || :
             [ $COUNT_BLACK -ge 1 ] && BLACK=$(printf "%${COUNT_BLACK}s" | tr " " "#")
-            [ $COUNT_WHITE -ge 1 ] && WHITE=$(printf "%${COUNT_WHITE}s" | tr " " ".")
+            [ $COUNT_WHITE -ge 3 ] && WHITE=$(printf "%${COUNT_WHITE}s" | tr " " ".")
+            [ $COUNT_WHITE -ge 2 ] && WHITE="."
 
             echo -ne "\r$BLACK-$WHITE ($PERCENTAGE%|${PROGRESS_TIME}s)" && sleep 0.15
             echo -ne "\r$BLACK\\$WHITE ($PERCENTAGE%|${PROGRESS_TIME}s)" && sleep 0.15
@@ -47,7 +48,7 @@ while : ; do
             echo -ne "\r$BLACK\\$WHITE ($PERCENTAGE%|${PROGRESS_TIME}s)" && sleep 0.15
             echo -ne "\r$BLACK|$WHITE ($PERCENTAGE%|${PROGRESS_TIME}s)" && sleep 0.15
 
-            [ "$PID" != "0" ] && [ -d /proc/$PID ] && continue
+            [ "$PID" != "0" ] && if ps -p $PID > /dev/null ; then continue ; fi
             echo -ne "\r$BLACK#$WHITE ($PERCENTAGE%|${PROGRESS_TIME}s)" 
         fi
     fi
