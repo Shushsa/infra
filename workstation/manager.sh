@@ -5,8 +5,6 @@ set -e
 
 # Local Update Shortcut:
 # (rm -fv $KIRA_MANAGER/manager.sh) && nano $KIRA_MANAGER/manager.sh && chmod 777 $KIRA_MANAGER/manager.sh && touch /tmp/rs_manager
-FIRST_RUN=$1
-[ "$FIRST_RUN" == "True" ] && script -e "$KIRA_DUMP/infra/manager.log"
 
 ETC_PROFILE="/etc/profile"
 LOOP_FILE="/tmp/manager_loop"
@@ -103,7 +101,7 @@ while : ; do
 
     i=-1 ; for name in $CONTAINERS ; do i=$((i+1))
         if [ "$OPTION" == "$i" ] ; then
-            gnome-terminal -- bash -c "$KIRA_MANAGER/container-manager.sh False $name ; read -d'' -s -n1 -p 'Press any key to exit...' && exit"
+            gnome-terminal -- script -e "$KIRA_DUMP/infra/container-manager-$name.log" -c "$KIRA_MANAGER/container-manager.sh $name ; read -d'' -s -n1 -p 'Press any key to exit...' && exit"
             BREAK="True"
             break
         fi 
@@ -126,15 +124,15 @@ while : ; do
         break
     elif [ "${OPTION,,}" == "a" ] ; then
         echo "INFO: Starting git manager..."
-        gnome-terminal -- bash -c "$KIRA_MANAGER/git-manager.sh False \"$INFRA_REPO_SSH\" \"$INFRA_REPO\" \"$INFRA_BRANCH\" \"$KIRA_INFRA\" \"INFRA_BRANCH\" ; read -d'' -s -n1 -p 'Press any key to exit...' && exit"
+        gnome-terminal -- script -e $KIRA_DUMP/infra/git-manager-infra.log -c "$KIRA_MANAGER/git-manager.sh \"$INFRA_REPO_SSH\" \"$INFRA_REPO\" \"$INFRA_BRANCH\" \"$KIRA_INFRA\" \"INFRA_BRANCH\" ; read -d'' -s -n1 -p 'Press any key to exit...' && exit"
         break
     elif [ "${OPTION,,}" == "b" ] ; then
         echo "INFO: Starting git manager..."
-        gnome-terminal -- bash -c "$KIRA_MANAGER/git-manager.sh False \"$SEKAI_REPO_SSH\" \"$SEKAI_REPO\" \"$SEKAI_BRANCH\" \"$KIRA_SEKAI\" \"SEKAI_BRANCH\" ; read -d'' -s -n1 -p 'Press any key to exit...' && exit"
+        gnome-terminal -- script -e $KIRA_DUMP/infra/git-manager-sekai.log -c "$KIRA_MANAGER/git-manager.sh \"$SEKAI_REPO_SSH\" \"$SEKAI_REPO\" \"$SEKAI_BRANCH\" \"$KIRA_SEKAI\" \"SEKAI_BRANCH\" ; read -d'' -s -n1 -p 'Press any key to exit...' && exit"
         break
     elif [ "${OPTION,,}" == "i" ] ; then
         echo "INFO: Wiping and re-initializing..."
-        gnome-terminal --disable-factory -- bash -c "$KIRA_MANAGER/init.sh False ; read -d'' -s -n1 -p 'Press any key to exit...' && exit"
+        gnome-terminal --disable-factory -- script -e $KIRA_DUMP/infra/init.log -c "$KIRA_MANAGER/init.sh False ; read -d'' -s -n1 -p 'Press any key to exit...' && exit"
         echo -e "\e[33;1mWARNING: You have to wait for new process to finish\e[0m"
         break
     elif [ "${OPTION,,}" == "s" ] ; then
@@ -191,5 +189,5 @@ else
 fi
 
 sleep 1
-source $KIRA_MANAGER/manager.sh "False" 
+source $KIRA_MANAGER/manager.sh
 
