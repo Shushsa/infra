@@ -37,9 +37,9 @@ while : ; do
             BLACK="" && let "COUNT_BLACK=(($LEN*$RESULT)/$MAX)-1" || :
             WHITE="" && let "COUNT_WHITE=$LEN-$COUNT_BLACK" || :
             [ $COUNT_BLACK -ge 1 ] && BLACK=$(printf "%${COUNT_BLACK}s" | tr " " "#")
+            [ $COUNT_WHITE -eq 2 ] && WHITE="."
             [ $COUNT_WHITE -ge 3 ] && WHITE=$(printf "%${COUNT_WHITE}s" | tr " " ".")
-            [ $COUNT_WHITE -ge 2 ] && WHITE="."
-
+            
             echo -ne "\r$BLACK-$WHITE ($PERCENTAGE%|${PROGRESS_TIME}s)" && sleep 0.15
             echo -ne "\r$BLACK\\$WHITE ($PERCENTAGE%|${PROGRESS_TIME}s)" && sleep 0.15
             echo -ne "\r$BLACK|$WHITE ($PERCENTAGE%|${PROGRESS_TIME}s)" && sleep 0.15
