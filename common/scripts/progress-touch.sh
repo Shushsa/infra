@@ -45,7 +45,11 @@ while : ; do
             printf "%s%%" "${PERCENTAGE}"
         else
             BLACK="" && let "COUNT_BLACK=(($LEN*$RESULT)/$MAX)-1" || :
+            [ $COUNT_BLACK -gt $LEN ] && COUNT_BLACK=$LEN
+
             WHITE="" && let "COUNT_WHITE=$LEN-$COUNT_BLACK" || :
+            [ $COUNT_WHITE -gt $LEN ] && COUNT_WHITE=$LEN
+            
             [ $COUNT_BLACK -ge 1 ] && BLACK=$(printf "%${COUNT_BLACK}s" | tr " " "#")
             [ $COUNT_WHITE -eq 2 ] && WHITE="."
             [ $COUNT_WHITE -ge 3 ] && WHITE=$(printf "%${COUNT_WHITE}s" | tr " " ".")
