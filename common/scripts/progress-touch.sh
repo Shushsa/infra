@@ -16,15 +16,25 @@ FILE=$5
 [ -z "${LEN##*[!0-9]*}" ] && LEN=0
 [ -z "${PID##*[!0-9]*}" ] && PID=0
 
+PROGRESS_TIME=0
+PROGRESS_TIME_FILE="${FILE}_time"
 VALUE=$(cat $FILE)
+
+
 [ -z "${VALUE##*[!0-9]*}" ] && VALUE=0
 let "RESULT=${VALUE}${OPERATION}" || :
 [ "$VALUE" != "$RESULT" ] && echo "$RESULT" > $FILE
-[ $RESULT -eq 0 ] && echo "$(date -u +%s)" > "${FILE}_time" && PROGRESS_TIME=0
+
+if [ ! -f $PROGRESS_TIME_FILE ] || [ $RESULT -eq 0 ] ; then
+    echo "$(date -u +%s)" > $PROGRESS_TIME_FILE
+fi
+
+PROGRESS_START_TIME=$(cat $PROGRESS_TIME_FILE)
 
 while : ; do
     RESULT=$(cat $FILE)
-    [ $RESULT -ge 1 ] && PROGRESS_TIME=$(($(date -u +%s)-$(cat "${FILE}_time")))
+    PROGRESS_NOW_TIME="$(date -u +%s)"
+    [ $RESULT -ge 1 ] && PROGRESS_TIME=$((${PROGRESS_NOW_TIME}-${PROGRESS_START_TIME}))
 
     if [ $MAX -ge 1 ] ; then
         let "PERCENTAGE=(100*$RESULT)/$MAX"
