@@ -20,11 +20,11 @@ VALUE=$(cat $FILE)
 [ -z "${VALUE##*[!0-9]*}" ] && VALUE=0
 let "RESULT=${VALUE}${OPERATION}" || :
 [ "$VALUE" != "$RESULT" ] && echo "$RESULT" > $FILE
-[ $RESULT -eq 0 ] && echo "$(date -u +%s)" > "${FILE}_time" && TIME=0
+[ $RESULT -eq 0 ] && echo "$(date -u +%s)" > "${FILE}_time" && PROGRESS_TIME=0
 
 while : ; do
     RESULT=$(cat $FILE)
-    [ $RESULT -ge 1 ] && TIME=$(($(date -u +%s)-$(cat "${FILE}_time")))
+    [ $RESULT -ge 1 ] && PROGRESS_TIME=$(($(date -u +%s)-$(cat "${FILE}_time")))
 
     if [ $MAX -ge 1 ] ; then
         let "PERCENTAGE=(100*$RESULT)/$MAX"
@@ -39,13 +39,13 @@ while : ; do
             BLACK=$(printf "%${COUNT_BLACK}s" | tr " " "#")
             WHITE=$(printf "%${COUNT_WHITE}s" | tr " " ".")
     
-            echo -ne "\r$BLACK-$WHITE ($PERCENTAGE%|${TIME}s)" && sleep 0.15
-            echo -ne "\r$BLACK\\$WHITE ($PERCENTAGE%|${TIME}s)" && sleep 0.15
-            echo -ne "\r$BLACK|$WHITE ($PERCENTAGE%|${TIME}s)" && sleep 0.15
-            echo -ne "\r$BLACK/$WHITE ($PERCENTAGE%|${TIME}s)" && sleep 0.15
-            echo -ne "\r$BLACK-$WHITE ($PERCENTAGE%|${TIME}s)" && sleep 0.15
-            echo -ne "\r$BLACK\\$WHITE ($PERCENTAGE%|${TIME}s)" && sleep 0.15
-            echo -ne "\r$BLACK|$WHITE ($PERCENTAGE%|${TIME}s)" && sleep 0.15
+            echo -ne "\r$BLACK-$WHITE ($PERCENTAGE%|${PROGRESS_TIME}s)" && sleep 0.15
+            echo -ne "\r$BLACK\\$WHITE ($PERCENTAGE%|${PROGRESS_TIME}s)" && sleep 0.15
+            echo -ne "\r$BLACK|$WHITE ($PERCENTAGE%|${PROGRESS_TIME}s)" && sleep 0.15
+            echo -ne "\r$BLACK/$WHITE ($PERCENTAGE%|${PROGRESS_TIME}s)" && sleep 0.15
+            echo -ne "\r$BLACK-$WHITE ($PERCENTAGE%|${PROGRESS_TIME}s)" && sleep 0.15
+            echo -ne "\r$BLACK\\$WHITE ($PERCENTAGE%|${PROGRESS_TIME}s)" && sleep 0.15
+            echo -ne "\r$BLACK|$WHITE ($PERCENTAGE%|${PROGRESS_TIME}s)" && sleep 0.15
 
             [ "$PID" != "0" ] && [ -d /proc/$PID ] && continue
             echo -ne "\r$BLACK#$WHITE ($PERCENTAGE%)" 
