@@ -66,7 +66,7 @@ NEW_INIT_HASH=$(hashdeep -r -l $KIRA_WORKSTATION/init.sh | sort | md5sum | awk '
 
 if [ "$NEW_INIT_HASH" != "$INIT_HASH" ] ; then
    echo "WARNING: Hash of the init file changed, full reset is required, starting INIT process..."
-   gnome-terminal --disable-factory -- bash -c "$KIRA_MANAGER/init.sh False ; read -d'' -s -n1 -p 'Press any key to exit...' && exit"
+   gnome-terminal -- bash -c "$KIRA_MANAGER/init.sh False ; read -d'' -s -n1 -p 'Press any key to exit...' && exit"
    sleep 3
    exit 0
 fi

@@ -111,7 +111,8 @@ while : ; do
         $KIRA_SCRIPTS/progress-touch.sh "*0"
         for name in $CONTAINERS ; do
             $WORKSTATION_SCRIPTS/dump-logs.sh $name &>> "$KIRA_DUMP/infra/dump_${name}.log" &
-            PID=$! && $KIRA_SCRIPTS/progress-touch.sh "+1" "$CONTAINERS_COUNT" 48 $PID
+            PID=$!
+            source $KIRA_SCRIPTS/progress-touch.sh "+1" "$CONTAINERS_COUNT" 48 $PID
             wait $PID
         done
         echo "INFO: Starting code editor..."
@@ -138,7 +139,7 @@ while : ; do
         echo -e "\e[33;1mWARNING: You have to wait for new process to finish\e[0m"
         $KIRA_SCRIPTS/progress-touch.sh "*0" 
         $KIRA_MANAGER/stop.sh &>> "$KIRA_DUMP/infra/stop.log" &
-        PID=$! && $KIRA_SCRIPTS/progress-touch.sh "+0" $((1+$CONTAINERS_COUNT)) 48 $PID
+        PID=$! && source $KIRA_SCRIPTS/progress-touch.sh "+0" $((1+$CONTAINERS_COUNT)) 48 $PID
         wait $PID || echo "ERROR: Stop script failed, logs are available in the '$KIRA_DUMP' directory" && read -d'' -s -n1 -p 'Press any key to continue...'
         break
     elif [ "${OPTION,,}" == "r" ] ; then
@@ -146,7 +147,7 @@ while : ; do
         echo -e "\e[33;1mWARNING: You have to wait for new process to finish\e[0m"
         $KIRA_SCRIPTS/progress-touch.sh "*0" 
         $KIRA_MANAGER/restart.sh &>> "$KIRA_DUMP/infra/restart.log" &
-        PID=$! && $KIRA_SCRIPTS/progress-touch.sh "+0" $((2+$CONTAINERS_COUNT)) 48 $PID
+        PID=$! && source $KIRA_SCRIPTS/progress-touch.sh "+0" $((2+$CONTAINERS_COUNT)) 48 $PID
         wait $PID || echo "ERROR: Restart script failed, logs are available in the '$KIRA_DUMP' directory" && read -d'' -s -n1 -p 'Press any key to continue...'
         break
     elif [ "${OPTION,,}" == "h" ] ; then
@@ -154,7 +155,7 @@ while : ; do
         echo -e "\e[33;1mWARNING: You have to wait for new process to finish\e[0m"
         $KIRA_SCRIPTS/progress-touch.sh "*0" 
         $KIRA_MANAGER/start.sh &>> "$KIRA_DUMP/infra/start.log" &
-        PID=$! && $KIRA_SCRIPTS/progress-touch.sh "+0" $((42+(2*$VALIDATORS_COUNT))) 48 $PID
+        PID=$! && source $KIRA_SCRIPTS/progress-touch.sh "+0" $((42+(2*$VALIDATORS_COUNT))) 48 $PID
         wait $PID || echo "ERROR: Start script failed, logs are available in the '$KIRA_DUMP' directory" && read -d'' -s -n1 -p 'Press any key to continue...'
         break
     elif [ "${OPTION,,}" == "d" ] ; then
@@ -162,7 +163,7 @@ while : ; do
         echo -e "\e[33;1mWARNING: You have to wait for new process to finish\e[0m"
         $KIRA_SCRIPTS/progress-touch.sh "*0" 
         $KIRA_MANAGER/delete.sh &>> "$KIRA_DUMP/infra/delete.log" &
-        PID=$! && $KIRA_SCRIPTS/progress-touch.sh "+0" $((7+$CONTAINERS_COUNT)) 48 $PID
+        PID=$! && source $KIRA_SCRIPTS/progress-touch.sh "+0" $((7+$CONTAINERS_COUNT)) 48 $PID
         wait $PID || echo "ERROR: Delete script failed, logs are available in the '$KIRA_DUMP' directory" && read -d'' -s -n1 -p 'Press any key to continue...'
         break
     elif [ "${OPTION,,}" == "w" ] ; then
