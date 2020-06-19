@@ -39,16 +39,16 @@ while : ; do
             BLACK=$(printf "%${COUNT_BLACK}s" | tr " " "#")
             WHITE=$(printf "%${COUNT_WHITE}s" | tr " " ".")
     
-            echo -ne "$BLACK-$WHITE ($PERCENTAGE%|${TIME}s)\r" && sleep 0.15
-            echo -ne "$BLACK\\$WHITE ($PERCENTAGE%|${TIME}s)\r" && sleep 0.15
-            echo -ne "$BLACK|$WHITE ($PERCENTAGE%|${TIME}s)\r" && sleep 0.15
-            echo -ne "$BLACK/$WHITE ($PERCENTAGE%|${TIME}s)\r" && sleep 0.15
-            echo -ne "$BLACK-$WHITE ($PERCENTAGE%|${TIME}s)\r" && sleep 0.15
-            echo -ne "$BLACK\\$WHITE ($PERCENTAGE%|${TIME}s)\r" && sleep 0.15
-            echo -ne "$BLACK|$WHITE ($PERCENTAGE%|${TIME}s)\r" && sleep 0.15
+            echo -ne "\r$BLACK-$WHITE ($PERCENTAGE%|${TIME}s)" && sleep 0.15
+            echo -ne "\r$BLACK\\$WHITE ($PERCENTAGE%|${TIME}s)" && sleep 0.15
+            echo -ne "\r$BLACK|$WHITE ($PERCENTAGE%|${TIME}s)" && sleep 0.15
+            echo -ne "\r$BLACK/$WHITE ($PERCENTAGE%|${TIME}s)" && sleep 0.15
+            echo -ne "\r$BLACK-$WHITE ($PERCENTAGE%|${TIME}s)" && sleep 0.15
+            echo -ne "\r$BLACK\\$WHITE ($PERCENTAGE%|${TIME}s)" && sleep 0.15
+            echo -ne "\r$BLACK|$WHITE ($PERCENTAGE%|${TIME}s)" && sleep 0.15
 
             [ "$PID" != "0" ] && [ -d /proc/$PID ] && continue
-            echo -ne "$BLACK#$WHITE ($PERCENTAGE%)\r" 
+            echo -ne "\r$BLACK#$WHITE ($PERCENTAGE%)" 
         fi
     fi
 break
