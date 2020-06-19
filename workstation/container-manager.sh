@@ -3,10 +3,7 @@
 exec 2>&1
 set -e
 
-FIRST_RUN=$1
-[ "$FIRST_RUN" == "True" ] && script -e "$KIRA_DUMP/infra/container-manager.log"
-
-NAME=$2
+NAME=$1
 
 ETC_PROFILE="/etc/profile"
 LOOP_FILE="/tmp/container_manager_loop"
@@ -132,4 +129,4 @@ else
 fi
 
 sleep 1
-source $KIRA_MANAGER/container-manager.sh "False" $NAME
+source $KIRA_MANAGER/container-manager.sh $NAME
