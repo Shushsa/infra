@@ -71,7 +71,8 @@ NEW_INIT_HASH=$(CDHelper hash SHA256 -p="$KIRA_WORKSTATION/init.sh" --silent=tru
 if [ "$NEW_INIT_HASH" != "$INIT_HASH" ] ; then
    INTERACTIVE="False"
    echo "WARNING: Hash of the init file changed, full reset is required, starting INIT process..."
-   gnome-terminal -- script -e "$KIRA_DUMP/INFRA/init.log" -c "$KIRA_MANAGER/init.sh False $START_TIME $DEBUG_MODE $INTERACTIVE ; read -d'' -s -n1 -p 'Press any key to exit and save logs...' && exit"
+   source $KIRA_MANAGER/init.sh "False" "$START_TIME" "$DEBUG_MODE" "$INTERACTIVE"
+   echo "INFO: Non-interactive init was finalized"
    sleep 3
    exit 0
 fi
