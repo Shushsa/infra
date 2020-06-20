@@ -14,7 +14,6 @@ VEREQ=$(CDHelper text vereq --old="$AWSHelperVersion" --new="$VERSION" --silent=
 [ -z "$INSTALL_DIR" ] && INSTALL_DIR="/usr/local/bin"
 
 INSTALL_DIR=$INSTALL_DIR/AWSHelper
-INSTALL_PATH=$INSTALL_DIR/AWSHelper
 echo "------------------------------------------------"
 echo "|       STARTED: AWSHELPER UPDATE v0.0.1       |" 
 echo "|-----------------------------------------------"
@@ -38,7 +37,9 @@ rm -rfv $INSTALL_DIR
 unzip AWSHelper-linux-x64.zip -d $INSTALL_DIR
 chmod -Rv 777 $INSTALL_DIR
 
-ln -s $INSTALL_PATH /bin/AWSHelper || echo "AWSHelper symlink already exists"
+ls -l /bin/AWSHelper || echo "AWSHelper symlink not found"
+rm /bin/AWSHelper || echo "Removing old AWSHelper symlink"
+ln -s $INSTALL_DIR/AWSHelper /bin/AWSHelper || echo "AWSHelper symlink already exists"
 
 AWSHelper version
 

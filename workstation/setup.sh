@@ -18,8 +18,9 @@ ETC_PROFILE="/etc/profile"
 
 source $ETC_PROFILE &> /dev/null
 
+[ -z "$DEBUG_MODE" ] && DEBUG_MODE="False"
 if [ "$DEBUG_MODE" == "True" ] ; then set -x ; else set +x ; fi
-[ -z "$INIT_HASH" ] && INIT_HASH=$(hashdeep -r -l $KIRA_MANAGER/init.sh | sort | md5sum | awk '{print $1}')
+[ -z "$INIT_HASH" ] && INIT_HASH=$(CDHelper hash SHA256 -p="$KIRA_MANAGER/init.sh" --silent=true || echo "")
 
 echo "------------------------------------------------"
 echo "|       STARTED: KIRA INFRA SETUP v0.0.2       |"
@@ -65,19 +66,18 @@ fi
 $KIRA_SCRIPTS/cdhelper-update.sh "v0.6.13" && $KIRA_SCRIPTS/progress-touch.sh "+1" #4
 $KIRA_SCRIPTS/awshelper-update.sh "v0.12.4" && $KIRA_SCRIPTS/progress-touch.sh "+1" #5
 
-source $KIRA_WORKSTATION/setup/certs.sh #6
-source $KIRA_WORKSTATION/setup/envs.sh #7
-
-
-NEW_INIT_HASH=$(hashdeep -r -l $KIRA_WORKSTATION/init.sh | sort | md5sum | awk '{print $1}')
+NEW_INIT_HASH=$(CDHelper hash SHA256 -p="$KIRA_WORKSTATION/init.sh" --silent=true)
 
 if [ "$NEW_INIT_HASH" != "$INIT_HASH" ] ; then
+   INTERACTIVE="False"
    echo "WARNING: Hash of the init file changed, full reset is required, starting INIT process..."
-   gnome-terminal -- bash -c "$KIRA_MANAGER/init.sh False ; read -d'' -s -n1 -p 'Press any key to exit...' && exit"
+   gnome-terminal -- script -e "$KIRA_DUMP/INFRA/init.log" -c "$KIRA_MANAGER/init.sh False $START_TIME $DEBUG_MODE $INTERACTIVE ; read -d'' -s -n1 -p 'Press any key to exit and save logs...' && exit"
    sleep 3
    exit 0
 fi
 
+source $KIRA_WORKSTATION/setup/certs.sh #6
+source $KIRA_WORKSTATION/setup/envs.sh #7
 source $KIRA_WORKSTATION/setup/hosts.sh #8
 source $KIRA_WORKSTATION/setup/system.sh #9
 source $KIRA_WORKSTATION/setup/tools.sh #10
