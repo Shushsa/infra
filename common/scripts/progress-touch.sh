@@ -52,9 +52,16 @@ while : ; do
     [ $RESULT -ge 1 ] && PROGRESS_TIME=$((${PROGRESS_NOW_TIME}-${PROGRESS_START_TIME}))
 
     let "PERCENTAGE=(100*$RESULT)/$PROGRESS_MAX" || PERCENTAGE=0
-    [ $PERCENTAGE -ge 100 ] && PERCENTAGE=100
+    [ $PERCENTAGE -gt 100 ] && PERCENTAGE=100
     [ $PERCENTAGE -lt 0 ] && PERCENTAGE=0
     [ $PROGRESS_LEN -le 0 ] && printf "%s%%" "${PERCENTAGE}" && break
+
+    [ "$PROGRESS_PID" != "0" ] && if ps -p $PROGRESS_PID > /dev/null ; then 
+        [ $PERCENTAGE -ge 100 ] && PERCENTAGE=99
+        CONTINUE="True"
+    else
+        CONTINUE="False"
+    fi
 
     BLACK=""
     WHITE=""
@@ -76,7 +83,7 @@ while : ; do
     echo -ne "\r$BLACK\\$WHITE ($PERCENTAGE%|${PROGRESS_TIME}s)" && sleep 0.15
     echo -ne "\r$BLACK|$WHITE ($PERCENTAGE%|${PROGRESS_TIME}s)" && sleep 0.15
      
-    [ "$PROGRESS_PID" != "0" ] && if ps -p $PROGRESS_PID > /dev/null ; then continue ; fi
+    [ "$CONTINUE" == "True" ] && continue
     echo -ne "\r$BLACK#$WHITE ($PERCENTAGE%|${PROGRESS_TIME}s)" 
 
     break
