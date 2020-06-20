@@ -2,7 +2,7 @@
 set -e
 
 INPUT=$1
-LOADER_NAME=$2
+PROGRESS_FILE=$2
 DEBUG=$3
 
 [ "$DEBUG" == "True" ] && set -x
@@ -18,20 +18,19 @@ PROGRESS_PID=${ARR[3]}
 [ -z "${PROGRESS_LEN##*[!0-9]*}" ] && PROGRESS_LEN=0
 [ -z "${PROGRESS_PID##*[!0-9]*}" ] && PROGRESS_PID=0
 
-PROGRESS_FILE="/tmp/loader"
+if [ ! -f "$PROGRESS_FILE" ] || [ -z "$PROGRESS_FILE" ] ; then
+    PROGRESS_FILE="/tmp/loader"
+fi
+
 PROGRESS_LEN=$(($PROGRESS_LEN-1))
 PROGRESS_TIME=0
-PROGRESS_TIME_FILE="${PROGRESS_FILE}_time_$LOADER_NAME"
-PROGRESS_END_FILE="${PROGRESS_FILE}_end_$LOADER_NAME"
+PROGRESS_TIME_FILE="${PROGRESS_FILE}_time"
 
 touch $PROGRESS_FILE
 touch $PROGRESS_TIME_FILE
-touch $PROGRESS_END_FILE
 
 VALUE=$(cat $PROGRESS_FILE || echo "0")
-LAST_ELAPSED=$(cat $PROGRESS_END_FILE || echo "7200")
 [ -z "${VALUE##*[!0-9]*}" ] && VALUE=0
-[ -z "${LAST_ELAPSED##*[!0-9]*}" ] && LAST_ELAPSED=7200
 let "RESULT=${VALUE}${OPERATION}" || RESULT=0
 echo "$RESULT" > $PROGRESS_FILE || echo "ERROR: Failed to save result into progress file `$PROGRESS_FILE`"
 
@@ -51,20 +50,10 @@ while : ; do
     [ -z "${PROGRESS_START_TIME##*[!0-9]*}" ] && PROGRESS_START_TIME=$PROGRESS_NOW_TIME
     
     [ $RESULT -ge 1 ] && PROGRESS_TIME=$((${PROGRESS_NOW_TIME}-${PROGRESS_START_TIME}))
-    [ $PROGRESS_TIME -le 0 ] && PROGRESS_TIME=1
 
     let "PERCENTAGE=(100*$RESULT)/$PROGRESS_MAX" || PERCENTAGE=0
     [ $PERCENTAGE -gt 100 ] && PERCENTAGE=100
     [ $PERCENTAGE -lt 0 ] && PERCENTAGE=0
-
-    if [ ! -z "$LOADER_NAME" ] && [ $LAST_ELAPSED -gt 0 ] ; then
-        let "PERCENTAGE_TIME=(100*$LAST_ELAPSED)/$PROGRESS_TIME" || PERCENTAGE_TIME=0
-        [ $PERCENTAGE_TIME -gt 100 ] && PERCENTAGE_TIME=100
-        [ $PERCENTAGE_TIME -lt 1 ] && PERCENTAGE_TIME=1
-        let "PERCENTAGE_AVG=($PERCENTAGE_TIME+$PERCENTAGE)/2" || PERCENTAGE_AVG=$PERCENTAGE
-        PERCENTAGE=$PERCENTAGE_AVG
-    fi
-    
     [ $PROGRESS_LEN -le 0 ] && printf "%s%%" "${PERCENTAGE}" && break
 
     [ "$PROGRESS_PID" != "0" ] && if ps -p $PROGRESS_PID > /dev/null ; then 
@@ -96,11 +85,7 @@ while : ; do
      
     [ "$CONTINUE" == "True" ] && continue
     echo -ne "\r$BLACK#$WHITE ($PERCENTAGE%|${PROGRESS_TIME}s)"
-
-    if [ ! -z "$LOADER_NAME" ] && [ "$PROGRESS_PID" != "0" ] && [ $PERCENTAGE -ge 100 ] ; then
-        let "PROGRESS_TIME_AVG=(($PROGRESS_TIME+$LAST_ELAPSED)/2)" || PROGRESS_TIME_AVG=7200
-        echo "$PROGRESS_TIME_AVG" > $PROGRESS_END_FILE
-    fi
+    [ "$PROGRESS_PID" != "0" ] && [ $PERCENTAGE -eq 100 ] && echo -ne "\r$BLACK#$WHITE ($PERCENTAGE%|${PROGRESS_TIME}s|${RESULT})"
 
     break
 done
