@@ -19,5 +19,3 @@ if [ ! -f "$KIRA_SETUP_DOCKER" ] || [ "$VERSION" == "Error" ] ; then
 else
     echo "INFO: Docker $(docker -v) was already installed"
 fi
-
-$KIRA_SCRIPTS/progress-touch.sh "+1"

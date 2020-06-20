@@ -77,22 +77,22 @@ if [ "$NEW_INIT_HASH" != "$INIT_HASH" ] ; then
    exit 0
 fi
 
-source $KIRA_WORKSTATION/setup/certs.sh #6
-source $KIRA_WORKSTATION/setup/envs.sh #7
-source $KIRA_WORKSTATION/setup/hosts.sh #8
-source $KIRA_WORKSTATION/setup/system.sh #9
-source $KIRA_WORKSTATION/setup/tools.sh #10
-source $KIRA_WORKSTATION/setup/npm.sh #11
-source $KIRA_WORKSTATION/setup/rust.sh #12
-source $KIRA_WORKSTATION/setup/dotnet.sh #13
-source $KIRA_WORKSTATION/setup/systemctl2.sh #14
-source $KIRA_WORKSTATION/setup/docker.sh #15
-source $KIRA_WORKSTATION/setup/golang.sh #16
-source $KIRA_WORKSTATION/setup/nginx.sh #17
-source $KIRA_WORKSTATION/setup/chrome.sh #18
-source $KIRA_WORKSTATION/setup/vscode.sh #19
-source $KIRA_WORKSTATION/setup/registry.sh #20
-source $KIRA_WORKSTATION/setup/shortcuts.sh #21
+$KIRA_WORKSTATION/setup/certs.sh && $KIRA_SCRIPTS/progress-touch.sh "+1" #6
+$KIRA_WORKSTATION/setup/envs.sh && $KIRA_SCRIPTS/progress-touch.sh "+1" #7
+$KIRA_WORKSTATION/setup/hosts.sh && $KIRA_SCRIPTS/progress-touch.sh "+1" #8
+$KIRA_WORKSTATION/setup/system.sh && $KIRA_SCRIPTS/progress-touch.sh "+1" #9
+$KIRA_WORKSTATION/setup/tools.sh && $KIRA_SCRIPTS/progress-touch.sh "+1" #10
+$KIRA_WORKSTATION/setup/npm.sh && $KIRA_SCRIPTS/progress-touch.sh "+1" #11
+$KIRA_WORKSTATION/setup/rust.sh && $KIRA_SCRIPTS/progress-touch.sh "+1" #12
+$KIRA_WORKSTATION/setup/dotnet.sh && $KIRA_SCRIPTS/progress-touch.sh "+1" #13
+$KIRA_WORKSTATION/setup/systemctl2.sh && $KIRA_SCRIPTS/progress-touch.sh "+1" #14
+$KIRA_WORKSTATION/setup/docker.sh && $KIRA_SCRIPTS/progress-touch.sh "+1" #15
+$KIRA_WORKSTATION/setup/golang.sh && $KIRA_SCRIPTS/progress-touch.sh "+1" #16
+$KIRA_WORKSTATION/setup/nginx.sh && $KIRA_SCRIPTS/progress-touch.sh "+1" #17
+$KIRA_WORKSTATION/setup/chrome.sh && $KIRA_SCRIPTS/progress-touch.sh "+1" #18
+$KIRA_WORKSTATION/setup/vscode.sh && $KIRA_SCRIPTS/progress-touch.sh "+1" #19
+$KIRA_WORKSTATION/setup/registry.sh && $KIRA_SCRIPTS/progress-touch.sh "+1" #20
+$KIRA_WORKSTATION/setup/shortcuts.sh && $KIRA_SCRIPTS/progress-touch.sh "+1" #21
 
 touch /tmp/rs_manager
 touch /tmp/rs_git_manager

@@ -29,5 +29,3 @@ exit 0"
 else
     echo "INFO: Your system has all pre-requisites set"
 fi
-
-$KIRA_SCRIPTS/progress-touch.sh "+1"

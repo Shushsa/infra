@@ -42,6 +42,4 @@ cat > $USER_MANAGER_DESKTOP <<< $KIRA_MANAGER_ENTRY
 
 chmod +x $USER_MANAGER_DESKTOP 
 
-$KIRA_SCRIPTS/progress-touch.sh "+1"
-
 

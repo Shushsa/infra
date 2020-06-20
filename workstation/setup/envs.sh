@@ -90,5 +90,3 @@ if [ ! -f "$KIRA_SETUP_KIRA_ENV" ] ; then
 else
     echo "INFO: Kira environment variables were already set"
 fi
-
-$KIRA_SCRIPTS/progress-touch.sh "+1"

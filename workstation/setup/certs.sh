@@ -21,5 +21,3 @@ if [ ! -f "$KIRA_SETUP_CERTS" ] ; then
 else
     echo "INFO: Certs and refs were already installed."
 fi
-
-$KIRA_SCRIPTS/progress-touch.sh "+1"

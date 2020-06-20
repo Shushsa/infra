@@ -19,5 +19,3 @@ if [ ! -f "$KIRA_SETUP_VSCODE" ] ; then
 else
     echo "Visual Studio Code $(code --version --user-data-dir=/usr/code) was already installed."
 fi
-
-$KIRA_SCRIPTS/progress-touch.sh "+1"

@@ -21,5 +21,3 @@ if [ ! -f "$KIRA_SETUP_CHROME" ] ; then
 else
     echo "INFO: Chrome $(google-chrome --version) was already installed"
 fi
-
-$KIRA_SCRIPTS/progress-touch.sh "+1"

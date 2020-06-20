@@ -18,5 +18,3 @@ if [ ! -f "$KIRA_SETUP_GO" ] ; then
 else
     echo "INFO: Go $(go version) was already installed"
 fi
-
-$KIRA_SCRIPTS/progress-touch.sh "+1"
