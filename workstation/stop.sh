@@ -22,6 +22,8 @@ for CONTAINER in $CONTAINERS ; do
     $KIRA_SCRIPTS/progress-touch.sh "+1"
 done
 
+$KIRA_SCRIPTS/progress-touch.sh "+1" #2+CONTAINER_COUNT
+
 echo "------------------------------------------------"
 echo "|      FINISHED: KIRA INFRA STOP v0.0.1        |"
 echo "------------------------------------------------"
