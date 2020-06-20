@@ -39,9 +39,6 @@ echo "|_______________________________________________"
 
 $KIRA_SCRIPTS/progress-touch.sh "+1" #1
 
-$KIRA_SCRIPTS/cdhelper-update.sh "v0.6.13" && $KIRA_SCRIPTS/progress-touch.sh "+1" #4
-$KIRA_SCRIPTS/awshelper-update.sh "v0.12.4" && $KIRA_SCRIPTS/progress-touch.sh "+1" #5
-
 cd /kira
 UPDATED="False"
 if [ "$SKIP_UPDATE" == "False" ] ; then
@@ -62,6 +59,9 @@ else
     echo "ERROR: SKIP_UPDATE propoerty is invalid or undefined"
     exit 1
 fi
+
+$KIRA_SCRIPTS/cdhelper-update.sh "v0.6.13" && $KIRA_SCRIPTS/progress-touch.sh "+1" #4
+$KIRA_SCRIPTS/awshelper-update.sh "v0.12.4" && $KIRA_SCRIPTS/progress-touch.sh "+1" #5
 
 NEW_INIT_HASH=$(CDHelper hash SHA256 -p="$KIRA_WORKSTATION/init.sh" --silent=true)
 

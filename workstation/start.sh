@@ -34,14 +34,14 @@ $KIRA_SCRIPTS/progress-touch.sh "+1" #1
 
 echo "INFO: Updating infra repository and fetching changes..."
 if [ "$SKIP_UPDATE" == "False" ] ; then
-    $KIRA_MANAGER/setup.sh "$SKIP_UPDATE" #22(+21)
-    source $KIRA_WORKSTATION/start.sh "True" #23(+1)
+    $KIRA_MANAGER/setup.sh "$SKIP_UPDATE" #23(+22)
+    source $KIRA_WORKSTATION/start.sh "True" #24(+1)
     exit 0
 fi
 
 source $ETC_PROFILE &> /dev/null
 
-$KIRA_SCRIPTS/container-restart.sh "registry" && $KIRA_SCRIPTS/progress-touch.sh "+1" #24
+$KIRA_SCRIPTS/container-restart.sh "registry" && $KIRA_SCRIPTS/progress-touch.sh "+1" #25
 for ((i=1;i<=$MAX_VALIDATORS;i++)); do
 
     VALIDATORS_EXIST=$($KIRA_SCRIPTS/containers-exist.sh "validator" || echo "error")
@@ -60,16 +60,16 @@ for ((i=1;i<=$MAX_VALIDATORS;i++)); do
     fi
 done
 
-$KIRA_SCRIPTS/progress-touch.sh "+1" #25
-source $WORKSTATION_SCRIPTS/update-base-image.sh #31(+6)
-source $WORKSTATION_SCRIPTS/update-tools-image.sh #36(+5)
-source $WORKSTATION_SCRIPTS/update-validator-image.sh #40(+4)
+$KIRA_SCRIPTS/progress-touch.sh "+1" #26
+source $WORKSTATION_SCRIPTS/update-base-image.sh #32(+6)
+source $WORKSTATION_SCRIPTS/update-tools-image.sh #37(+5)
+source $WORKSTATION_SCRIPTS/update-validator-image.sh #41(+4)
 
 cd $KIRA_WORKSTATION
 
 docker network rm kiranet || echo "Failed to remove kira network"
 docker network create --subnet=$KIRA_VALIDATORS_SUBNET kiranet
-$KIRA_SCRIPTS/progress-touch.sh "+1" #41
+$KIRA_SCRIPTS/progress-touch.sh "+1" #42
 
 GENESIS_SOUCE="/root/.sekaid/config/genesis.json"
 GENESIS_DESTINATION="$DOCKER_COMMON/genesis.json"
@@ -150,7 +150,7 @@ for ((i=1;i<=$VALIDATORS_COUNT;i++)); do
     echo "SUCCESS: validator-$i is up and running, seed: $SEEDS"
 done
 
-$KIRA_SCRIPTS/progress-touch.sh "+1" #42+(2*$VALIDATORS_COUNT)
+$KIRA_SCRIPTS/progress-touch.sh "+1" #43+(2*$VALIDATORS_COUNT)
 
 # success_end file is created when docker startup suceeds
 echo "------------------------------------------------"
