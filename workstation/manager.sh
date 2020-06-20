@@ -133,8 +133,13 @@ while : ; do
         break
     elif [ "${OPTION,,}" == "i" ] ; then
         echo "INFO: Wiping and re-initializing..."
-        gnome-terminal --disable-factory -- script -e $KIRA_DUMP/INFRA/init.log -c "$KIRA_MANAGER/init.sh False ; read -d'' -s -n1 -p 'Press any key to exit and save logs...' && exit"
-        echo -e "\e[33;1mWARNING: You have to wait for new process to finish\e[0m"
+        $KIRA_SCRIPTS/progress-touch.sh "*0" 
+        gnome-terminal --disable-factory -- script -e $KIRA_DUMP/INFRA/init.log -c "$KIRA_MANAGER/init.sh False ; read -d'' -s -n1 -p 'Press any key to exit and save logs...' && exit" &
+        PID=$! && echo -e "\e[33;1mWARNING: You have to wait for process $PID to finish\e[0m"
+        $KIRA_SCRIPTS/progress-touch.sh "+0;$((61+(2*$VALIDATORS_COUNT)));48;$PID" "" 2> "$KIRA_DUMP/INFRA/progress.log" || echo "WARNING: Progress tool failed"
+        FAILURE="False" && wait $PID || FAILURE="True"
+        [ "$FAILURE" == "False" ] && echo -e "\nSUCCESS: Infra was stopped" && break
+        [ "$FAILURE" == "True" ] && echo -e "\nERROR: Init script failed, logs are available in the '$KIRA_DUMP' directory"
         break
     elif [ "${OPTION,,}" == "s" ] ; then
         echo "INFO: Stopping infrastructure..."
@@ -144,7 +149,8 @@ while : ; do
         $KIRA_SCRIPTS/progress-touch.sh "+0;$((2+$CONTAINERS_COUNT));48;$PID" "" 2> "$KIRA_DUMP/INFRA/progress.log" || echo "WARNING: Progress tool failed"
         FAILURE="False" && wait $PID || FAILURE="True"
         [ "$FAILURE" == "True" ] && echo -e "\nERROR: Stop script failed, logs are available in the '$KIRA_DUMP' directory" && read -d'' -s -n1 -p 'Press any key to continue...'
-        echo -e "\nSUCCESS: Infra was stopped" && break
+        [ "$FAILURE" == "False" ] && echo -e "\nSUCCESS: Infra was stopped"
+        break
     elif [ "${OPTION,,}" == "r" ] ; then
         echo "INFO: Re-starting infrastructure..."
         $KIRA_SCRIPTS/progress-touch.sh "*0" 
@@ -153,7 +159,8 @@ while : ; do
         $KIRA_SCRIPTS/progress-touch.sh "+0;$((2+$CONTAINERS_COUNT));48;$PID" "" 2> "$KIRA_DUMP/INFRA/progress.log" || echo "WARNING: Progress tool failed"
         FAILURE="False" && wait $PID || FAILURE="True"
         [ "$FAILURE" == "True" ] && echo -e "\nERROR: Restart script failed, logs are available in the '$KIRA_DUMP' directory" && read -d'' -s -n1 -p 'Press any key to continue...'
-        echo -e "\nSUCCESS: Infra was restarted" && break
+        [ "$FAILURE" == "False" ] && echo -e "\nSUCCESS: Infra was restarted" 
+        break
     elif [ "${OPTION,,}" == "h" ] ; then
         echo "INFO: Wiping and Restarting infra..."
         $KIRA_SCRIPTS/progress-touch.sh "*0" 
@@ -162,7 +169,8 @@ while : ; do
         $KIRA_SCRIPTS/progress-touch.sh "+0;$((61+(2*$VALIDATORS_COUNT)));48;$PID" "" 2> "$KIRA_DUMP/INFRA/progress.log" || echo "WARNING: Progress tool failed"
         FAILURE="False" && wait $PID || FAILURE="True"
         [ "$FAILURE" == "True" ] && echo -e "\nERROR: Start script failed, logs are available in the '$KIRA_DUMP' directory" && read -d'' -s -n1 -p 'Press any key to continue...'
-        echo -e "\nSUCCESS: Infra was wiped and restarted" && break
+        [ "$FAILURE" == "False" ] && echo -e "\nSUCCESS: Infra was wiped and restarted"
+        break
     elif [ "${OPTION,,}" == "d" ] ; then
         echo "INFO: Wiping and removing infra..."
         $KIRA_SCRIPTS/progress-touch.sh "*0" 
@@ -171,7 +179,8 @@ while : ; do
         $KIRA_SCRIPTS/progress-touch.sh "+0;$((6+$CONTAINERS_COUNT));48;$PID" "" 2> "$KIRA_DUMP/INFRA/progress.log" || echo "WARNING: Progress tool failed"
         FAILURE="False" && wait $PID || FAILURE="True"
         [ "$FAILURE" == "True" ] && echo "ERROR: Delete script failed, logs are available in the '$KIRA_DUMP' directory" && read -d'' -s -n1 -p 'Press any key to continue...'
-        echo -e "\nSUCCESS: Infra was wiped" && break
+        [ "$FAILURE" == "False" ] && echo -e "\nSUCCESS: Infra was wiped"
+        break
     elif [ "${OPTION,,}" == "w" ] ; then
         echo "INFO: Please wait, refreshing user interface..." && break
     elif [ "${OPTION,,}" == "x" ] ; then
