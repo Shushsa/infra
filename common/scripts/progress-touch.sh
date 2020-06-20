@@ -33,7 +33,7 @@ touch $PROGRESS_TIME_FILE
 
 VALUE=$(cat $PROGRESS_FILE || echo "0")
 [ -z "${VALUE##*[!0-9]*}" ] && VALUE=0
-let "RESULT=${VALUE}${OPERATION}" || :
+let "RESULT=${VALUE}${OPERATION}" || RESULT=0
 echo "$RESULT" > $PROGRESS_FILE || echo "ERROR: Failed to save result into progress file `$PROGRESS_FILE`"
 
 PROGRESS_START_TIME="$(date -u +%s)"
@@ -53,17 +53,17 @@ while : ; do
     
     [ $RESULT -ge 1 ] && PROGRESS_TIME=$((${PROGRESS_NOW_TIME}-${PROGRESS_START_TIME}))
 
-    let "PERCENTAGE=(100*$RESULT)/$PROGRESS_MAX"
+    let "PERCENTAGE=(100*$RESULT)/$PROGRESS_MAX" || PERCENTAGE=0
     [ $PERCENTAGE -ge 100 ] && PERCENTAGE=100
-    [ $PERCENTAGE -le 0 ] && PERCENTAGE=0
+    [ $PERCENTAGE -lt 0 ] && PERCENTAGE=0
     [ $PROGRESS_LEN -le 0 ] && printf "%s%%" "${PERCENTAGE}" && break
 
     BLACK=""
     WHITE=""
 
-    let "COUNT_BLACK=(($PROGRESS_LEN*$RESULT)/$PROGRESS_MAX)-1" || :
+    let "COUNT_BLACK=(($PROGRESS_LEN*$RESULT)/$PROGRESS_MAX)-1" || COUNT_BLACK=0
     [ $COUNT_BLACK -gt $PROGRESS_LEN ] && COUNT_BLACK=$PROGRESS_LEN
-    let "COUNT_WHITE=$PROGRESS_LEN-$COUNT_BLACK" || :
+    let "COUNT_WHITE=$PROGRESS_LEN-$COUNT_BLACK" || COUNT_WHITE=0
     [ $COUNT_WHITE -gt $PROGRESS_LEN ] && COUNT_WHITE=$PROGRESS_LEN
     
     [ $COUNT_BLACK -ge 1 ] && BLACK=$(printf "%${COUNT_BLACK}s" | tr " " "#")
