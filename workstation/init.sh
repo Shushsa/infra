@@ -18,6 +18,9 @@ INTERACTIVE=$4
 [ -z "$SILENT_MODE" ] && SILENT_MODE="False"
 [ -z "$INTERACTIVE" ] && INTERACTIVE="True"
 
+# in the non interactive mode always use explicit shell
+[ "$INTERACTIVE" != "True" ] && set -x 
+
 NEW_INTERACTIVE=""
 NEW_DEBUG_MODE=""
 NEW_INFRA_BRANCH=""
@@ -28,27 +31,6 @@ NEW_SMTP_LOGIN=""
 NEW_SMTP_PASSWORD=""
 NEW_SSH_KEY=""
 NEW_VALIDATORS_COUNT=""
-
-if [ "$INTERACTIVE" == "True" ] ; then
-    echo -e "\e[36;1mPress [Y]es/[N]o is you want to run in interactive mode, [ENTER] if '$INTERACTIVE': \e[0m\c" && read  -d'' -s -n1 NEW_INTERACTIVE
-    if [ "${NEW_INTERACTIVE,,}" == "y" ] ; then
-        INTERACTIVE="True"
-    elif [ "${NEW_INTERACTIVE,,}" == "n" ]  ; then
-        INTERACTIVE="False"
-    fi
-fi
-
-[ "$INTERACTIVE" == "True" ] && if [ "$SKIP_UPDATE" == "False" ] ; then
-    echo -e "\e[36;1mPress [Y]es/[N]o is you want to run in debug mode, [ENTER] if '$DEBUG_MODE': \e[0m\c" && read  -d'' -s -n1 NEW_DEBUG_MODE
-    if [ "${NEW_DEBUG_MODE,,}" == "y" ] ; then
-        DEBUG_MODE="True"
-    elif [ "${NEW_DEBUG_MODE,,}" == "n" ]  ; then
-        DEBUG_MODE="False"
-    fi
-fi
-
-# in the non interactive mode always use explicit shell
-[ "$INTERACTIVE" != "True" ] && set -x 
 
 MAX_VALIDATORS=254
 [ -z "$INFRA_BRANCH" ] && INFRA_BRANCH="master"
@@ -68,6 +50,28 @@ MAX_VALIDATORS=254
 [ "$KIRA_USER" == "root" ] && echo "You must login as non root user to your machine"
 
 if [ "$SKIP_UPDATE" == "False" ] ; then
+
+    if [ "$INTERACTIVE" == "True" ] ; then
+        echo -e "\e[36;1mPress [Y]es/[N]o if you want to run in interactive mode, [ENTER] if '$INTERACTIVE': \e[0m\c" && read  -d'' -s -n1 NEW_INTERACTIVE
+        if [ "${NEW_INTERACTIVE,,}" == "y" ] ; then
+            INTERACTIVE="True"
+        elif [ "${NEW_INTERACTIVE,,}" == "n" ]  ; then
+            INTERACTIVE="False"
+        fi
+    fi
+    
+    [ "$INTERACTIVE" == "True" ] && if [ "$SKIP_UPDATE" == "False" ] ; then
+        echo -e "\e[36;1mPress [Y]es/[N]o if you want to run in debug mode, [ENTER] if '$DEBUG_MODE': \e[0m\c" && read  -d'' -s -n1 NEW_DEBUG_MODE
+        if [ "${NEW_DEBUG_MODE,,}" == "y" ] ; then
+            DEBUG_MODE="True"
+        elif [ "${NEW_DEBUG_MODE,,}" == "n" ]  ; then
+            DEBUG_MODE="False"
+        fi
+    fi
+    
+    # in the non interactive mode always use explicit shell
+    [ "$INTERACTIVE" != "True" ] && set -x 
+
     #########################################
     # START Installing Essentials
     #########################################
