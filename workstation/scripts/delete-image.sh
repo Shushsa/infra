@@ -2,6 +2,7 @@
 
 exec 2>&1
 set -e
+set -x
 
 # Local Update Shortcut:
 # (rm -fv $KIRA_WORKSTATION/delete-image.sh) && nano $KIRA_WORKSTATION/delete-image.sh && chmod 777 $KIRA_WORKSTATION/delete-image.sh

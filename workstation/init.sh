@@ -3,6 +3,7 @@
 
 exec 2>&1
 set -e
+set -x
 
 ETC_PROFILE="/etc/profile"
 source $ETC_PROFILE &> /dev/null

@@ -2,10 +2,10 @@
 
 exec 2>&1
 set -e
-START_TIME_IMAGE_UPDATE="$(date -u +%s)"
+set -x
 
-ETC_PROFILE="/etc/profile"
-source $ETC_PROFILE &> /dev/null
+START_TIME_IMAGE_UPDATE="$(date -u +%s)"
+source "/etc/profile" &> /dev/null
 
 echo "------------------------------------------------"
 echo "|      STARTED: BASE IMAGE UPDATE v0.0.1        |"

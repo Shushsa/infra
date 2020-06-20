@@ -13,10 +13,9 @@ BRANCH_ENVAR=$5
 
 [ -z "$BRANCH_ENVAR" ] && echo "Git manager failure, BRANCH_ENVAR property was not defined" && exit 1
 
-ETC_PROFILE="/etc/profile"
 LOOP_FILE="/tmp/git_manager_loop"
 RESTART_SIGNAL="/tmp/rs_git_manager"
-source $ETC_PROFILE &> /dev/null
+source "/etc/profile" &> /dev/null
 if [ "$DEBUG_MODE" == "True" ] ; then set -x ; else set +x ; fi
 
 while : ; do

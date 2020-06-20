@@ -2,9 +2,11 @@
 
 exec 2>&1
 set -e
+set -x
 
 # Local Update Shortcut:
 # (rm -fv $KIRA_WORKSTATION/setup.sh) && nano $KIRA_WORKSTATION/setup.sh && chmod 777 $KIRA_WORKSTATION/setup.sh
+source "/etc/profile" &> /dev/null
 
 SKIP_UPDATE=$1
 START_TIME=$2
@@ -13,13 +15,7 @@ INIT_HASH=$3
 [ -z "$START_TIME" ] && START_TIME="$(date -u +%s)"
 [ -z "$SKIP_UPDATE" ] && SKIP_UPDATE="False"
 
-BASHRC=~/.bashrc
-ETC_PROFILE="/etc/profile"
-
-source $ETC_PROFILE &> /dev/null
-
 [ -z "$DEBUG_MODE" ] && DEBUG_MODE="False"
-if [ "$DEBUG_MODE" == "True" ] ; then set -x ; else set +x ; fi
 [ -z "$INIT_HASH" ] && INIT_HASH=$(CDHelper hash SHA256 -p="$KIRA_MANAGER/init.sh" --silent=true || echo "")
 
 echo "------------------------------------------------"
@@ -43,7 +39,11 @@ echo "|_______________________________________________"
 
 $KIRA_SCRIPTS/progress-touch.sh "+1" #1
 
+$KIRA_SCRIPTS/cdhelper-update.sh "v0.6.13" && $KIRA_SCRIPTS/progress-touch.sh "+1" #4
+$KIRA_SCRIPTS/awshelper-update.sh "v0.12.4" && $KIRA_SCRIPTS/progress-touch.sh "+1" #5
+
 cd /kira
+UPDATED="False"
 if [ "$SKIP_UPDATE" == "False" ] ; then
     echo "INFO: Updating Infra..."
     $KIRA_SCRIPTS/git-pull.sh "$INFRA_REPO" "$INFRA_BRANCH" "$KIRA_INFRA" 777 && $KIRA_SCRIPTS/progress-touch.sh "+1" #2
@@ -55,7 +55,7 @@ if [ "$SKIP_UPDATE" == "False" ] ; then
     chmod -R 777 $KIRA_MANAGER
 
     source $KIRA_WORKSTATION/setup.sh "True" "$START_TIME" "$INIT_HASH" 
-    exit 0
+    UPDATED="True"
 elif [ "$SKIP_UPDATE" == "True" ] ; then
     echo "INFO: Skipping Infra Update..."
 else
@@ -63,12 +63,9 @@ else
     exit 1
 fi
 
-$KIRA_SCRIPTS/cdhelper-update.sh "v0.6.13" && $KIRA_SCRIPTS/progress-touch.sh "+1" #4
-$KIRA_SCRIPTS/awshelper-update.sh "v0.12.4" && $KIRA_SCRIPTS/progress-touch.sh "+1" #5
-
 NEW_INIT_HASH=$(CDHelper hash SHA256 -p="$KIRA_WORKSTATION/init.sh" --silent=true)
 
-if [ "$NEW_INIT_HASH" != "$INIT_HASH" ] ; then
+if [ "$UPDATED" == "True" ] && [ "$NEW_INIT_HASH" != "$INIT_HASH" ] ; then
    INTERACTIVE="False"
    echo "WARNING: Hash of the init file changed, full reset is required, starting INIT process..."
    source $KIRA_MANAGER/init.sh "False" "$START_TIME" "$DEBUG_MODE" "$INTERACTIVE"

@@ -2,6 +2,7 @@
 
 exec 2>&1
 set -e
+set -x
 
 # Local Update Shortcut:
 # (rm -fv $KIRA_WORKSTATION/image-updated.sh) && nano $KIRA_WORKSTATION/image-updated.sh && chmod 777 $KIRA_WORKSTATION/image-updated.sh

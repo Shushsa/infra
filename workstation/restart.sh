@@ -2,10 +2,8 @@
 
 exec 2>&1
 set -e
-
-ETC_PROFILE="/etc/profile"
-source $ETC_PROFILE &> /dev/null
-if [ "$DEBUG_MODE" == "True" ] ; then set -x ; else set +x ; fi
+set -x
+source "/etc/profile" &> /dev/null
 
 SKIP_UPDATE=$1
 [ -z "$SKIP_UPDATE" ] && SKIP_UPDATE="False"

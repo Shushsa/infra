@@ -5,10 +5,9 @@ set -e
 
 NAME=$1
 
-ETC_PROFILE="/etc/profile"
 LOOP_FILE="/tmp/container_manager_loop"
 RESTART_SIGNAL="/tmp/rs_container_manager"
-source $ETC_PROFILE &> /dev/null
+source "/etc/profile" &> /dev/null
 CONTAINER_DUPM="/home/$KIRA_USER/Desktop/DUMP/${NAME^^}"
 if [ "$DEBUG_MODE" == "True" ] ; then set -x ; else set +x ; fi
 
