@@ -3,11 +3,9 @@
 
 exec 2>&1
 set -e
-set -x
 
 ETC_PROFILE="/etc/profile"
 source $ETC_PROFILE &> /dev/null
-if [ "$DEBUG_MODE" == "True" ] ; then set -x ; else set +x ; fi
 
 SKIP_UPDATE=$1
 START_TIME=$2
@@ -19,7 +17,6 @@ INTERACTIVE=$4
 [ -z "$DEBUG_MODE" ] && DEBUG_MODE="False"
 [ -z "$SILENT_MODE" ] && SILENT_MODE="False"
 [ -z "$INTERACTIVE" ] && INTERACTIVE="True"
-if [ "$DEBUG_MODE" == "True" ] ; then set -x ; else set +x ; fi
 
 NEW_INTERACTIVE=""
 NEW_DEBUG_MODE=""
@@ -50,9 +47,8 @@ fi
     fi
 fi
 
-if [ "$DEBUG_MODE" == "True" ] ; then set -x ; else set +x ; fi
 # in the non interactive mode always use explicit shell
-[ "$INTERACTIVE" == "False" ] && set -x 
+[ "$INTERACTIVE" != "True" ] && set -x 
 
 MAX_VALIDATORS=254
 [ -z "$INFRA_BRANCH" ] && INFRA_BRANCH="master"
