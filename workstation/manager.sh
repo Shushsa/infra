@@ -135,7 +135,7 @@ while : ; do
         echo "INFO: Wiping and re-initializing..."
         $KIRA_SCRIPTS/progress-touch.sh "*0" 
         gnome-terminal --disable-factory -- script -e $KIRA_DUMP/INFRA/init.log -c "$KIRA_MANAGER/init.sh False ; read -d'' -s -n1 -p 'Press any key to exit and save logs...' && exit" &
-        PID=$! && echo -e "\e[33;1mWARNING: You have to wait for process $PID to finish\e[0m"
+        PID=$! && sleep 2 && echo -e "\e[33;1mWARNING: You have to wait for process $PID to finish then close the new terminal\e[0m"
         $KIRA_SCRIPTS/progress-touch.sh "+0;$((61+(2*$VALIDATORS_COUNT)));48;$PID" "" 2> "$KIRA_DUMP/INFRA/progress.log" || echo "WARNING: Progress tool failed"
         FAILURE="False" && wait $PID || FAILURE="True"
         [ "$FAILURE" == "False" ] && echo -e "\nSUCCESS: Infra was stopped" && break
