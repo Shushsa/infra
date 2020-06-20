@@ -6,7 +6,6 @@ set -e
 
 ETC_PROFILE="/etc/profile"
 source $ETC_PROFILE &> /dev/null
-if [ "$DEBUG_MODE" == "True" ] ; then set -x ; else set +x ; fi
 
 KIRA_SETUP_CHROME="$KIRA_SETUP/chrome-v0.0.1" 
 if [ ! -f "$KIRA_SETUP_CHROME" ] ; then

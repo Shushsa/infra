@@ -91,7 +91,7 @@ if [ "$SKIP_UPDATE" == "False" ] ; then
     mkdir -p $KIRA_MANAGER
     mkdir -p $KIRA_PROGRESS
     rm -rfv $KIRA_DUMP
-    mkdir -p "$KIRA_DUMP/INFRA"
+    mkdir -p "$KIRA_DUMP/INFRA/manager"
 
     KIRA_SETUP_ESSSENTIALS="$KIRA_SETUP/essentials-v0.0.2" 
     if [ ! -f "$KIRA_SETUP_ESSSENTIALS" ] ; then

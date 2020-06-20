@@ -6,7 +6,6 @@ set -e
 
 ETC_PROFILE="/etc/profile"
 source $ETC_PROFILE &> /dev/null
-if [ "$DEBUG_MODE" == "True" ] ; then set -x ; else set +x ; fi
 
 CONTAINER_REACHABLE="True"
 curl --max-time 3 "$KIRA_REGISTRY/v2/_catalog" || CONTAINER_REACHABLE="False"

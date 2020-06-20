@@ -38,9 +38,13 @@ fi
 while : ; do
     [ $PROGRESS_MAX -le 0 ] && break
 
-    RESULT=$(cat $PROGRESS_FILE)
-    PROGRESS_START_TIME=$(cat $PROGRESS_TIME_FILE)
+    RESULT=$(cat $PROGRESS_FILE || echo "0")
+    [ -z "${RESULT##*[!0-9]*}" ] && RESULT=0
+
     PROGRESS_NOW_TIME="$(date -u +%s)"
+    PROGRESS_START_TIME=$(cat $PROGRESS_TIME_FILE || echo $PROGRESS_NOW_TIME)
+    [ -z "${PROGRESS_START_TIME##*[!0-9]*}" ] && PROGRESS_START_TIME=$PROGRESS_NOW_TIME
+    
     [ $RESULT -ge 1 ] && PROGRESS_TIME=$((${PROGRESS_NOW_TIME}-${PROGRESS_START_TIME}))
 
     let "PERCENTAGE=(100*$RESULT)/$PROGRESS_MAX"
