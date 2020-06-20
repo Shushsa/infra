@@ -11,10 +11,13 @@ if [ "$DEBUG_MODE" == "True" ] ; then set -x ; else set +x ; fi
 SKIP_UPDATE=$1
 START_TIME=$2
 DEBUG_MODE=$3
+INTERACTIVE=$4
 
 [ -z "$START_TIME" ] && START_TIME="$(date -u +%s)"
 [ -z "$SKIP_UPDATE" ] && SKIP_UPDATE="False"
 [ -z "$DEBUG_MODE" ] && DEBUG_MODE="False"
+[ -z "$SILENT_MODE" ] && SILENT_MODE="False"
+[ -z "$INTERACTIVE" ] && INTERACTIVE="True"
 if [ "$DEBUG_MODE" == "True" ] ; then set -x ; else set +x ; fi
 
 if [ "$SKIP_UPDATE" == "False" ] ; then
@@ -86,7 +89,7 @@ if [ "$SKIP_UPDATE" == "False" ] ; then
         cd /tmp
         INSTALL_DIR="/usr/local/bin"
         rm -f -v ./CDHelper-linux-x64.zip
-        wget https://github.com/asmodat/CDHelper/releases/download/v0.6.12/CDHelper-linux-x64.zip
+        wget https://github.com/asmodat/CDHelper/releases/download/v0.6.13/CDHelper-linux-x64.zip
         rm -rfv $INSTALL_DIR
         unzip CDHelper-linux-x64.zip -d $INSTALL_DIR
         chmod -R -v 777 $INSTALL_DIR

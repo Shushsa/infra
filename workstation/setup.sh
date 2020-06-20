@@ -19,7 +19,7 @@ ETC_PROFILE="/etc/profile"
 source $ETC_PROFILE &> /dev/null
 
 if [ "$DEBUG_MODE" == "True" ] ; then set -x ; else set +x ; fi
-[ -z "$INIT_HASH" ] && INIT_HASH=$(hashdeep -r -l $KIRA_WORKSTATION/init.sh | sort | md5sum | awk '{print $1}')
+[ -z "$INIT_HASH" ] && INIT_HASH=$(hashdeep -r -l $KIRA_MANAGER/init.sh | sort | md5sum | awk '{print $1}')
 
 echo "------------------------------------------------"
 echo "|       STARTED: KIRA INFRA SETUP v0.0.2       |"
@@ -62,6 +62,13 @@ else
     exit 1
 fi
 
+$KIRA_SCRIPTS/cdhelper-update.sh "v0.6.13" && $KIRA_SCRIPTS/progress-touch.sh "+1" #4
+$KIRA_SCRIPTS/awshelper-update.sh "v0.12.4" && $KIRA_SCRIPTS/progress-touch.sh "+1" #5
+
+source $KIRA_WORKSTATION/setup/certs.sh #6
+source $KIRA_WORKSTATION/setup/envs.sh #7
+
+
 NEW_INIT_HASH=$(hashdeep -r -l $KIRA_WORKSTATION/init.sh | sort | md5sum | awk '{print $1}')
 
 if [ "$NEW_INIT_HASH" != "$INIT_HASH" ] ; then
@@ -71,11 +78,6 @@ if [ "$NEW_INIT_HASH" != "$INIT_HASH" ] ; then
    exit 0
 fi
 
-$KIRA_SCRIPTS/cdhelper-update.sh "v0.6.12" && $KIRA_SCRIPTS/progress-touch.sh "+1" #4
-$KIRA_SCRIPTS/awshelper-update.sh "v0.12.4" && $KIRA_SCRIPTS/progress-touch.sh "+1" #5
-
-source $KIRA_WORKSTATION/setup/certs.sh #6
-source $KIRA_WORKSTATION/setup/envs.sh #7
 source $KIRA_WORKSTATION/setup/hosts.sh #8
 source $KIRA_WORKSTATION/setup/system.sh #9
 source $KIRA_WORKSTATION/setup/tools.sh #10
