@@ -21,7 +21,8 @@ function checkContainerStatus() {
     echo "CONTAINER_ID_$i=$CONTAINER_ID" >> $output
     [ -z "$CONTAINER_ID" ] && echo "SUCCESS=False" >> $output && exit 0
     CONTAINER_STATUS=$(docker inspect $CONTAINER_ID 2>/dev/null | jq -r '.[0].State.Status' 2>/dev/null || echo "error")
-        
+    [ "$CONTAINER_STATUS" != "exited" ] && echo "EXITED=False" >> $output
+
     #Add block height info
     if [ "$CONTAINER_STATUS" == "running" ] ; then
         HEALTH=$(docker inspect $(docker ps --no-trunc -aqf name=$name ) 2>/dev/null | jq -r '.[0].State.Health.Status' 2>/dev/null || echo "")
@@ -44,7 +45,8 @@ while : ; do
     START_TIME="$(date -u +%s)"
     [ -f $RESTART_SIGNAL ] && break
     
-    SUCCESS="True"
+    SUCCESS="True" # all passed
+    EXITED="True" # all exited
     rm -f $VARS_FILE && touch $VARS_FILE
     CONTAINERS=$(docker ps -a | awk '{if(NR>1) print $NF}' | tac)
     i=-1 ; for name in $CONTAINERS ; do i=$((i+1))
@@ -76,7 +78,7 @@ while : ; do
     echo "|----------------------------------------------|"
     echo "| [I] | Re-INITALIZE Environment               |"
     echo "| [L] | Show All LOGS                          |"
-    [ "$CONTAINERS_COUNT" != "0" ] && \
+    [ "$EXITED" == "False" ] && [ "$CONTAINERS_COUNT" != "0" ] && \
     echo "| [S] | STOP All Containers                    |"
     [ "$CONTAINERS_COUNT" != "0" ] && \
     echo "| [R] | Re-START All Containers                |"
@@ -112,7 +114,7 @@ while : ; do
         for name in $CONTAINERS ; do
             $WORKSTATION_SCRIPTS/dump-logs.sh $name > "$KIRA_DUMP/INFRA/dump_${name}.log" 2>&1 &
             PID=$!
-            $KIRA_SCRIPTS/progress-touch.sh "+1" "$CONTAINERS_COUNT" "48" "$PID" "" 2>&1 "$KIRA_DUMP/INFRA/progress.log" || echo "WARNING: Progress tool failed"
+            $KIRA_SCRIPTS/progress-touch.sh "+1" "$CONTAINERS_COUNT" "48" "$PID" "" 2> "$KIRA_DUMP/INFRA/progress.log" || echo "WARNING: Progress tool failed"
             FAILURE="False" && wait $PID || FAILURE="True"
             [ "$FAILURE" == "True" ] && echo "ERROR: Failed to dump $name container logs" && read -d'' -s -n1 -p 'Press any key to continue...'
         done
@@ -140,7 +142,7 @@ while : ; do
         $KIRA_SCRIPTS/progress-touch.sh "*0" 
         $KIRA_MANAGER/stop.sh > "$KIRA_DUMP/INFRA/manager-stop.log" 2>&1 &
         PID=$! && echo -e "\e[33;1mWARNING: You have to wait for new process $PID to finish\e[0m"
-        $KIRA_SCRIPTS/progress-touch.sh "+0" "$((1+$CONTAINERS_COUNT))" "48" "$PID" "" 2>&1 "$KIRA_DUMP/INFRA/progress.log" || echo "WARNING: Progress tool failed"
+        $KIRA_SCRIPTS/progress-touch.sh "+0" "$((1+$CONTAINERS_COUNT))" "48" "$PID" "" 2> "$KIRA_DUMP/INFRA/progress.log" || echo "WARNING: Progress tool failed"
         FAILURE="False" && wait $PID || FAILURE="True"
         [ "$FAILURE" == "True" ] && echo -e "\nERROR: Stop script failed, logs are available in the '$KIRA_DUMP' directory" && read -d'' -s -n1 -p 'Press any key to continue...'
         echo -e "\nSUCCESS: Infra was stopped" && break
@@ -149,7 +151,7 @@ while : ; do
         $KIRA_SCRIPTS/progress-touch.sh "*0" 
         $KIRA_MANAGER/restart.sh > "$KIRA_DUMP/INFRA/manager-restart.log" 2>&1 &
         PID=$! && echo -e "\e[33;1mWARNING: You have to wait for new process $PID to finish\e[0m"
-        $KIRA_SCRIPTS/progress-touch.sh "+0" "$((2+$CONTAINERS_COUNT))" "48" "$PID" "" 2>&1 "$KIRA_DUMP/INFRA/progress.log" || echo "WARNING: Progress tool failed"
+        $KIRA_SCRIPTS/progress-touch.sh "+0" "$((2+$CONTAINERS_COUNT))" "48" "$PID" "" 2> "$KIRA_DUMP/INFRA/progress.log" || echo "WARNING: Progress tool failed"
         FAILURE="False" && wait $PID || FAILURE="True"
         [ "$FAILURE" == "True" ] && echo -e "\nERROR: Restart script failed, logs are available in the '$KIRA_DUMP' directory" && read -d'' -s -n1 -p 'Press any key to continue...'
         echo -e "\nSUCCESS: Infra was restarted" && break
@@ -158,7 +160,7 @@ while : ; do
         $KIRA_SCRIPTS/progress-touch.sh "*0" 
         $KIRA_MANAGER/start.sh > "$KIRA_DUMP/INFRA/manager-start.log" 2>&1 &
         PID=$! && echo -e "\e[33;1mWARNING: You have to wait for new process $PID to finish\e[0m"
-        $KIRA_SCRIPTS/progress-touch.sh "+0" "$((42+(2*$VALIDATORS_COUNT)))" "48" "$PID" "" 2>&1 "$KIRA_DUMP/INFRA/progress.log" || echo "WARNING: Progress tool failed"
+        $KIRA_SCRIPTS/progress-touch.sh "+0" "$((42+(2*$VALIDATORS_COUNT)))" "48" "$PID" "" 2> "$KIRA_DUMP/INFRA/progress.log" || echo "WARNING: Progress tool failed"
         FAILURE="False" && wait $PID || FAILURE="True"
         [ "$FAILURE" == "True" ] && echo -e "\nERROR: Start script failed, logs are available in the '$KIRA_DUMP' directory" && read -d'' -s -n1 -p 'Press any key to continue...'
         echo -e "\nSUCCESS: Infra was wiped and restarted" && break
@@ -167,7 +169,7 @@ while : ; do
         $KIRA_SCRIPTS/progress-touch.sh "*0" 
         $KIRA_MANAGER/delete.sh > "$KIRA_DUMP/INFRA/manager-delete.log" 2>&1 &
         PID=$! && echo -e "\e[33;1mWARNING: You have to wait for new process $PID to finish\e[0m"
-        $KIRA_SCRIPTS/progress-touch.sh "+0" "$((7+$CONTAINERS_COUNT))" "48" "$PID" "" 2>&1 "$KIRA_DUMP/INFRA/progress.log" || echo "WARNING: Progress tool failed"
+        $KIRA_SCRIPTS/progress-touch.sh "+0" "$((7+$CONTAINERS_COUNT))" "48" "$PID" "" 2> "$KIRA_DUMP/INFRA/progress.log" || echo "WARNING: Progress tool failed"
         FAILURE="False" && wait $PID || FAILURE="True"
         [ "$FAILURE" == "True" ] && echo "ERROR: Delete script failed, logs are available in the '$KIRA_DUMP' directory" && read -d'' -s -n1 -p 'Press any key to continue...'
         echo -e "\nSUCCESS: Infra was wiped" && break
