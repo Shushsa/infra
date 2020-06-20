@@ -3,11 +3,17 @@
 exec 2>&1
 set -e
 
-OPERATION=$1
-PROGRESS_MAX=$2
-PROGRESS_LEN=$3
-PROGRESS_PID=$4
-PROGRESS_FILE=$5
+INPUT=$1
+PROGRESS_FILE=$2
+DEBUG=$3
+
+[ "$DEBUG" == "True" ] && set -x
+
+ARR=(${INPUT//;/ })
+OPERATION=${ARR[0]}
+PROGRESS_MAX=${ARR[1]}
+PROGRESS_LEN=${ARR[2]}
+PROGRESS_PID=${ARR[3]}
 
 [ -z "$OPERATION" ] && OPERATION="+0"
 [ -z "${PROGRESS_MAX##*[!0-9]*}" ] && PROGRESS_MAX=0
@@ -25,14 +31,14 @@ PROGRESS_TIME_FILE="${PROGRESS_FILE}_time"
 touch $PROGRESS_FILE
 touch $PROGRESS_TIME_FILE
 
-VALUE=$(cat $PROGRESS_FILE)
+VALUE=$(cat $PROGRESS_FILE || echo "0")
 [ -z "${VALUE##*[!0-9]*}" ] && VALUE=0
 let "RESULT=${VALUE}${OPERATION}" || :
-echo "$RESULT" > $PROGRESS_FILE
+echo "$RESULT" > $PROGRESS_FILE || echo "ERROR: Failed to save result into progress file `$PROGRESS_FILE`"
 
 PROGRESS_START_TIME="$(date -u +%s)"
 if [ ! -f $PROGRESS_TIME_FILE ] || [ $RESULT -eq 0 ] ; then
-    echo "$PROGRESS_START_TIME" > $PROGRESS_TIME_FILE
+    echo "$PROGRESS_START_TIME" > $PROGRESS_TIME_FILE || echo "ERROR: Failed to save time into progress time file `$PROGRESS_TIME_FILE`"
 fi
 
 while : ; do
