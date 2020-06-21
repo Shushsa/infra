@@ -109,11 +109,11 @@ while : ; do
     done
     if [ "${OPTION,,}" == "l" ] ; then
         echo "INFO: Please wait, dumping logs form all $CONTAINERS_COUNT containers..."
-        $KIRA_SCRIPTS/progress-touch.sh "*0"
+        $KIRA_SCRIPTS/progress-touch.sh "*0" "prg-logs"
         for name in $CONTAINERS ; do
             $WORKSTATION_SCRIPTS/dump-logs.sh $name > "$KIRA_DUMP/INFRA/dump_${name}.log" 2>&1 &
             PID=$!
-            $KIRA_SCRIPTS/progress-touch.sh "+1;$CONTAINERS_COUNT;48;$PID" 2> "$KIRA_DUMP/INFRA/progress.log" || echo -e "\nWARNING: Progress tool failed"
+            $KIRA_SCRIPTS/progress-touch.sh "+1;$CONTAINERS_COUNT;48;$PID" "prg-logs" 2> "$KIRA_DUMP/INFRA/progress.log" || echo -e "\nWARNING: Progress tool failed"
             FAILURE="False" && wait $PID || FAILURE="True"
             [ "$FAILURE" == "True" ] && echo -e "\nERROR: Failed to dump $name container logs" && read -d'' -s -n1 -p 'Press any key to continue...'
         done
