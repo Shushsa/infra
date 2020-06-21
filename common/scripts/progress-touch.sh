@@ -18,6 +18,8 @@ PID=${ARR[3]}
 [ -z "${MAX##*[!0-9]*}" ] && MAX=0
 [ -z "${LEN##*[!0-9]*}" ] && LEN=0
 [ -z "${PID##*[!0-9]*}" ] && PID=0
+let "LEN=$LEN-1" || LEN=0
+[ $LEN -lt 0 ] && LEN = 0
 
 if [ $PID -ge 1 ] && [ "$NAME" != "default" ] ; then
     COMMAND=$(ps -o cmd fp $PID || echo "")
@@ -102,11 +104,13 @@ while : ; do
     PROGRESS_SPEED="0.$PROGRESS_SPEED"
 
     for ((i=$PERCENTAGE_OLD;i<=$PERCENTAGE;i++)); do
-        let "COUNT_BLACK=(($LEN*$i)/100)-1" || COUNT_BLACK=0
+        let "COUNT_BLACK=($LEN*$i)/100" || COUNT_BLACK=0
         [ $COUNT_BLACK -lt 0 ] && COUNT_BLACK=0
         [ $COUNT_BLACK -gt $LEN ] && COUNT_BLACK=$LEN
         let "COUNT_WHITE=$LEN-$COUNT_BLACK" || COUNT_WHITE=0
         [ $COUNT_WHITE -gt $LEN ] && COUNT_WHITE=$LEN
+        if [ $COUNT_BLACK -gt 0 ] ; then let "COUNT_BLACK=$COUNT_BLACK-1" || COUNT_BLACK=0 ; fi
+        if [ $COUNT_WHITE -ge $LEN ] ; then let "COUNT_WHITE=$COUNT_WHITE-1" ; fi
         
         [ $COUNT_BLACK -ge 1 ] && BLACK=$(printf "%${COUNT_BLACK}s" | tr " " "#")
         [ $COUNT_WHITE -ge 1 ] && WHITE=$(printf "%${COUNT_WHITE}s" | tr " " ".")
