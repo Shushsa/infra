@@ -6,7 +6,6 @@ set -e
 
 ETC_PROFILE="/etc/profile"
 source $ETC_PROFILE &> /dev/null
-if [ "$DEBUG_MODE" == "True" ] ; then set -x ; else set +x ; fi
 
 CONTAINER_REACHABLE="True"
 curl --max-time 3 "$KIRA_REGISTRY/v2/_catalog" || CONTAINER_REACHABLE="False"
@@ -41,7 +40,7 @@ EOL
     touch $KIRA_SETUP_REGISTRY
 else
     echo "Container 'registry' already exists."
-    docker exec -it registry bin/registry --version
+    docker exec -i registry bin/registry --version
 fi
 
 docker ps # list containers

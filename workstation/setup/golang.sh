@@ -6,7 +6,6 @@ set -e
 
 ETC_PROFILE="/etc/profile"
 source $ETC_PROFILE &> /dev/null
-if [ "$DEBUG_MODE" == "True" ] ; then set -x ; else set +x ; fi
 
 KIRA_SETUP_GO="$KIRA_SETUP/go-v$GO_VERSION" 
 if [ ! -f "$KIRA_SETUP_GO" ] ; then

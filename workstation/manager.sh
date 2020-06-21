@@ -6,11 +6,10 @@ set -e
 # Local Update Shortcut:
 # (rm -fv $KIRA_MANAGER/manager.sh) && nano $KIRA_MANAGER/manager.sh && chmod 777 $KIRA_MANAGER/manager.sh && touch /tmp/rs_manager
 
-ETC_PROFILE="/etc/profile"
 LOOP_FILE="/tmp/manager_loop"
 VARS_FILE="/tmp/manager_vars"
 RESTART_SIGNAL="/tmp/rs_manager"
-source $ETC_PROFILE &> /dev/null
+source "/etc/profile" &> /dev/null
 if [ "$DEBUG_MODE" == "True" ] ; then set -x ; else set +x ; fi
 
 function checkContainerStatus() {
@@ -21,7 +20,8 @@ function checkContainerStatus() {
     echo "CONTAINER_ID_$i=$CONTAINER_ID" >> $output
     [ -z "$CONTAINER_ID" ] && echo "SUCCESS=False" >> $output && exit 0
     CONTAINER_STATUS=$(docker inspect $CONTAINER_ID 2>/dev/null | jq -r '.[0].State.Status' 2>/dev/null || echo "error")
-        
+    [ "$CONTAINER_STATUS" != "exited" ] && echo "EXITED=False" >> $output
+
     #Add block height info
     if [ "$CONTAINER_STATUS" == "running" ] ; then
         HEALTH=$(docker inspect $(docker ps --no-trunc -aqf name=$name ) 2>/dev/null | jq -r '.[0].State.Health.Status' 2>/dev/null || echo "")
@@ -44,7 +44,8 @@ while : ; do
     START_TIME="$(date -u +%s)"
     [ -f $RESTART_SIGNAL ] && break
     
-    SUCCESS="True"
+    SUCCESS="True" # all passed
+    EXITED="True" # all exited
     rm -f $VARS_FILE && touch $VARS_FILE
     CONTAINERS=$(docker ps -a | awk '{if(NR>1) print $NF}' | tac)
     i=-1 ; for name in $CONTAINERS ; do i=$((i+1))
@@ -59,7 +60,7 @@ while : ; do
     clear
     
     echo -e "\e[33;1m------------------------------------------------"
-    echo "|         KIRA NETWORK MANAGER v0.0.3          |"
+    echo "|         KIRA NETWORK MANAGER v0.0.4          |"
     echo "|             $(date '+%d/%m/%Y %H:%M:%S')              |"
     [ "$SUCCESS" == "True" ] && echo -e "|\e[0m\e[32;1m     SUCCESS, INFRASTRUCTURE IS HEALTHY       \e[33;1m|"
     [ "$SUCCESS" != "True" ] && echo -e "|\e[0m\e[31;1m ISSUES DETECTED, INFRASTRUCTURE IS UNHEALTHY \e[33;1m|"
@@ -75,7 +76,8 @@ while : ; do
     echo "| [B] | Mange SEKAI Repo ($SEKAI_BRANCH)"
     echo "|----------------------------------------------|"
     echo "| [I] | Re-INITALIZE Environment               |"
-    [ "$CONTAINERS_COUNT" != "0" ] && \
+    echo "| [L] | Show All LOGS                          |"
+    [ "$EXITED" == "False" ] && [ "$CONTAINERS_COUNT" != "0" ] && \
     echo "| [S] | STOP All Containers                    |"
     [ "$CONTAINERS_COUNT" != "0" ] && \
     echo "| [R] | Re-START All Containers                |"
@@ -100,44 +102,84 @@ while : ; do
 
     i=-1 ; for name in $CONTAINERS ; do i=$((i+1))
         if [ "$OPTION" == "$i" ] ; then
-            gnome-terminal -- bash -c "$KIRA_MANAGER/container-manager.sh $name ; read -d'' -s -n1 -p 'Press any key to exit...' && exit"
+            gnome-terminal -- script -e "$KIRA_DUMP/INFRA/manager/container-$name.log" -c "$KIRA_MANAGER/container-manager.sh $name ; read -d'' -s -n1 -p 'Press any key to exit and save logs...' && exit"
             BREAK="True"
             break
         fi 
     done
-
-    if [ "${OPTION,,}" == "a" ] ; then
+    if [ "${OPTION,,}" == "l" ] ; then
+        echo "INFO: Please wait, dumping logs form all $CONTAINERS_COUNT containers..."
+        $KIRA_SCRIPTS/progress-touch.sh "*0" "prg-logs"
+        for name in $CONTAINERS ; do
+            $WORKSTATION_SCRIPTS/dump-logs.sh $name > "$KIRA_DUMP/INFRA/dump_${name}.log" 2>&1 &
+            PID=$!
+            $KIRA_SCRIPTS/progress-touch.sh "+1;$CONTAINERS_COUNT;48;$PID" "prg-logs" 2> "$KIRA_DUMP/INFRA/progress.log" || echo -e "\nWARNING: Progress tool failed"
+            FAILURE="False" && wait $PID || FAILURE="True"
+            [ "$FAILURE" == "True" ] && echo -e "\nERROR: Failed to dump $name container logs" && read -d'' -s -n1 -p 'Press any key to continue...'
+        done
+        echo -e "\nINFO: Starting code editor..."
+        USER_DATA_DIR="/usr/code$KIRA_DUMP"
+        rm -rf $USER_DATA_DIR
+        mkdir -p $USER_DATA_DIR
+        code --user-data-dir $USER_DATA_DIR $KIRA_DUMP
+        break
+    elif [ "${OPTION,,}" == "a" ] ; then
         echo "INFO: Starting git manager..."
-        gnome-terminal -- bash -c "$KIRA_MANAGER/git-manager.sh \"$INFRA_REPO_SSH\" \"$INFRA_REPO\" \"$INFRA_BRANCH\" \"$KIRA_INFRA\" \"INFRA_BRANCH\" ; read -d'' -s -n1 -p 'Press any key to exit...' && exit"
+        gnome-terminal -- script -e $KIRA_DUMP/INFRA/manager/git-infra.log -c "$KIRA_MANAGER/git-manager.sh \"$INFRA_REPO_SSH\" \"$INFRA_REPO\" \"$INFRA_BRANCH\" \"$KIRA_INFRA\" \"INFRA_BRANCH\" ; read -d'' -s -n1 -p 'Press any key to exit...' && exit"
         break
     elif [ "${OPTION,,}" == "b" ] ; then
         echo "INFO: Starting git manager..."
-        gnome-terminal -- bash -c "$KIRA_MANAGER/git-manager.sh \"$SEKAI_REPO_SSH\" \"$SEKAI_REPO\" \"$SEKAI_BRANCH\" \"$KIRA_SEKAI\" \"SEKAI_BRANCH\" ; read -d'' -s -n1 -p 'Press any key to exit...' && exit"
+        gnome-terminal -- script -e $KIRA_DUMP/INFRA/manager/git-sekai.log -c "$KIRA_MANAGER/git-manager.sh \"$SEKAI_REPO_SSH\" \"$SEKAI_REPO\" \"$SEKAI_BRANCH\" \"$KIRA_SEKAI\" \"SEKAI_BRANCH\" ; read -d'' -s -n1 -p 'Press any key to exit...' && exit"
         break
     elif [ "${OPTION,,}" == "i" ] ; then
         echo "INFO: Wiping and re-initializing..."
-        echo -e "\e[33;1mWARNING: You have to wait for new process to finish\e[0m"
-        gnome-terminal --disable-factory -- bash -c "$KIRA_MANAGER/init.sh False ; read -d'' -s -n1 -p 'Press any key to exit...' && exit"
+        $KIRA_SCRIPTS/progress-touch.sh "*0" 
+        gnome-terminal --disable-factory -- script -e $KIRA_DUMP/INFRA/init.log -c "$KIRA_MANAGER/init.sh False ; read -d'' -s -n1 -p 'Press any key to exit and save logs...' && exit" &
+        PID=$! && sleep 2 && echo -e "\e[33;1mWARNING: You have to wait for process $PID to finish then close the new terminal\e[0m"
+        $KIRA_SCRIPTS/progress-touch.sh "+0;$((61+(2*$VALIDATORS_COUNT)));48;$PID" 2> "$KIRA_DUMP/INFRA/progress.log" || echo -e "\nWARNING: Progress tool failed"
+        FAILURE="False" && wait $PID || FAILURE="True"
+        [ "$FAILURE" == "False" ] && echo -e "\nSUCCESS: Infra was stopped" && break
+        [ "$FAILURE" == "True" ] && echo -e "\nERROR: Init script failed, logs are available in the '$KIRA_DUMP' directory"
         break
     elif [ "${OPTION,,}" == "s" ] ; then
         echo "INFO: Stopping infrastructure..."
-        echo -e "\e[33;1mWARNING: You have to wait for new process to finish\e[0m"
-        gnome-terminal -- bash -c "$KIRA_MANAGER/stop.sh ; read -d'' -s -n1 -p 'Press any key to exit...' && exit"
+        $KIRA_SCRIPTS/progress-touch.sh "*0" 
+        $KIRA_MANAGER/stop.sh > "$KIRA_DUMP/INFRA/manager/stop.log" 2>&1 &
+        PID=$! && echo -e "\e[33;1mWARNING: You have to wait for process $PID to finish\e[0m"
+        $KIRA_SCRIPTS/progress-touch.sh "+0;$((2+$CONTAINERS_COUNT));48;$PID" 2> "$KIRA_DUMP/INFRA/progress.log" || echo -e "\nWARNING: Progress tool failed"
+        FAILURE="False" && wait $PID || FAILURE="True"
+        [ "$FAILURE" == "True" ] && echo -e "\nERROR: Stop script failed, logs are available in the '$KIRA_DUMP' directory" && read -d'' -s -n1 -p 'Press any key to continue...'
+        [ "$FAILURE" == "False" ] && echo -e "\nSUCCESS: Infra was stopped"
         break
     elif [ "${OPTION,,}" == "r" ] ; then
         echo "INFO: Re-starting infrastructure..."
-        echo -e "\e[33;1mWARNING: You have to wait for new process to finish\e[0m"
-        gnome-terminal -- bash -c "$KIRA_MANAGER/restart.sh ; read -d'' -s -n1 -p 'Press any key to exit...' && exit"
+        $KIRA_SCRIPTS/progress-touch.sh "*0" 
+        $KIRA_MANAGER/restart.sh > "$KIRA_DUMP/INFRA/manager/restart.log" 2>&1 &
+        PID=$! && echo -e "\e[33;1mWARNING: You have to wait for process $PID to finish\e[0m"
+        $KIRA_SCRIPTS/progress-touch.sh "+0;$((2+$CONTAINERS_COUNT));48;$PID" 2> "$KIRA_DUMP/INFRA/progress.log" || echo -e "\nWARNING: Progress tool failed"
+        FAILURE="False" && wait $PID || FAILURE="True"
+        [ "$FAILURE" == "True" ] && echo -e "\nERROR: Restart script failed, logs are available in the '$KIRA_DUMP' directory" && read -d'' -s -n1 -p 'Press any key to continue...'
+        [ "$FAILURE" == "False" ] && echo -e "\nSUCCESS: Infra was restarted" 
         break
     elif [ "${OPTION,,}" == "h" ] ; then
         echo "INFO: Wiping and Restarting infra..."
-        echo -e "\e[33;1mWARNING: You have to wait for new process to finish\e[0m"
-        gnome-terminal -- bash -c "$KIRA_MANAGER/start.sh ; read -d'' -s -n1 -p 'Press any key to exit...' && exit"
+        $KIRA_SCRIPTS/progress-touch.sh "*0" 
+        $KIRA_MANAGER/start.sh > "$KIRA_DUMP/INFRA/manager/start.log" 2>&1 &
+        PID=$! && echo -e "\e[33;1mWARNING: You have to wait for process $PID to finish\e[0m"
+        $KIRA_SCRIPTS/progress-touch.sh "+0;$((61+(2*$VALIDATORS_COUNT)));48;$PID" 2> "$KIRA_DUMP/INFRA/progress.log" || echo -e "\nWARNING: Progress tool failed"
+        FAILURE="False" && wait $PID || FAILURE="True"
+        [ "$FAILURE" == "True" ] && echo -e "\nERROR: Start script failed, logs are available in the '$KIRA_DUMP' directory" && read -d'' -s -n1 -p 'Press any key to continue...'
+        [ "$FAILURE" == "False" ] && echo -e "\nSUCCESS: Infra was wiped and restarted"
         break
     elif [ "${OPTION,,}" == "d" ] ; then
         echo "INFO: Wiping and removing infra..."
-        echo -e "\e[33;1mWARNING: You have to wait for new process to finish\e[0m"
-        gnome-terminal --disable-factory -- bash -c "$KIRA_MANAGER/delete.sh ; read -d'' -s -n1 -p 'Press any key to exit...' && exit"
+        $KIRA_SCRIPTS/progress-touch.sh "*0" 
+        $KIRA_MANAGER/delete.sh > "$KIRA_DUMP/INFRA/manager/delete.log" 2>&1 &
+        PID=$! && echo -e "\e[33;1mWARNING: You have to wait for process $PID to finish\e[0m"
+        $KIRA_SCRIPTS/progress-touch.sh "+0;$((6+$CONTAINERS_COUNT));48;$PID" 2> "$KIRA_DUMP/INFRA/progress.log" || echo -e "\nWARNING: Progress tool failed"
+        FAILURE="False" && wait $PID || FAILURE="True"
+        [ "$FAILURE" == "True" ] && echo "ERROR: Delete script failed, logs are available in the '$KIRA_DUMP' directory" && read -d'' -s -n1 -p 'Press any key to continue...'
+        [ "$FAILURE" == "False" ] && echo -e "\nSUCCESS: Infra was wiped"
         break
     elif [ "${OPTION,,}" == "w" ] ; then
         echo "INFO: Please wait, refreshing user interface..." && break

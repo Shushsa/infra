@@ -19,7 +19,6 @@ VEREQ=$(CDHelper text vereq --old="$CDHelperVersion" --new="$VERSION" --silent=t
 [ -z "$SERVICE_FILE" ] && SERVICE_FILE="/etc/systemd/system/scheduler.service"
 
 INSTALL_DIR=$INSTALL_DIR/CDHelper
-INSTALL_PATH=$INSTALL_DIR/CDHelper
 echo "------------------------------------------------"
 echo "|       STARTED: CDHELPER UPDATE v0.0.1        |"
 echo "|----------------------------------------------|"
@@ -45,7 +44,9 @@ rm -rfv $INSTALL_DIR
 unzip CDHelper-linux-x64.zip -d $INSTALL_DIR
 chmod -R -v 777 $INSTALL_DIR
 
-ln -s $INSTALL_PATH /bin/CDHelper || echo "CDHelper symlink already exists"
+ls -l /bin/CDHelper || echo "Symlink not found"
+rm /bin/CDHelper || echo "Removing old symlink"
+ln -s $INSTALL_DIR/CDHelper /bin/CDHelper || echo "CDHelper symlink already exists"
 
 CDHelper version
 
@@ -59,7 +60,7 @@ After=network.target
 Type=simple
 User=root
 EnvironmentFile=/etc/environment
-ExecStart=$INSTALL_PATH scheduler github
+ExecStart=$INSTALL_DIR/CDHelper scheduler github
 WorkingDirectory=/root
 Restart=on-failure
 RestartSec=5

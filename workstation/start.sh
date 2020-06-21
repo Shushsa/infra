@@ -2,19 +2,16 @@
 
 exec 2>&1
 set -e
+set -x
+
 START_TIME_INFRA="$(date -u +%s)"
+source "/etc/profile" &> /dev/null
 
 # Local Update Shortcut:
 # (rm -fv $KIRA_WORKSTATION/start.sh) && nano $KIRA_WORKSTATION/start.sh && chmod 777 $KIRA_WORKSTATION/start.sh
 
 SKIP_UPDATE=$1
-
 [ -z "$SKIP_UPDATE" ] && SKIP_UPDATE="False"
-
-ETC_PROFILE="/etc/profile"
-source $ETC_PROFILE &> /dev/null
-
-[ "$DEBUG_MODE" == "True" ] && set -x
 
 echo "------------------------------------------------"
 echo "|       STARTED: KIRA INFRA START v0.0.2       |"
@@ -33,16 +30,18 @@ echo "|_______________________________________________"
 [ -z "$SEKAI_REPO" ] && echo "ERROR: SEKAI_REPO env was not defined" && exit 1
 [ -z "$EMAIL_NOTIFY" ] && echo "ERROR: EMAIL_NOTIFY env was not defined" && exit 1
 
+$KIRA_SCRIPTS/progress-touch.sh "+1" #1
+
 echo "INFO: Updating infra repository and fetching changes..."
 if [ "$SKIP_UPDATE" == "False" ] ; then
-    $KIRA_MANAGER/setup.sh "$SKIP_UPDATE"
-    source $KIRA_WORKSTATION/start.sh "True"
+    $KIRA_MANAGER/setup.sh "$SKIP_UPDATE" #23(+22)
+    source $KIRA_WORKSTATION/start.sh "True" #24(+1)
     exit 0
 fi
 
 source $ETC_PROFILE &> /dev/null
 
-$KIRA_SCRIPTS/container-restart.sh "registry"
+$KIRA_SCRIPTS/container-restart.sh "registry" && $KIRA_SCRIPTS/progress-touch.sh "+1" #25
 for ((i=1;i<=$MAX_VALIDATORS;i++)); do
 
     VALIDATORS_EXIST=$($KIRA_SCRIPTS/containers-exist.sh "validator" || echo "error")
@@ -61,14 +60,16 @@ for ((i=1;i<=$MAX_VALIDATORS;i++)); do
     fi
 done
 
-source $WORKSTATION_SCRIPTS/update-base-image.sh 
-source $WORKSTATION_SCRIPTS/update-tools-image.sh 
-source $WORKSTATION_SCRIPTS/update-validator-image.sh 
+$KIRA_SCRIPTS/progress-touch.sh "+1" #26
+source $WORKSTATION_SCRIPTS/update-base-image.sh #32(+6)
+source $WORKSTATION_SCRIPTS/update-tools-image.sh #37(+5)
+source $WORKSTATION_SCRIPTS/update-validator-image.sh #41(+4)
 
 cd $KIRA_WORKSTATION
 
 docker network rm kiranet || echo "Failed to remove kira network"
 docker network create --subnet=$KIRA_VALIDATORS_SUBNET kiranet
+$KIRA_SCRIPTS/progress-touch.sh "+1" "" "True" #42
 
 GENESIS_SOUCE="/root/.sekaid/config/genesis.json"
 GENESIS_DESTINATION="$DOCKER_COMMON/genesis.json"
@@ -111,14 +112,18 @@ for ((i=1;i<=$VALIDATORS_COUNT;i++)); do
      -v $DOCKER_COMMON:"/common" \
      validator:latest
 
+    $KIRA_SCRIPTS/progress-touch.sh "+1"
+
     # NOTE: Following actions destroy $i variable so VALIDATOR_INDEX is needed
     echo "INFO: Waiting for validator-$i to start..."
     VALIDATOR_INDEX=$i
     sleep 10
     source $WORKSTATION_SCRIPTS/await-container-init.sh "validator-$i" "300" "10"
 
+    $KIRA_SCRIPTS/progress-touch.sh "+1"
+
     echo "INFO: Inspecting if validator-$VALIDATOR_INDEX is running..."
-    SEKAID_VERSION=$(docker exec -it "validator-$VALIDATOR_INDEX" sekaid version || echo "error")
+    SEKAID_VERSION=$(docker exec -i "validator-$VALIDATOR_INDEX" sekaid version || echo "error")
     if [ "$SEKAID_VERSION" == "error" ] ; then 
         echo "ERROR: sekaid was NOT found" 
         exit 1
@@ -136,7 +141,7 @@ for ((i=1;i<=$VALIDATORS_COUNT;i++)); do
         fi
     fi
 
-    NODE_ID=$(docker exec -it "validator-$VALIDATOR_INDEX" sekaid tendermint show-node-id || echo "error")
+    NODE_ID=$(docker exec -i "validator-$VALIDATOR_INDEX" sekaid tendermint show-node-id || echo "error")
     # NOTE: New lines have to be removed
     SEEDS=$(echo "${NODE_ID}@101.1.0.$VALIDATOR_INDEX:$P2P_LOCAL_PORT" | xargs | tr -d '\n' | tr -d '\r')
     PEERS=$SEEDS
@@ -144,6 +149,8 @@ for ((i=1;i<=$VALIDATORS_COUNT;i++)); do
     i=$VALIDATOR_INDEX
     echo "SUCCESS: validator-$i is up and running, seed: $SEEDS"
 done
+
+$KIRA_SCRIPTS/progress-touch.sh "+1" #43+(2*$VALIDATORS_COUNT)
 
 # success_end file is created when docker startup suceeds
 echo "------------------------------------------------"

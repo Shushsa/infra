@@ -6,27 +6,31 @@ set -e
 
 ETC_PROFILE="/etc/profile"
 source $ETC_PROFILE &> /dev/null
-if [ "$DEBUG_MODE" == "True" ] ; then set -x ; else set +x ; fi
 
 SKIP_UPDATE=$1
 START_TIME=$2
 DEBUG_MODE=$3
+INTERACTIVE=$4
 
 [ -z "$START_TIME" ] && START_TIME="$(date -u +%s)"
 [ -z "$SKIP_UPDATE" ] && SKIP_UPDATE="False"
 [ -z "$DEBUG_MODE" ] && DEBUG_MODE="False"
-if [ "$DEBUG_MODE" == "True" ] ; then set -x ; else set +x ; fi
+[ -z "$SILENT_MODE" ] && SILENT_MODE="False"
+[ -z "$INTERACTIVE" ] && INTERACTIVE="True"
 
-if [ "$SKIP_UPDATE" == "False" ] ; then
-    echo -e "\e[36;1mPress [Y]es/[N]o is you want to run in debug mode, [ENTER] if '$DEBUG_MODE': \e[0m\c" && read  -d'' -s -n1 NEW_DEBUG_MODE
-    if [ "${NEW_DEBUG_MODE,,}" == "y" ] ; then
-        DEBUG_MODE="True"
-    elif [ "${NEW_DEBUG_MODE,,}" == "n" ]  ; then
-        DEBUG_MODE="False"
-    fi
-fi
+# in the non interactive mode always use explicit shell
+[ "$INTERACTIVE" != "True" ] && set -x 
 
-if [ "$DEBUG_MODE" == "True" ] ; then set -x ; else set +x ; fi
+NEW_INTERACTIVE=""
+NEW_DEBUG_MODE=""
+NEW_INFRA_BRANCH=""
+NEW_SEKAI_BRANCH=""
+NEW_NOTIFICATIONS=""
+NEW_NOTIFY_EMAIL=""
+NEW_SMTP_LOGIN=""
+NEW_SMTP_PASSWORD=""
+NEW_SSH_KEY=""
+NEW_VALIDATORS_COUNT=""
 
 MAX_VALIDATORS=254
 [ -z "$INFRA_BRANCH" ] && INFRA_BRANCH="master"
@@ -46,6 +50,28 @@ MAX_VALIDATORS=254
 [ "$KIRA_USER" == "root" ] && echo "You must login as non root user to your machine"
 
 if [ "$SKIP_UPDATE" == "False" ] ; then
+
+    if [ "$INTERACTIVE" == "True" ] ; then
+        echo -e "\e[36;1mPress [Y]es/[N]o if you want to run in interactive mode, [ENTER] if '$INTERACTIVE': \e[0m\c" && read  -d'' -s -n1 NEW_INTERACTIVE
+        if [ "${NEW_INTERACTIVE,,}" == "y" ] ; then
+            INTERACTIVE="True"
+        elif [ "${NEW_INTERACTIVE,,}" == "n" ]  ; then
+            INTERACTIVE="False"
+        fi
+    fi
+    
+    [ "$INTERACTIVE" == "True" ] && if [ "$SKIP_UPDATE" == "False" ] ; then
+        echo -e "\e[36;1mPress [Y]es/[N]o if you want to run in debug mode, [ENTER] if '$DEBUG_MODE': \e[0m\c" && read  -d'' -s -n1 NEW_DEBUG_MODE
+        if [ "${NEW_DEBUG_MODE,,}" == "y" ] ; then
+            DEBUG_MODE="True"
+        elif [ "${NEW_DEBUG_MODE,,}" == "n" ]  ; then
+            DEBUG_MODE="False"
+        fi
+    fi
+    
+    # in the non interactive mode always use explicit shell
+    [ "$INTERACTIVE" != "True" ] && set -x 
+
     #########################################
     # START Installing Essentials
     #########################################
@@ -54,6 +80,8 @@ if [ "$SKIP_UPDATE" == "False" ] ; then
     KIRA_SEKAI=/kira/sekai
     KIRA_SETUP=/kira/setup
     KIRA_MANAGER="/kira/manager"
+    KIRA_PROGRESS="/kira/progress"
+    KIRA_DUMP="/home/$KIRA_USER/Desktop/DUMP"
     KIRA_SCRIPTS="${KIRA_INFRA}/common/scripts"
     KIRA_WORKSTATION="${KIRA_INFRA}/workstation"
     
@@ -62,6 +90,9 @@ if [ "$SKIP_UPDATE" == "False" ] ; then
     mkdir -p $KIRA_SEKAI
     mkdir -p $KIRA_SETUP
     mkdir -p $KIRA_MANAGER
+    mkdir -p $KIRA_PROGRESS
+    rm -rfv $KIRA_DUMP
+    mkdir -p "$KIRA_DUMP/INFRA/manager"
 
     KIRA_SETUP_ESSSENTIALS="$KIRA_SETUP/essentials-v0.0.2" 
     if [ ! -f "$KIRA_SETUP_ESSSENTIALS" ] ; then
@@ -81,12 +112,14 @@ if [ "$SKIP_UPDATE" == "False" ] ; then
         cd /tmp
         INSTALL_DIR="/usr/local/bin"
         rm -f -v ./CDHelper-linux-x64.zip
-        wget https://github.com/asmodat/CDHelper/releases/download/v0.6.12/CDHelper-linux-x64.zip
+        wget https://github.com/asmodat/CDHelper/releases/download/v0.6.13/CDHelper-linux-x64.zip
         rm -rfv $INSTALL_DIR
         unzip CDHelper-linux-x64.zip -d $INSTALL_DIR
         chmod -R -v 777 $INSTALL_DIR
-        
-        ln -s $INSTALL_DIR/CDHelper /bin/CDHelper || echo "CDHelper symlink already exists"
+
+        ls -l /bin/CDHelper || echo "Symlink not found"
+        rm /bin/CDHelper || echo "Removing old symlink"
+        ln -s $INSTALL_DIR/CDHelper/CDHelper /bin/CDHelper || echo "CDHelper symlink already exists"
         
         CDHelper version
 
@@ -120,7 +153,7 @@ if [ "$SKIP_UPDATE" == "False" ] ; then
     # END Installing Essentials
     #########################################
 
-    echo -e "\e[36;1mType INFRA reposiotry branch, [ENTER] if '$INFRA_BRANCH': \e[0m\c" && read NEW_INFRA_BRANCH
+    [ "$INTERACTIVE" == "True" ] && echo -e "\e[36;1mType INFRA reposiotry branch, [ENTER] if '$INFRA_BRANCH': \e[0m\c" && read NEW_INFRA_BRANCH
     [ ! -z "$NEW_INFRA_BRANCH" ] && INFRA_BRANCH=$NEW_INFRA_BRANCH
 
     echo "INFO: Updating Infra Repository..."
@@ -137,7 +170,7 @@ if [ "$SKIP_UPDATE" == "False" ] ; then
     chmod -R 777 $KIRA_MANAGER
 
     cd /kira
-    source $KIRA_WORKSTATION/init.sh "True" "$START_TIME"
+    source $KIRA_WORKSTATION/init.sh "True" "$START_TIME" "$DEBUG_MODE" "$INTERACTIVE"
     exit 0
 else
     chmod 700 $SSH_PATH
@@ -146,14 +179,14 @@ else
         chmod 600 $SSH_KEY_PRIV_PATH
     fi
 
-    echo -e "\e[36;1mType SEKAI reposiotry branch, [ENTER] if '$SEKAI_BRANCH': \e[0m\c" && read NEW_SEKAI_BRANCH
+    [ "$INTERACTIVE" == "True" ] && echo -e "\e[36;1mType SEKAI reposiotry branch, [ENTER] if '$SEKAI_BRANCH': \e[0m\c" && read NEW_SEKAI_BRANCH
     [ ! -z "$NEW_SEKAI_BRANCH" ] && SEKAI_BRANCH=$NEW_SEKAI_BRANCH
     
-    echo -e "\e[36;1mPress [Y]es/[N]o to receive notifications, [ENTER] if '$NOTIFICATIONS': \e[0m\c" && read  -d'' -s -n1 NEW_NOTIFICATIONS
+    [ "$INTERACTIVE" == "True" ] && echo -e "\e[36;1mPress [Y]es/[N]o to receive notifications, [ENTER] if '$NOTIFICATIONS': \e[0m\c" && read  -d'' -s -n1 NEW_NOTIFICATIONS
     [ "${NEW_NOTIFICATIONS,,}" == "y" ] && NOTIFICATIONS="True"
     [ "${NEW_NOTIFICATIONS,,}" == "n" ] && NOTIFICATIONS="False"
     
-    if [ "$NOTIFICATIONS" == "True" ] ; then
+    if [ "$INTERACTIVE" == "True" ] && [ "$NOTIFICATIONS" == "True" ] ; then
         echo -e "\e[36;1mType desired notification email, [ENTER] if '$EMAIL_NOTIFY': \e[0m\c" && read NEW_NOTIFY_EMAIL
         [ ! -z "$NEW_NOTIFY_EMAIL" ] && EMAIL_NOTIFY=$NEW_NOTIFY_EMAIL
         
@@ -172,7 +205,7 @@ else
         echo "INFO: Your current public SSH Key:"
         echo -e "\e[33;1m$SSH_KEY_PUB\e[0m"
         
-        echo -e "\e[36;1mPress [Y] and paste your PRIVATE git SSH key or press [ENTER] to skip: \e[0m\c" && read -n1 NEW_SSH_KEY
+        [ "$INTERACTIVE" == "True" ] && echo -e "\e[36;1mPress [Y] and paste your PRIVATE git SSH key or press [ENTER] to skip: \e[0m\c" && read -n1 NEW_SSH_KEY
         if [ "${NEW_SSH_KEY,,}" == "y" ] ; then
             echo -e "\nINFO: Press [Ctrl+D] to save input, or use [Ctrl+C] to exit without changes\n"
             set +e
@@ -203,13 +236,13 @@ else
     done
 
     echo "INFO: Make sure you copied and saved your private key for recovery purpouses"
-    echo -e "\e[36;1mPress [Y]es/[N]o to display your private key: \e[0m\c" && read  -d'' -s -n1 SHOW_PRIV_KEY
+    [ "$INTERACTIVE" == "True" ] && echo -e "\e[36;1mPress [Y]es/[N]o to display your private key: \e[0m\c" && read  -d'' -s -n1 SHOW_PRIV_KEY
     if [ "${SHOW_PRIV_KEY,,}" == "y" ] ; then
         echo "INFO: Your private SSH Key: (select, copy and save it for future recovery)"
         echo -e "\e[32;1m$(cat $SSH_KEY_PRIV_PATH)\e[0m"
     fi
 
-    if [ ! -z "$NEW_SSH_KEY" ] ; then 
+    if [ "$INTERACTIVE" == "True" ] && [ ! -z "$NEW_SSH_KEY" ] ; then 
         echo -e "\e[36;1mPress [Y]es/[N]o to display your public key: \e[0m\c" && read  -d'' -s -n1 SHOW_PUB_KEY
         if [ "${SHOW_PUB_KEY,,}" == "y" ] ; then
             echo "INFO: Your public SSH Key:"
@@ -217,7 +250,7 @@ else
         fi
     fi
 
-    echo -e "\e[36;1mInput number of validators to deploy (min 1, max $MAX_VALIDATORS), [ENTER] if '$VALIDATORS_COUNT': \e[0m\c" && read NEW_VALIDATORS_COUNT
+    [ "$INTERACTIVE" == "True" ] && echo -e "\e[36;1mInput number of validators to deploy (min 1, max $MAX_VALIDATORS), [ENTER] if '$VALIDATORS_COUNT': \e[0m\c" && read NEW_VALIDATORS_COUNT
     [ ! -z "$NEW_VALIDATORS_COUNT" ] && [ ! -z "${NEW_VALIDATORS_COUNT##*[!0-9]*}" ] && [ $NEW_VALIDATORS_COUNT -ge 1 ] && [ $NEW_VALIDATORS_COUNT -le $MAX_VALIDATORS ] && VALIDATORS_COUNT=$NEW_VALIDATORS_COUNT
 
     echo -e "\e[33;1m------------------------------------------------"
@@ -237,7 +270,7 @@ else
     echo "| PUBLIC GIT SSH KEY: $(echo $SSH_KEY_PUB | head -c 24)...$(echo $SSH_KEY_PUB | tail -c 24)"
     echo -e "------------------------------------------------\e[0m"
     
-    echo -e "\e[36;1mPress [ENTER] to confirm or any other key to exit: \e[0m\c" && read  -d'' -s -n1 ACCEPT
+    [ "$INTERACTIVE" == "True" ] && echo -e "\e[36;1mPress [ENTER] to confirm or any other key to exit: \e[0m\c" && read  -d'' -s -n1 ACCEPT
     [ ! -z "$ACCEPT" ] && exit 1
 fi
 
@@ -246,6 +279,8 @@ CDHelper text lineswap --insert="SMTP_LOGIN=$SMTP_LOGIN" --prefix="SMTP_LOGIN=" 
 CDHelper text lineswap --insert="SMTP_PASSWORD=$SMTP_PASSWORD" --prefix="SMTP_PASSWORD=" --path=$ETC_PROFILE --append-if-found-not=True --silent=$SILENT_MODE
 CDHelper text lineswap --insert="SMTP_SECRET={\\\"host\\\":\\\"smtp.gmail.com\\\",\\\"port\\\":\\\"587\\\",\\\"ssl\\\":true,\\\"login\\\":\\\"$SMTP_LOGIN\\\",\\\"password\\\":\\\"$SMTP_PASSWORD\\\"}" --prefix="SMTP_SECRET=" --path=$ETC_PROFILE --append-if-found-not=True --silent=$SILENT_MODE
 
+CDHelper text lineswap --insert="KIRA_DUMP=$KIRA_DUMP" --prefix="KIRA_DUMP=" --path=$ETC_PROFILE --append-if-found-not=True --silent=$SILENT_MODE
+CDHelper text lineswap --insert="KIRA_PROGRESS=$KIRA_PROGRESS" --prefix="KIRA_PROGRESS=" --path=$ETC_PROFILE --append-if-found-not=True --silent=$SILENT_MODE
 CDHelper text lineswap --insert="KIRA_USER=$KIRA_USER" --prefix="KIRA_USER=" --path=$ETC_PROFILE --append-if-found-not=True --silent=$SILENT_MODE
 CDHelper text lineswap --insert="USER_SHORTCUTS=/home/$KIRA_USER/.local/share/applications" --prefix="USER_SHORTCUTS=" --path=$ETC_PROFILE --append-if-found-not=True --silent=$SILENT_MODE
 CDHelper text lineswap --insert="EMAIL_NOTIFY=$EMAIL_NOTIFY" --prefix="EMAIL_NOTIFY=" --path=$ETC_PROFILE --append-if-found-not=True --silent=$SILENT_MODE

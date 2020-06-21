@@ -3,7 +3,7 @@
 exec 2>&1
 set -e
 
-# rm -r -f $KIRA_MANAGER && cp -r $KIRA_WORKSTATION $KIRA_MANAGER && chmod -R 777 $KIRA_MANAGER
+# (rm -fv $KIRA_MANAGER/git-manager.sh) && nano $KIRA_MANAGER/git-manager.sh && chmod 777 $KIRA_MANAGER/git-manager.sh && touch /tmp/rs_git_manager
 
 REPO_SSH=$1
 REPO_HTTPS=$2
@@ -13,10 +13,9 @@ BRANCH_ENVAR=$5
 
 [ -z "$BRANCH_ENVAR" ] && echo "Git manager failure, BRANCH_ENVAR property was not defined" && exit 1
 
-ETC_PROFILE="/etc/profile"
 LOOP_FILE="/tmp/git_manager_loop"
 RESTART_SIGNAL="/tmp/rs_git_manager"
-source $ETC_PROFILE &> /dev/null
+source "/etc/profile" &> /dev/null
 if [ "$DEBUG_MODE" == "True" ] ; then set -x ; else set +x ; fi
 
 while : ; do
@@ -86,7 +85,7 @@ while : ; do
     echo "Input option then press [ENTER] or [SPACE]: " && rm -f $LOOP_FILE && touch $LOOP_FILE
     while : ; do
         OPTION=$(cat $LOOP_FILE)
-        [ -z "$OPTION" ] && [ $(($(date -u +%s)-$START_TIME)) -ge 8 ] && break
+        [ -z "$OPTION" ] && [ $(($(date -u +%s)-$START_TIME)) -ge 6 ] && break
         read -n 1 -t 3 KEY || continue
         [ ! -z "$KEY" ] && echo "${OPTION}${KEY}" > $LOOP_FILE
         [ -z "$KEY" ] && break
@@ -102,7 +101,7 @@ while : ; do
         rm -rf $USER_DATA_DIR
         mkdir -p $USER_DATA_DIR
         code --user-data-dir $USER_DATA_DIR $DIRECTORY
-        break
+        sleep 2 && continue
     elif [ "${OPTION,,}" == "c" ] ; then
         echo -e "\e[36;1mType desired commit message: \e[0m\c" && read COMMIT
         if [ -z "$COMMIT" ] ; then
@@ -147,7 +146,7 @@ while : ; do
         BRANCH=$NEW_BRANCH
         CDHelper text lineswap --insert="$BRANCH_ENVAR=$BRANCH" --prefix="$BRANCH_ENVAR=" --path=$ETC_PROFILE --silent=$SILENT_MODE
         
-        echo "SUCCESS: Changing branch suceeded" && break
+        echo "SUCCESS: Changing branch suceeded" && sleep 2 && continue
     elif [ "${OPTION,,}" == "n" ] ; then
         echo "INFO: Listing available branches..."
         git branch -r || echo "ERROR: Failed to list remote branches"
@@ -168,7 +167,7 @@ while : ; do
         BRANCH=$NEW_BRANCH
         CDHelper text lineswap --insert="$BRANCH_ENVAR=$BRANCH" --prefix="$BRANCH_ENVAR=" --path=$ETC_PROFILE --silent=$SILENT_MODE
         
-        echo "SUCCESS: New branch was created" && break
+        echo "SUCCESS: New branch was created" && sleep 2 && continue
     elif [ "${OPTION,,}" == "l" ] ; then
         git pull --no-edit origin $BRANCH_REF || FAILED="True"
         [ "$FAILED" == "True" ] && echo "ERROR: Failed to pull chnages from origin to branch '$BRANCH_REF'" && break

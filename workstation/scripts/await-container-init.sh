@@ -2,10 +2,10 @@
 
 exec 2>&1
 set -e
-START_TIME_CONTAINER_AWAIT="$(date -u +%s)"
+set -x
 
-ETC_PROFILE="/etc/profile"
-source $ETC_PROFILE &> /dev/null
+START_TIME_CONTAINER_AWAIT="$(date -u +%s)"
+source "/etc/profile" &> /dev/null
 
 NAME=$1
 TIMEOUT=$2
