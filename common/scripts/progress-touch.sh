@@ -51,11 +51,10 @@ if [ ! -f $PROGRESS_TIME_FILE ] || [ $RESULT -eq 0 ] ; then
     echo "$PROGRESS_START_TIME" > $PROGRESS_TIME_FILE || echo "ERROR: Failed to save time into progress time file `$PROGRESS_TIME_FILE`"
 fi
 
+[ $PROGRESS_MAX -le 0 ] && return 0
 let "PERCENTAGE_OLD=(100*$RESULT)/$PROGRESS_MAX" || PERCENTAGE_OLD=0
 
 while : ; do
-    [ $PROGRESS_MAX -le 0 ] && break
-
     RESULT=$(cat $PROGRESS_FILE || echo "0")
     [ -z "${RESULT##*[!0-9]*}" ] && RESULT=0
 
@@ -90,10 +89,10 @@ while : ; do
     BLACK=""
     WHITE=""
     let "DELTA_PERCENTAGE=$PERCENTAGE-$PERCENTAGE_OLD" || DELTA_PERCENTAGE=0
-    let "PROGRESS_SPEED=1000/(7*($DELTA_PERCENTAGE+1)" || PROGRESS_SPEED=1
-    [ $PROGRESS_SPEED -lt 10 ] && PROGRESS_SPEED="0$PROGRESS_SPEED"
+    let "PROGRESS_SPEED=1000/(7*($DELTA_PERCENTAGE+1)" || PROGRESS_SPEED=10
+    [ $PROGRESS_SPEED -lt 10 ] && PROGRESS_SPEED=10
     [ $PROGRESS_SPEED -lt 100 ] && PROGRESS_SPEED="0$PROGRESS_SPEED"
-    
+
     for ((i=$PERCENTAGE_OLD;i<=$PERCENTAGE;i++)); do
         let "COUNT_BLACK=(($PROGRESS_LEN*$i)/100)-1" || COUNT_BLACK=0
         [ $COUNT_BLACK -gt $PROGRESS_LEN ] && COUNT_BLACK=$PROGRESS_LEN
