@@ -37,6 +37,7 @@ touch $PROGRESS_SPAN_FILE
 
 VALUE=$(cat $PROGRESS_FILE || echo "0")
 [ -z "${VALUE##*[!0-9]*}" ] && VALUE=0
+[ $PROGRESS_MAX -gt 0 ] && let "PERCENTAGE_OLD=(100*$VALUE)/$PROGRESS_MAX"
 
 SPAN=$(cat $PROGRESS_SPAN_FILE || echo "0")
 [ -z "${SPAN##*[!0-9]*}" ] && SPAN=0
@@ -52,7 +53,6 @@ if [ ! -f $PROGRESS_TIME_FILE ] || [ $RESULT -eq 0 ] ; then
 fi
 
 [ $PROGRESS_MAX -le 0 ] && exit 0
-let "PERCENTAGE_OLD=(100*$RESULT)/$PROGRESS_MAX" || PERCENTAGE_OLD=0
 
 while : ; do
     RESULT=$(cat $PROGRESS_FILE || echo "0")
@@ -90,7 +90,7 @@ while : ; do
     WHITE=""
     let "DELTA_PERCENTAGE=$PERCENTAGE-$PERCENTAGE_OLD" || DELTA_PERCENTAGE=0
     let "PROGRESS_SPEED=1000/(7*($DELTA_PERCENTAGE+1)" || PROGRESS_SPEED=10
-    [ $PROGRESS_SPEED -lt 10 ] && PROGRESS_SPEED=10
+    [ $PROGRESS_SPEED -lt 20 ] && PROGRESS_SPEED=20
     [ $PROGRESS_SPEED -lt 100 ] && PROGRESS_SPEED="0$PROGRESS_SPEED"
 
     for ((i=$PERCENTAGE_OLD;i<=$PERCENTAGE;i++)); do
