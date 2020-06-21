@@ -19,7 +19,7 @@ PID=${ARR[3]}
 [ -z "${LEN##*[!0-9]*}" ] && LEN=0
 [ -z "${PID##*[!0-9]*}" ] && PID=0
 let "LEN=$LEN-1" || LEN=0
-[ $LEN -lt 0 ] && LEN = 0
+[ $LEN -lt 0 ] && LEN=0
 
 if [ $PID -ge 1 ] && [ "$NAME" != "default" ] ; then
     COMMAND=$(ps -o cmd fp $PID || echo "")
