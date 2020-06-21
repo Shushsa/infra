@@ -69,7 +69,7 @@ cd $KIRA_WORKSTATION
 
 docker network rm kiranet || echo "Failed to remove kira network"
 docker network create --subnet=$KIRA_VALIDATORS_SUBNET kiranet
-source $KIRA_SCRIPTS/progress-touch.sh "+1" "" "True" #42
+$KIRA_SCRIPTS/progress-touch.sh "+1" "" "True" #42
 
 GENESIS_SOUCE="/root/.sekaid/config/genesis.json"
 GENESIS_DESTINATION="$DOCKER_COMMON/genesis.json"
