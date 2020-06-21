@@ -51,7 +51,7 @@ if [ ! -f $PROGRESS_TIME_FILE ] || [ $RESULT -eq 0 ] ; then
     echo "$PROGRESS_START_TIME" > $PROGRESS_TIME_FILE || echo "ERROR: Failed to save time into progress time file `$PROGRESS_TIME_FILE`"
 fi
 
-[ $PROGRESS_MAX -le 0 ] && return 0
+[ $PROGRESS_MAX -le 0 ] && exit 0
 let "PERCENTAGE_OLD=(100*$RESULT)/$PROGRESS_MAX" || PERCENTAGE_OLD=0
 
 while : ; do
