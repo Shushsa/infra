@@ -53,7 +53,7 @@ if [ ! -f $PROGRESS_TIME_FILE ] || [ $RESULT -eq 0 ] ; then
 fi
 
 [ $PROGRESS_MAX -le 0 ] && exit 0
-
+LAST_PROGRESS_SPEED=140
 while : ; do
     RESULT=$(cat $PROGRESS_FILE || echo "0")
     [ -z "${RESULT##*[!0-9]*}" ] && RESULT=0
@@ -90,7 +90,8 @@ while : ; do
     WHITE=""
     [ $PERCENTAGE_OLD -gt $PERCENTAGE ] && $PERCENTAGE_OLD=$PERCENTAGE
     let "DELTA_PERCENTAGE=$PERCENTAGE-$PERCENTAGE_OLD" || DELTA_PERCENTAGE=0
-    let "PROGRESS_SPEED=1000/(7*($DELTA_PERCENTAGE+1))" || PROGRESS_SPEED=0
+    let "PROGRESS_SPEED=($LAST_PROGRESS_SPEED+(1000/(7*($DELTA_PERCENTAGE+1))))/2" || PROGRESS_SPEED=0
+    LAST_PROGRESS_SPEED=$PROGRESS_SPEED # simulate acceleraton
     [ $PROGRESS_SPEED -lt 30 ] && PROGRESS_SPEED=30
     [ $PROGRESS_SPEED -lt 100 ] && PROGRESS_SPEED="0$PROGRESS_SPEED"
     PROGRESS_SPEED="0.$PROGRESS_SPEED"
@@ -108,13 +109,13 @@ while : ; do
         PROGRESS_NOW_TIME="$(date -u +%s)"
         PROGRESS_TIME=$((${PROGRESS_NOW_TIME}-${PROGRESS_START_TIME}))
          
-        echo -ne "\r$BLACK-$WHITE ($i%|${PROGRESS_TIME}s|$PROGRESS_SPEED|$DELTA_PERCENTAGE)" && sleep $PROGRESS_SPEED
-        echo -ne "\r$BLACK\\$WHITE ($i%|${PROGRESS_TIME}s|$PROGRESS_SPEED|$DELTA_PERCENTAGE)" && sleep $PROGRESS_SPEED
-        echo -ne "\r$BLACK|$WHITE ($i%|${PROGRESS_TIME}s|$PROGRESS_SPEED|$DELTA_PERCENTAGE)" && sleep $PROGRESS_SPEED
-        echo -ne "\r$BLACK/$WHITE ($i%|${PROGRESS_TIME}s|$PROGRESS_SPEED|$DELTA_PERCENTAGE)" && sleep $PROGRESS_SPEED
-        echo -ne "\r$BLACK-$WHITE ($i%|${PROGRESS_TIME}s|$PROGRESS_SPEED|$DELTA_PERCENTAGE)" && sleep $PROGRESS_SPEED
-        echo -ne "\r$BLACK\\$WHITE ($i%|${PROGRESS_TIME}s|$PROGRESS_SPEED|$DELTA_PERCENTAGE)" && sleep $PROGRESS_SPEED
-        echo -ne "\r$BLACK|$WHITE ($i%|${PROGRESS_TIME}s|$PROGRESS_SPEED|$DELTA_PERCENTAGE)" && sleep $PROGRESS_SPEED
+        echo -ne "\r$BLACK-$WHITE ($i%|${PROGRESS_TIME}s)" && sleep $PROGRESS_SPEED
+        echo -ne "\r$BLACK\\$WHITE ($i%|${PROGRESS_TIME}s)" && sleep $PROGRESS_SPEED
+        echo -ne "\r$BLACK|$WHITE ($i%|${PROGRESS_TIME}s)" && sleep $PROGRESS_SPEED
+        echo -ne "\r$BLACK/$WHITE ($i%|${PROGRESS_TIME}s)" && sleep $PROGRESS_SPEED
+        echo -ne "\r$BLACK-$WHITE ($i%|${PROGRESS_TIME}s)" && sleep $PROGRESS_SPEED
+        echo -ne "\r$BLACK\\$WHITE ($i%|${PROGRESS_TIME}s)" && sleep $PROGRESS_SPEED
+        echo -ne "\r$BLACK|$WHITE ($i%|${PROGRESS_TIME}s)" && sleep $PROGRESS_SPEED
     done
      
     PERCENTAGE_OLD=$PERCENTAGE
