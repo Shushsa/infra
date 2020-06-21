@@ -18,8 +18,6 @@ PID=${ARR[3]}
 [ -z "${MAX##*[!0-9]*}" ] && MAX=0
 [ -z "${LEN##*[!0-9]*}" ] && LEN=0
 [ -z "${PID##*[!0-9]*}" ] && PID=0
-let "LEN=$LEN-1" || LEN=0
-[ $LEN -lt 0 ] && LEN=0
 
 if [ $PID -ge 1 ] && [ "$NAME" != "default" ] ; then
     COMMAND=$(ps -o cmd fp $PID || echo "")
@@ -93,8 +91,6 @@ while : ; do
         CONTINUE="False"
     fi
 
-    BLACK=""
-    WHITE=""
     [ $PERCENTAGE_OLD -gt $PERCENTAGE ] && PERCENTAGE_OLD=$PERCENTAGE
     let "DELTA_PERCENTAGE=$PERCENTAGE-$PERCENTAGE_OLD" || DELTA_PERCENTAGE=0
     let "PROGRESS_SPEED=($LAST_SPEED+(1000/(7*($DELTA_PERCENTAGE+1))))/2" || PROGRESS_SPEED=0
@@ -112,8 +108,8 @@ while : ; do
         if [ $COUNT_BLACK -gt 0 ] ; then let "COUNT_BLACK=$COUNT_BLACK-1" || COUNT_BLACK=0 ; fi
         if [ $COUNT_WHITE -ge $LEN ] ; then let "COUNT_WHITE=$COUNT_WHITE-1" ; fi
         
-        [ $COUNT_BLACK -ge 1 ] && BLACK=$(printf "%${COUNT_BLACK}s" | tr " " "#")
-        [ $COUNT_WHITE -ge 1 ] && WHITE=$(printf "%${COUNT_WHITE}s" | tr " " ".")
+        BLACK=$(printf "%${COUNT_BLACK}s" | tr " " "#")
+        WHITE=$(printf "%${COUNT_WHITE}s" | tr " " ".")
 
         TIME_NOW="$(date -u +%s)"
         ELAPSED=$((${TIME_NOW}-${TIME_START}))
@@ -131,7 +127,7 @@ while : ; do
     [ "$CONTINUE" == "True" ] && continue
     
     if [ "$PID" != "0" ] && [ $PERCENTAGE -eq 100 ] ; then
-        echo -ne "\r$BLACK#$WHITE ($PERCENTAGE%|${ELAPSED}s|${RESULT}/${MAX}"
+        echo -ne "\r$BLACK#$WHITE ($PERCENTAGE%|${ELAPSED}s|${RESULT}/${MAX})"
         let "SPAN_AVG=($ELAPSED+$SPAN)/2" || SPAN_AVG=0
         echo "$SPAN_AVG" > $SPAN_FILE
     else
