@@ -27,7 +27,6 @@ fi
 COMMAND=`/bin/echo "$COMMAND" | /usr/bin/md5sum | /bin/cut -f1 -d" "`
 
 PROGRESS_FILE="/tmp/loader"
-PROGRESS_LEN=$(($PROGRESS_LEN-1))
 PROGRESS_TIME=0
 PROGRESS_TIME_FILE="${PROGRESS_FILE}_time"
 PROGRESS_SPAN_FILE="${PROGRESS_FILE}_$COMMAND" # containes avg elapsed time from the previous run
@@ -103,13 +102,13 @@ while : ; do
 
     for ((i=$PERCENTAGE_OLD;i<=$PERCENTAGE;i++)); do
         let "COUNT_BLACK=(($PROGRESS_LEN*$i)/100)-1" || COUNT_BLACK=0
+        [ $COUNT_BLACK -lt 0 ] && COUNT_BLACK=0
         [ $COUNT_BLACK -gt $PROGRESS_LEN ] && COUNT_BLACK=$PROGRESS_LEN
         let "COUNT_WHITE=$PROGRESS_LEN-$COUNT_BLACK" || COUNT_WHITE=0
         [ $COUNT_WHITE -gt $PROGRESS_LEN ] && COUNT_WHITE=$PROGRESS_LEN
         
         [ $COUNT_BLACK -ge 1 ] && BLACK=$(printf "%${COUNT_BLACK}s" | tr " " "#")
-        [ $COUNT_WHITE -eq 2 ] && WHITE="."
-        [ $COUNT_WHITE -ge 3 ] && WHITE=$(printf "%${COUNT_WHITE}s" | tr " " ".")
+        [ $COUNT_WHITE -ge 1 ] && WHITE=$(printf "%${COUNT_WHITE}s" | tr " " ".")
 
         PROGRESS_NOW_TIME="$(date -u +%s)"
         PROGRESS_TIME=$((${PROGRESS_NOW_TIME}-${PROGRESS_START_TIME}))
