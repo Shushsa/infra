@@ -1,6 +1,5 @@
 #!/bin/bash
 set -e
-set -x
 
 INPUT=$1
 DEBUG=$2
@@ -86,7 +85,6 @@ while : ; do
         [ $PERCENTAGE -ge 100 ] && PERCENTAGE=99
         CONTINUE="True"
     else
-        PERCENTAGE=100
         CONTINUE="False"
     fi
 
