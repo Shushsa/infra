@@ -2,47 +2,49 @@
 set -e
 
 INPUT=$1
-DEBUG=$2
+NAME=$2
+DEBUG=$3
 
 [ "$DEBUG" == "True" ] && set -x
+[ -z "$NAME" ] && NAME="default"
 
 ARR=(${INPUT//;/ })
 OPERATION=${ARR[0]}
-PROGRESS_MAX=${ARR[1]}
-PROGRESS_LEN=${ARR[2]}
-PROGRESS_PID=${ARR[3]}
+MAX=${ARR[1]}
+LEN=${ARR[2]}
+PID=${ARR[3]}
 
 [ -z "$OPERATION" ] && OPERATION="+0"
-[ -z "${PROGRESS_MAX##*[!0-9]*}" ] && PROGRESS_MAX=0
-[ -z "${PROGRESS_LEN##*[!0-9]*}" ] && PROGRESS_LEN=0
-[ -z "${PROGRESS_PID##*[!0-9]*}" ] && PROGRESS_PID=0
+[ -z "${MAX##*[!0-9]*}" ] && MAX=0
+[ -z "${LEN##*[!0-9]*}" ] && LEN=0
+[ -z "${PID##*[!0-9]*}" ] && PID=0
 
-if [ $PROGRESS_PID -ge 1 ] ; then
-    COMMAND=$(ps -o cmd fp $PROGRESS_PID || echo "")
+if [ $PID -ge 1 ] ; then
+    COMMAND=$(ps -o cmd fp $PID || echo "")
 else
     COMMAND=""
 fi
 
 COMMAND=`/bin/echo "$COMMAND" | /usr/bin/md5sum | /bin/cut -f1 -d" "`
 
-PROGRESS_FILE="/tmp/loader"
+PROGRESS_FILE="/tmp/loader_$NAME"
 PROGRESS_TIME=0
-PROGRESS_TIME_FILE="${PROGRESS_FILE}_time"
-PROGRESS_SPAN_FILE="${PROGRESS_FILE}_$COMMAND" # containes avg elapsed time from the previous run
+TIME_FILE="${PROGRESS_FILE}_time"
+SPAN_FILE="${PROGRESS_FILE}_${COMMAND}" # containes avg elapsed time from the previous run
 
 touch $PROGRESS_FILE
-touch $PROGRESS_TIME_FILE
-touch $PROGRESS_SPAN_FILE
+touch $TIME_FILE
+touch $SPAN_FILE
 
 VALUE=$(cat $PROGRESS_FILE || echo "0")
 [ -z "${VALUE##*[!0-9]*}" ] && VALUE=0
-if [ $PROGRESS_MAX -gt 0 ] ; then
-    let "PERCENTAGE_OLD=(100*$VALUE)/$PROGRESS_MAX" || PERCENTAGE_OLD=0
+if [ $MAX -gt 0 ] ; then
+    let "PERCENTAGE_OLD=(100*$VALUE)/$MAX" || PERCENTAGE_OLD=0
 else
     PERCENTAGE_OLD=0
 fi
 
-SPAN=$(cat $PROGRESS_SPAN_FILE || echo "0")
+SPAN=$(cat $SPAN_FILE || echo "0")
 [ -z "${SPAN##*[!0-9]*}" ] && SPAN=0
 [ $SPAN -le 0 ] && SPAN=3000
 [ $SPAN -gt 9000 ] && SPAN=3000
@@ -50,27 +52,27 @@ SPAN=$(cat $PROGRESS_SPAN_FILE || echo "0")
 let "RESULT=${VALUE}${OPERATION}" || RESULT=0
 echo "$RESULT" > $PROGRESS_FILE || echo "ERROR: Failed to save result into progress file `$PROGRESS_FILE`"
 
-PROGRESS_START_TIME="$(date -u +%s)"
-if [ ! -f $PROGRESS_TIME_FILE ] || [ $RESULT -eq 0 ] ; then
-    echo "$PROGRESS_START_TIME" > $PROGRESS_TIME_FILE || echo "ERROR: Failed to save time into progress time file `$PROGRESS_TIME_FILE`"
+TIME_START="$(date -u +%s)"
+if [ ! -f $TIME_FILE ] || [ $RESULT -eq 0 ] ; then
+    echo "$TIME_START" > $TIME_FILE || echo "ERROR: Failed to save time into progress time file `$TIME_FILE`"
 fi
 
-[ $PROGRESS_MAX -le 0 ] && exit 0
-LAST_PROGRESS_SPEED=140
+[ $MAX -le 0 ] && exit 0
+LAST_SPEED=140
 while : ; do
     RESULT=$(cat $PROGRESS_FILE || echo "0")
     [ -z "${RESULT##*[!0-9]*}" ] && RESULT=0
 
-    PROGRESS_NOW_TIME="$(date -u +%s)"
-    PROGRESS_START_TIME=$(cat $PROGRESS_TIME_FILE || echo $PROGRESS_NOW_TIME)
-    [ -z "${PROGRESS_START_TIME##*[!0-9]*}" ] && PROGRESS_START_TIME=$PROGRESS_NOW_TIME
-    PROGRESS_TIME=$((${PROGRESS_NOW_TIME}-${PROGRESS_START_TIME}))
+    TIME_NOW="$(date -u +%s)"
+    TIME_START=$(cat $TIME_FILE || echo $TIME_NOW)
+    [ -z "${TIME_START##*[!0-9]*}" ] && TIME_START=$TIME_NOW
+    ELAPSED=$((${TIME_NOW}-${TIME_START}))
 
-    let "PERCENTAGE=(100*$RESULT)/$PROGRESS_MAX" || PERCENTAGE=0
+    let "PERCENTAGE=(100*$RESULT)/$MAX" || PERCENTAGE=0
     [ $PERCENTAGE -gt 100 ] && PERCENTAGE=100
     [ $PERCENTAGE -lt 0 ] && PERCENTAGE=0
 
-    let "SPAN_PERCENTAGE=(100*$PROGRESS_TIME)/$SPAN" || SPAN_PERCENTAGE=$PERCENTAGE
+    let "SPAN_PERCENTAGE=(100*$ELAPSED)/$SPAN" || SPAN_PERCENTAGE=$PERCENTAGE
     [ $SPAN_PERCENTAGE -gt 100 ] && SPAN_PERCENTAGE=100
     [ $SPAN_PERCENTAGE -lt 0 ] && SPAN_PERCENTAGE=0
 
@@ -79,12 +81,13 @@ while : ; do
     [ $AVG_PERCENTAGE -lt 0 ] && AVG_PERCENTAGE=0
     [ $AVG_PERCENTAGE -gt 1 ] && PERCENTAGE=$AVG_PERCENTAGE
     
-    [ $PROGRESS_LEN -le 0 ] && printf "%s%%" "${PERCENTAGE}" && break
+    [ $LEN -le 0 ] && printf "%s%%" "${PERCENTAGE}" && break
 
-    [ "$PROGRESS_PID" != "0" ] && if ps -p $PROGRESS_PID > /dev/null ; then 
+    [ "$PID" != "0" ] && if ps -p $PID > /dev/null ; then 
         [ $PERCENTAGE -ge 100 ] && PERCENTAGE=99
         CONTINUE="True"
     else
+        [ $RESULT -eq $MAX ] && PERCENTAGE=100
         CONTINUE="False"
     fi
 
@@ -92,43 +95,43 @@ while : ; do
     WHITE=""
     [ $PERCENTAGE_OLD -gt $PERCENTAGE ] && $PERCENTAGE_OLD=$PERCENTAGE
     let "DELTA_PERCENTAGE=$PERCENTAGE-$PERCENTAGE_OLD" || DELTA_PERCENTAGE=0
-    let "PROGRESS_SPEED=($LAST_PROGRESS_SPEED+(1000/(7*($DELTA_PERCENTAGE+1))))/2" || PROGRESS_SPEED=0
-    LAST_PROGRESS_SPEED=$PROGRESS_SPEED # simulate acceleraton
+    let "PROGRESS_SPEED=($LAST_SPEED+(1000/(7*($DELTA_PERCENTAGE+1))))/2" || PROGRESS_SPEED=0
+    LAST_SPEED=$PROGRESS_SPEED # simulate acceleraton
     [ $PROGRESS_SPEED -lt 30 ] && PROGRESS_SPEED=30
     [ $PROGRESS_SPEED -lt 100 ] && PROGRESS_SPEED="0$PROGRESS_SPEED"
     PROGRESS_SPEED="0.$PROGRESS_SPEED"
 
     for ((i=$PERCENTAGE_OLD;i<=$PERCENTAGE;i++)); do
-        let "COUNT_BLACK=(($PROGRESS_LEN*$i)/100)-1" || COUNT_BLACK=0
+        let "COUNT_BLACK=(($LEN*$i)/100)-1" || COUNT_BLACK=0
         [ $COUNT_BLACK -lt 0 ] && COUNT_BLACK=0
-        [ $COUNT_BLACK -gt $PROGRESS_LEN ] && COUNT_BLACK=$PROGRESS_LEN
-        let "COUNT_WHITE=$PROGRESS_LEN-$COUNT_BLACK" || COUNT_WHITE=0
-        [ $COUNT_WHITE -gt $PROGRESS_LEN ] && COUNT_WHITE=$PROGRESS_LEN
+        [ $COUNT_BLACK -gt $LEN ] && COUNT_BLACK=$LEN
+        let "COUNT_WHITE=$LEN-$COUNT_BLACK" || COUNT_WHITE=0
+        [ $COUNT_WHITE -gt $LEN ] && COUNT_WHITE=$LEN
         
         [ $COUNT_BLACK -ge 1 ] && BLACK=$(printf "%${COUNT_BLACK}s" | tr " " "#")
         [ $COUNT_WHITE -ge 1 ] && WHITE=$(printf "%${COUNT_WHITE}s" | tr " " ".")
 
-        PROGRESS_NOW_TIME="$(date -u +%s)"
-        PROGRESS_TIME=$((${PROGRESS_NOW_TIME}-${PROGRESS_START_TIME}))
+        TIME_NOW="$(date -u +%s)"
+        ELAPSED=$((${TIME_NOW}-${TIME_START}))
          
-        echo -ne "\r$BLACK-$WHITE ($i%|${PROGRESS_TIME}s)" && sleep $PROGRESS_SPEED
-        echo -ne "\r$BLACK\\$WHITE ($i%|${PROGRESS_TIME}s)" && sleep $PROGRESS_SPEED
-        echo -ne "\r$BLACK|$WHITE ($i%|${PROGRESS_TIME}s)" && sleep $PROGRESS_SPEED
-        echo -ne "\r$BLACK/$WHITE ($i%|${PROGRESS_TIME}s)" && sleep $PROGRESS_SPEED
-        echo -ne "\r$BLACK-$WHITE ($i%|${PROGRESS_TIME}s)" && sleep $PROGRESS_SPEED
-        echo -ne "\r$BLACK\\$WHITE ($i%|${PROGRESS_TIME}s)" && sleep $PROGRESS_SPEED
-        echo -ne "\r$BLACK|$WHITE ($i%|${PROGRESS_TIME}s)" && sleep $PROGRESS_SPEED
+        echo -ne "\r$BLACK-$WHITE ($i%|${ELAPSED}s)" && sleep $PROGRESS_SPEED
+        echo -ne "\r$BLACK\\$WHITE ($i%|${ELAPSED}s)" && sleep $PROGRESS_SPEED
+        echo -ne "\r$BLACK|$WHITE ($i%|${ELAPSED}s)" && sleep $PROGRESS_SPEED
+        echo -ne "\r$BLACK/$WHITE ($i%|${ELAPSED}s)" && sleep $PROGRESS_SPEED
+        echo -ne "\r$BLACK-$WHITE ($i%|${ELAPSED}s)" && sleep $PROGRESS_SPEED
+        echo -ne "\r$BLACK\\$WHITE ($i%|${ELAPSED}s)" && sleep $PROGRESS_SPEED
+        echo -ne "\r$BLACK|$WHITE ($i%|${ELAPSED}s)" && sleep $PROGRESS_SPEED
     done
      
     PERCENTAGE_OLD=$PERCENTAGE
     [ "$CONTINUE" == "True" ] && continue
     
-    if [ "$PROGRESS_PID" != "0" ] && [ $PERCENTAGE -eq 100 ] ; then
-        echo -ne "\r$BLACK#$WHITE ($PERCENTAGE%|${PROGRESS_TIME}s|${RESULT})"
-        let "SPAN_AVG=($PROGRESS_TIME+$SPAN)/2" || SPAN_AVG=0
-        echo "$SPAN_AVG" > $PROGRESS_SPAN_FILE
+    if [ "$PID" != "0" ] && [ $PERCENTAGE -eq 100 ] ; then
+        echo -ne "\r$BLACK#$WHITE ($PERCENTAGE%|${ELAPSED}s|${RESULT}/${MAX}"
+        let "SPAN_AVG=($ELAPSED+$SPAN)/2" || SPAN_AVG=0
+        echo "$SPAN_AVG" > $SPAN_FILE
     else
-        echo -ne "\r$BLACK#$WHITE ($PERCENTAGE%|${PROGRESS_TIME}s)"
+        echo -ne "\r$BLACK#$WHITE ($PERCENTAGE%|${ELAPSED}s)"
     fi
 
     break
