@@ -90,8 +90,9 @@ while : ; do
     WHITE=""
     let "DELTA_PERCENTAGE=$PERCENTAGE-$PERCENTAGE_OLD" || DELTA_PERCENTAGE=0
     let "PROGRESS_SPEED=1000/(7*($DELTA_PERCENTAGE+1)" || PROGRESS_SPEED=10
-    [ $PROGRESS_SPEED -lt 20 ] && PROGRESS_SPEED=20
+    [ $PROGRESS_SPEED -lt 25 ] && PROGRESS_SPEED=25
     [ $PROGRESS_SPEED -lt 100 ] && PROGRESS_SPEED="0$PROGRESS_SPEED"
+    PROGRESS_SPEED="0.$PROGRESS_SPEED"
 
     for ((i=$PERCENTAGE_OLD;i<=$PERCENTAGE;i++)); do
         let "COUNT_BLACK=(($PROGRESS_LEN*$i)/100)-1" || COUNT_BLACK=0
@@ -106,13 +107,13 @@ while : ; do
         PROGRESS_NOW_TIME="$(date -u +%s)"
         PROGRESS_TIME=$((${PROGRESS_NOW_TIME}-${PROGRESS_START_TIME}))
          
-        echo -ne "\r$BLACK-$WHITE ($i%|${PROGRESS_TIME}s)" && sleep "0.$PROGRESS_SPEED"
-        echo -ne "\r$BLACK\\$WHITE ($i%|${PROGRESS_TIME}s)" && sleep "0.$PROGRESS_SPEED"
-        echo -ne "\r$BLACK|$WHITE ($i%|${PROGRESS_TIME}s)" && sleep "0.$PROGRESS_SPEED"
-        echo -ne "\r$BLACK/$WHITE ($i%|${PROGRESS_TIME}s)" && sleep "0.$PROGRESS_SPEED"
-        echo -ne "\r$BLACK-$WHITE ($i%|${PROGRESS_TIME}s)" && sleep "0.$PROGRESS_SPEED"
-        echo -ne "\r$BLACK\\$WHITE ($i%|${PROGRESS_TIME}s)" && sleep "0.$PROGRESS_SPEED"
-        echo -ne "\r$BLACK|$WHITE ($i%|${PROGRESS_TIME}s)" && sleep "0.$PROGRESS_SPEED"
+        echo -ne "\r$BLACK-$WHITE ($i%|${PROGRESS_TIME}s|$PROGRESS_SPEED)" && sleep $PROGRESS_SPEED
+        echo -ne "\r$BLACK\\$WHITE ($i%|${PROGRESS_TIME}s|$PROGRESS_SPEED)" && sleep $PROGRESS_SPEED
+        echo -ne "\r$BLACK|$WHITE ($i%|${PROGRESS_TIME}s|$PROGRESS_SPEED)" && sleep $PROGRESS_SPEED
+        echo -ne "\r$BLACK/$WHITE ($i%|${PROGRESS_TIME}s|$PROGRESS_SPEED)" && sleep $PROGRESS_SPEED
+        echo -ne "\r$BLACK-$WHITE ($i%|${PROGRESS_TIME}s|$PROGRESS_SPEED)" && sleep $PROGRESS_SPEED
+        echo -ne "\r$BLACK\\$WHITE ($i%|${PROGRESS_TIME}s|$PROGRESS_SPEED)" && sleep $PROGRESS_SPEED
+        echo -ne "\r$BLACK|$WHITE ($i%|${PROGRESS_TIME}s|$PROGRESS_SPEED)" && sleep $PROGRESS_SPEED
     done
      
     PERCENTAGE_OLD=$PERCENTAGE
