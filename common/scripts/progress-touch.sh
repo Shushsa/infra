@@ -19,7 +19,7 @@ PID=${ARR[3]}
 [ -z "${LEN##*[!0-9]*}" ] && LEN=0
 [ -z "${PID##*[!0-9]*}" ] && PID=0
 
-if [ $PID -ge 1 ] && [ "$NAME" != "default" ] ; then
+if [ $PID -ge 1 ] && [ "$NAME" == "default" ] ; then
     COMMAND=$(ps -o cmd fp $PID || echo "")
 else
     COMMAND=""
@@ -27,7 +27,8 @@ fi
 
 COMMAND=`/bin/echo "$COMMAND" | /usr/bin/md5sum | /bin/cut -f1 -d" "`
 
-PROGRESS_FILE="/tmp/loader_$NAME"
+PROGRESS_FILE="/tmp/progress_$NAME"
+LOADER_FILE="/tmp/loader_$NAME"
 PROGRESS_TIME=0
 TIME_FILE="${PROGRESS_FILE}_time"
 SPAN_FILE="${PROGRESS_FILE}_${COMMAND}" # containes avg elapsed time from the previous run
@@ -55,6 +56,7 @@ echo "$RESULT" > $PROGRESS_FILE || echo "ERROR: Failed to save result into progr
 TIME_START="$(date -u +%s)"
 if [ ! -f $TIME_FILE ] || [ $RESULT -eq 0 ] ; then
     echo "$TIME_START" > $TIME_FILE || echo "ERROR: Failed to save time into progress time file `$TIME_FILE`"
+    echo "0" > $LOADER_FILE || echo "ERROR: Failed to save progress to loader file `$LOADER_FILE`"
 fi
 
 [ $MAX -le 0 ] && exit 0
@@ -80,7 +82,12 @@ while : ; do
     [ $AVG_PERCENTAGE -gt 100 ] && AVG_PERCENTAGE=100
     [ $AVG_PERCENTAGE -lt 0 ] && AVG_PERCENTAGE=0
     [ $AVG_PERCENTAGE -gt 1 ] && PERCENTAGE=$AVG_PERCENTAGE
-    
+
+    OLD_PERCENTAGE=$(cat $LOADER_FILE || echo "0")
+    [ -z "${OLD_PERCENTAGE##*[!0-9]*}" ] && OLD_PERCENTAGE=0
+    [ $OLD_PERCENTAGE -gt $PERCENTAGE ] && PERCENTAGE=$OLD_PERCENTAGE
+
+    echo "$AVG_PERCENTAGE" > $LOADER_FILE || echo "ERROR: Failed to save progress to loader file `$LOADER_FILE`"
     [ $LEN -le 0 ] && printf "%s%%" "${PERCENTAGE}" && break
 
     [ "$PID" != "0" ] && if ps -p $PID > /dev/null ; then 
@@ -95,7 +102,7 @@ while : ; do
     let "DELTA_PERCENTAGE=$PERCENTAGE-$PERCENTAGE_OLD" || DELTA_PERCENTAGE=0
     let "PROGRESS_SPEED=($LAST_SPEED+(1000/(7*($DELTA_PERCENTAGE+1))))/2" || PROGRESS_SPEED=0
     LAST_SPEED=$PROGRESS_SPEED # simulate acceleraton
-    [ $PROGRESS_SPEED -lt 30 ] && PROGRESS_SPEED=30
+    [ $PROGRESS_SPEED -lt 20 ] && PROGRESS_SPEED=20
     [ $PROGRESS_SPEED -lt 100 ] && PROGRESS_SPEED="0$PROGRESS_SPEED"
     PROGRESS_SPEED="0.$PROGRESS_SPEED"
 
