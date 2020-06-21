@@ -1,5 +1,6 @@
 #!/bin/bash
 set -e
+set -x
 
 INPUT=$1
 DEBUG=$2
@@ -37,7 +38,11 @@ touch $PROGRESS_SPAN_FILE
 
 VALUE=$(cat $PROGRESS_FILE || echo "0")
 [ -z "${VALUE##*[!0-9]*}" ] && VALUE=0
-[ $PROGRESS_MAX -gt 0 ] && let "PERCENTAGE_OLD=(100*$VALUE)/$PROGRESS_MAX"
+if [ $PROGRESS_MAX -gt 0 ] ; then
+    let "PERCENTAGE_OLD=(100*$VALUE)/$PROGRESS_MAX" || PERCENTAGE_OLD=0
+else
+    PERCENTAGE_OLD=0
+fi
 
 SPAN=$(cat $PROGRESS_SPAN_FILE || echo "0")
 [ -z "${SPAN##*[!0-9]*}" ] && SPAN=0
