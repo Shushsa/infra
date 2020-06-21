@@ -87,7 +87,7 @@ while : ; do
         [ $PERCENTAGE -ge 100 ] && PERCENTAGE=99
         CONTINUE="True"
     else
-        [ $RESULT -eq $MAX ] && PERCENTAGE=100
+        [ $RESULT -ge $MAX ] && PERCENTAGE=100
         CONTINUE="False"
     fi
 
@@ -127,11 +127,11 @@ while : ; do
     [ "$CONTINUE" == "True" ] && continue
     
     if [ "$PID" != "0" ] && [ $PERCENTAGE -eq 100 ] ; then
-        echo -ne "\r$BLACK#$WHITE ($PERCENTAGE%|${ELAPSED}s|${RESULT}/${MAX})"
+        echo -ne "\r${BLACK}${WHITE} ($PERCENTAGE%|${ELAPSED}s|${RESULT}/${MAX})"
         let "SPAN_AVG=($ELAPSED+$SPAN)/2" || SPAN_AVG=0
         echo "$SPAN_AVG" > $SPAN_FILE
     else
-        echo -ne "\r$BLACK#$WHITE ($PERCENTAGE%|${ELAPSED}s)"
+        echo -ne "\r${BLACK}${WHITE} ($PERCENTAGE%|${ELAPSED}s)"
     fi
 
     break
