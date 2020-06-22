@@ -85,6 +85,7 @@ while : ; do
     echo "Input option then press [ENTER] or [SPACE]: " && rm -f $LOOP_FILE && touch $LOOP_FILE
     while : ; do
         OPTION=$(cat $LOOP_FILE)
+        [ -f $RESTART_SIGNAL ] && break
         [ -z "$OPTION" ] && [ $(($(date -u +%s)-$START_TIME)) -ge 6 ] && break
         read -n 1 -t 3 KEY || continue
         [ ! -z "$KEY" ] && echo "${OPTION}${KEY}" > $LOOP_FILE
@@ -216,5 +217,5 @@ else
     touch /tmp/rs_container_manager
 fi
 
-sleep 1
+touch $LOOP_FILE && [ ! -z "$(cat $LOOP_FILE)" ] && sleep 2
 source $KIRA_MANAGER/git-manager.sh "$REPO_SSH" "$REPO_HTTPS" "$BRANCH" "$DIRECTORY" "$BRANCH_ENVAR"

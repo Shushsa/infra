@@ -40,6 +40,7 @@ function checkContainerStatus() {
     echo "CONTAINER_STATUS_$i=$CONTAINER_STATUS" >> $output
 }
 
+
 while : ; do
     START_TIME="$(date -u +%s)"
     [ -f $RESTART_SIGNAL ] && break
@@ -91,7 +92,7 @@ while : ; do
     while : ; do
         [ -f $LOOP_FILE ] && OPTION=$(cat $LOOP_FILE)
         [ -f $RESTART_SIGNAL ] && break
-        [ -z "$OPTION" ] && [ $(($(date -u +%s)-$START_TIME)) -ge 15 ] && break
+        [ -z "$OPTION" ] && [ $(($(date -u +%s)-$START_TIME)) -ge 10 ] && break
         read -n 1 -t 5 KEY || continue
         [ ! -z "$KEY" ] && echo "${OPTION}${KEY}" > $LOOP_FILE
         [ -z "$KEY" ] && break
@@ -195,6 +196,6 @@ else
     touch /tmp/rs_container_manager
 fi
 
-sleep 1
+touch $LOOP_FILE && [ ! -z "$(cat $LOOP_FILE)" ] && sleep 2
 source $KIRA_MANAGER/manager.sh
 
