@@ -88,9 +88,9 @@ while : ; do
     echo "| [X] | Exit | [W] | Refresh Window            |"
     echo -e "------------------------------------------------\e[0m"
     
-    echo "Input option then press [ENTER] or [SPACE]: " && rm -f $LOOP_FILE && touch $LOOP_FILE
+    echo "Input option then press [ENTER] or [SPACE]: " && rm -f $LOOP_FILE && touch $LOOP_FILE && OPTION=""
     while : ; do
-        [ -f $LOOP_FILE ] && OPTION=$(cat $LOOP_FILE)
+        [ -f $LOOP_FILE ] && OPTION=$(cat $LOOP_FILE || echo "")
         [ -f $RESTART_SIGNAL ] && break
         [ -z "$OPTION" ] && [ $(($(date -u +%s)-$START_TIME)) -ge 10 ] && break
         read -n 1 -t 5 KEY || continue
@@ -196,6 +196,6 @@ else
     touch /tmp/rs_container_manager
 fi
 
-touch $LOOP_FILE && [ ! -z "$(cat $LOOP_FILE)" ] && sleep 2
+touch $LOOP_FILE && [ ! -z "$(cat $LOOP_FILE || echo '')" ] && sleep 2
 source $KIRA_MANAGER/manager.sh
 
