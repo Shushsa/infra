@@ -1,6 +1,6 @@
 #!/bin/bash
 set -e
-
+set -x
 INPUT=$1
 NAME=$2
 DEBUG=$3
@@ -37,7 +37,7 @@ touch $PROGRESS_FILE
 touch $TIME_FILE
 touch $SPAN_FILE
 
-VALUE=$(cat $c || echo "0")
+VALUE=$(cat $PROGRESS_FILE || echo "0")
 [ -z "${VALUE##*[!0-9]*}" ] && VALUE=0
 if [ $MAX -gt 0 ] ; then
     let "PERCENTAGE_OLD=(100*$VALUE)/$MAX" || PERCENTAGE_OLD=0
