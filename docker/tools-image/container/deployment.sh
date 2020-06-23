@@ -47,7 +47,8 @@ apt-get install -y --allow-unauthenticated --allow-downgrades --allow-remove-ess
 
 echo "APT Intall Essential Dependencies..."
 apt-get install -y --allow-unauthenticated --allow-downgrades --allow-remove-essential --allow-change-held-packages \
-    expect
+    expect \
+    hxtools
 
 echo "Creating GIT simlink and global setup"
 ln -s /usr/bin/git /bin/git || echo "git symlink already exists"

@@ -7,7 +7,7 @@ set -e
 ETC_PROFILE="/etc/profile"
 source $ETC_PROFILE &> /dev/null
 
-KIRA_SETUP_BASE_TOOLS="$KIRA_SETUP/base-tools-v0.0.6" 
+KIRA_SETUP_BASE_TOOLS="$KIRA_SETUP/base-tools-v0.0.7" 
 if [ ! -f "$KIRA_SETUP_BASE_TOOLS" ] ; then
     echo "INFO: Update and Intall basic tools and dependencies..."
     apt-get update -y --fix-missing
@@ -35,6 +35,7 @@ if [ ! -f "$KIRA_SETUP_BASE_TOOLS" ] ; then
         groff \
         htop \
         hashdeep \
+        hxtools \
         ifupdown \
         imagemagick \
         iputils-tracepath \
