@@ -1,6 +1,6 @@
 #!/bin/bash
 set -e
-set -x
+
 INPUT=$1
 NAME=$2
 DEBUG=$3
